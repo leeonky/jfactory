@@ -1,7 +1,9 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyWriter;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -29,5 +31,9 @@ class ObjectFactory<T> implements Factory<T> {
 
     public BeanClass<T> getType() {
         return type;
+    }
+
+    public Map<String, PropertyWriter<T>> getProperties() {
+        return type.getPropertyWriters();
     }
 }

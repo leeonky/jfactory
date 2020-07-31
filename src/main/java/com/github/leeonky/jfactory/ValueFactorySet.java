@@ -8,9 +8,8 @@ import java.util.Optional;
 
 class ValueFactorySet {
     private final Map<Class<?>, Factory<?>> buildIns = new HashMap<Class<?>, Factory<?>>() {{
-
         put(String.class, new ValueFactory<>(String.class).constructor(instance ->
-                "string" + "#" + instance.getSequence()));
+                String.format("%s#%d", instance.getProperty() == null ? "string" : instance.getProperty(), instance.getSequence())));
     }};
 
     @SuppressWarnings("unchecked")
