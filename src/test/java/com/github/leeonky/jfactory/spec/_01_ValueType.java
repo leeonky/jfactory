@@ -9,7 +9,7 @@ class _01_ValueType {
     private FactorySet factorySet = new FactorySet();
 
     @Test
-    void create_default_string() {
+    void create_string_values_sequentially() {
         assertCreate(String.class, "string#1");
         assertCreate(String.class, "string#2");
     }

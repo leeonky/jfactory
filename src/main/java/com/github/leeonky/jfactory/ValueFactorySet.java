@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class ValueFactories {
+class ValueFactorySet {
     private final Map<Class<?>, Factory<?>> buildIns = new HashMap<Class<?>, Factory<?>>() {{
 
-        put(String.class, new ValueFactory<>(String.class).construct(instance ->
+        put(String.class, new ValueFactory<>(String.class).constructor(instance ->
                 "string" + "#" + instance.getSequence()));
     }};
 

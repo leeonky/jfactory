@@ -14,7 +14,7 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> construct(Function<Instance, T> constructor) {
+    public Factory<T> constructor(Function<Instance, T> constructor) {
         this.constructor = Objects.requireNonNull(constructor);
         return this;
     }
