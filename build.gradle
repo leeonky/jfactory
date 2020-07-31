@@ -46,11 +46,12 @@ repositories {
 
 dependencies {
     implementation 'com.github.leeonky:bean-util:0.0.16'
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.1'
     testImplementation 'org.assertj:assertj-core:3.15.0'
+    testImplementation 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.1'
-    testAnnotationProcessor('org.projectlombok:lombok:1.18.12')
-    testCompile('org.projectlombok:lombok:1.18.12')
 }
 
 test {
