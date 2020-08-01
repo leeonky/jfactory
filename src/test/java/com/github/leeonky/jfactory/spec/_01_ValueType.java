@@ -14,6 +14,12 @@ class _01_ValueType {
         assertCreate(String.class, "string#2");
     }
 
+    @Test
+    void create_int_values_sequentially() {
+        assertCreate(int.class, 1);
+        assertCreate(Integer.class, 2);
+    }
+
     private void assertCreate(Class<?> type, Object expect) {
         assertThat(factorySet.create(type)).isEqualTo(expect);
     }
