@@ -8,11 +8,11 @@ import java.util.Optional;
 
 class ObjectFactorySet {
     private final ValueFactorySet valueFactorySet = new ValueFactorySet();
-    private final Map<Class<?>, ObjectFactory<?>> beanFactories = new HashMap<>();
+    private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public <T> ObjectFactory<T> queryObjectFactory(Class<T> type) {
-        return (ObjectFactory<T>) beanFactories.computeIfAbsent(type, this::create);
+        return (ObjectFactory<T>) objectFactories.computeIfAbsent(type, this::create);
     }
 
     private <T> ObjectFactory<T> create(Class<T> type) {

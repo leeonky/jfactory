@@ -1,20 +1,18 @@
 package com.github.leeonky.jfactory;
 
 class DefaultBuilder<T> implements Builder<T> {
-    private final FactorySet factorySet;
     private final ObjectFactory<T> objectFactory;
-    private final int sequence;
-    private final ObjectFactorySet objectFactorySet;
+    private final FactorySet factorySet;
 
-    public DefaultBuilder(FactorySet factorySet, ObjectFactory<T> objectFactory, int sequence, ObjectFactorySet objectFactorySet) {
+    public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
         this.factorySet = factorySet;
         this.objectFactory = objectFactory;
-        this.sequence = sequence;
-        this.objectFactorySet = objectFactorySet;
     }
 
     @Override
     public T create() {
-        return new ObjectProducer<>(objectFactory, new Instance(sequence), objectFactorySet).getValue();
+        return new ObjectProducer<>(objectFactory,
+                new Instance(factorySet.sequence(objectFactory.getType())),
+                factorySet.getObjectFactorySet()).getValue();
     }
 }

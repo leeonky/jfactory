@@ -11,7 +11,7 @@ class _02_BeanType {
     private FactorySet factorySet = new FactorySet();
 
     @Test
-    void default_creation() {
+    void default_creation_with_default_value_producing() {
         assertThat(factorySet.create(Bean.class))
                 .hasFieldOrPropertyWithValue("stringValue", "stringValue#1")
         ;
