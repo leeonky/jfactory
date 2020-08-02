@@ -34,4 +34,8 @@ public class FactorySet {
     public DataRepository getDataRepository() {
         return dataRepository;
     }
+
+    public <T> Factory<T> factory(Class<T> type) {
+        return objectFactorySet.queryObjectFactory(type);
+    }
 }

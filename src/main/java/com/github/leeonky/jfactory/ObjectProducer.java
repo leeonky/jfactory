@@ -6,14 +6,15 @@ import java.util.Map;
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
-    private final Instance instance;
+    private final Instance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
 
     public ObjectProducer(ObjectFactory<T> objectFactory, Map<String, Object> properties, FactorySet factorySet) {
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
-        instance = new Instance(factorySet.sequence(objectFactory.getType()));
+        instance = new Instance<>(factorySet.sequence(objectFactory.getType()), new Specification<T>().setObjectProducer(this));
         collectPropertyDefaultProducer(factorySet.getObjectFactorySet());
+        objectFactory.collectSpecification(instance);
         QueryExpression.createQueryExpressions(objectFactory.getType(), properties)
                 .forEach(exp -> addChild(exp.getProperty(), exp.buildProducer(factorySet)));
     }
@@ -21,7 +22,8 @@ class ObjectProducer<T> extends Producer<T> {
     private void collectPropertyDefaultProducer(ObjectFactorySet objectFactorySet) {
         objectFactory.getProperties().forEach((name, propertyWriter) ->
                 objectFactorySet.queryValueFactory(propertyWriter.getPropertyType()).ifPresent(factory ->
-                        addChild(name, new ValueProducer<>(factory, instance.nested(name)))
+                        //TODO Redesign ValueFactory logic
+                        addChild(name, new ValueProducer(factory, instance.nested(name)))
                 ));
     }
 

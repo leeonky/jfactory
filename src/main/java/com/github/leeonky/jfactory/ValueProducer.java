@@ -3,9 +3,9 @@ package com.github.leeonky.jfactory;
 class ValueProducer<T> extends Producer<T> {
 
     private final ObjectFactory<T> objectFactory;
-    private final Instance instance;
+    private final Instance<T> instance;
 
-    public ValueProducer(ObjectFactory<T> objectFactory, Instance instance) {
+    public ValueProducer(ObjectFactory<T> objectFactory, Instance<T> instance) {
         this.objectFactory = objectFactory;
         this.instance = instance;
     }
