@@ -31,6 +31,24 @@ public class _03_CreateWithRepo {
         assertThat(factorySet.type(Bean.class).property("stringValue", "hello").query()).isEqualTo(bean);
     }
 
+    @Test
+    void should_use_queried_object_of_given_criteria_as_property_value_in_nested_specified_property() {
+        Bean helloBean = factorySet.type(Bean.class).property("stringValue", "hello").create();
+
+        assertThat(factorySet.type(Beans.class).property("bean.stringValue", "hello").create())
+                .hasFieldOrPropertyWithValue("bean", helloBean);
+    }
+
+    @Test
+    void should_create_nested_with_property_and_value_when_query_return_empty() {
+        Beans notMatched = factorySet.type(Beans.class).create();
+
+        Beans beans = factorySet.type(BeansWrapper.class).property("beans.bean.stringValue", "hello").create().getBeans();
+        assertThat(beans).isNotEqualTo(notMatched);
+        assertThat(beans.getBean())
+                .hasFieldOrPropertyWithValue("stringValue", "hello");
+    }
+
     @Getter
     @Setter
     public static class Bean {
@@ -42,5 +60,11 @@ public class _03_CreateWithRepo {
     @Setter
     public static class Beans {
         private Bean bean;
+    }
+
+    @Getter
+    @Setter
+    public static class BeansWrapper {
+        private Beans beans;
     }
 }
