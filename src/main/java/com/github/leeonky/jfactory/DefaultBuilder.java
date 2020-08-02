@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,9 +16,11 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        return new ObjectProducer<>(objectFactory,
+        T value = new ObjectProducer<>(objectFactory,
                 new Instance(factorySet.sequence(objectFactory.getType())),
                 factorySet.getObjectFactorySet(), properties).getValue();
+        factorySet.getDataRepository().save(value);
+        return value;
     }
 
     @Override
@@ -38,5 +41,17 @@ class DefaultBuilder<T> implements Builder<T> {
         DefaultBuilder<T> newBuilder = copy();
         newBuilder.properties.putAll(properties);
         return newBuilder;
+    }
+
+    @Override
+    public T query() {
+        Collection<T> collection = queryAll();
+        return collection.isEmpty() ?
+                null
+                : collection.iterator().next();
+    }
+
+    public Collection<T> queryAll() {
+        return factorySet.getDataRepository().query(objectFactory.getType(), properties);
     }
 }

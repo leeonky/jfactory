@@ -5,6 +5,11 @@ import com.github.leeonky.util.BeanClass;
 public class FactorySet {
     private final TypeSequence typeSequence = new TypeSequence();
     private final ObjectFactorySet objectFactorySet = new ObjectFactorySet();
+    private final DataRepository dataRepository;
+
+    public FactorySet() {
+        dataRepository = new HashMapDataRepository();
+    }
 
     public <T> Builder<T> type(Class<T> type) {
         return new DefaultBuilder<>(objectFactorySet.queryObjectFactory(type), this);
@@ -20,5 +25,13 @@ public class FactorySet {
 
     public <T> T create(Class<T> type) {
         return type(type).create();
+    }
+
+    public void clearRepo() {
+        dataRepository.clear();
+    }
+
+    public DataRepository getDataRepository() {
+        return dataRepository;
     }
 }

@@ -8,4 +8,6 @@ public interface Builder<T> {
     Builder<T> property(String property, Object value);
 
     Builder<T> properties(Map<String, ?> properties);
+
+    T query();
 }
