@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory;
 
+import java.util.Collection;
 import java.util.Map;
 
 public interface Builder<T> {
@@ -10,4 +11,8 @@ public interface Builder<T> {
     Builder<T> properties(Map<String, ?> properties);
 
     T query();
+
+    Collection<T> queryAll();
+
+    ObjectProducer<T> toProducer(String property);
 }

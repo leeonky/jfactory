@@ -16,11 +16,12 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        T value = new ObjectProducer<>(objectFactory,
-                new Instance(factorySet.sequence(objectFactory.getType())),
-                factorySet.getObjectFactorySet(), properties).getValue();
-        factorySet.getDataRepository().save(value);
-        return value;
+        return toProducer(null).getValue();
+    }
+
+    @Override
+    public ObjectProducer<T> toProducer(String property) {
+        return new ObjectProducer<>(objectFactory, properties, factorySet);
     }
 
     @Override
@@ -51,6 +52,7 @@ class DefaultBuilder<T> implements Builder<T> {
                 : collection.iterator().next();
     }
 
+    @Override
     public Collection<T> queryAll() {
         return factorySet.getDataRepository().query(objectFactory.getType(), properties);
     }

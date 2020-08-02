@@ -40,6 +40,10 @@ class QueryExpression<T> {
         return expressions.get(0);
     }
 
+    public String getProperty() {
+        return property;
+    }
+
     private void parsePropertyAndConditionValue(String chain, Object value) {
         Matcher matcher = Pattern.compile("([^.(!\\[]+)(\\[(\\d+)])?(\\(([^, ]*[, ])*(.+)\\))?(!)?(\\.(.+))?").matcher(chain);
         if (matcher.matches()) {
@@ -50,8 +54,8 @@ class QueryExpression<T> {
                     matcher.group(GROUP_DEFINITION), matcher.group(GROUP_CONDITION))
                     .setIntently(matcher.group(GROUP_INTENTLY) != null);
 
-            if (matcher.group(GROUP_COLLECTION_INDEX) != null)
-                conditionValue = new CollectionConditionValue(Integer.valueOf(matcher.group(GROUP_COLLECTION_INDEX)), conditionValue);
+//            if (matcher.group(GROUP_COLLECTION_INDEX) != null)
+//                conditionValue = new CollectionConditionValue(Integer.valueOf(matcher.group(GROUP_COLLECTION_INDEX)), conditionValue);
         }
     }
 
@@ -69,16 +73,20 @@ class QueryExpression<T> {
         return conditionValue.matches(propertyReader.getElementOrPropertyType(), propertyReader.getValue(object));
     }
 
-//    public void queryOrCreateNested(FactorySet factorySet, Builder<T>.BeanFactoryProducer beanFactoryProducer) {
-//        beanFactoryProducer.addProducer(property, conditionValue.buildProducer(factorySet, beanFactoryProducer));
+    public Producer<?> buildProducer(FactorySet factorySet) {
+        return conditionValue.buildProducer(factorySet);
+    }
+
+//    public void queryOrCreateNested(FactorySet factorySet, ObjectProducer<T> objectProducer) {
+//        objectProducer.addProducer(property, conditionValue.buildProducer(factorySet, objectProducer));
 //    }
 
-    private abstract class ConditionValue {
+    public abstract class ConditionValue {
         private boolean intently = false;
 
         public abstract boolean matches(Class<?> type, Object propertyValue);
 
-//        public abstract Producer<?> buildProducer(FactorySet factorySet, Builder<T>.BeanFactoryProducer beanFactoryProducer);
+        public abstract Producer<?> buildProducer(FactorySet factorySet);
 
         public abstract ConditionValue merge(ConditionValue conditionValue);
 
@@ -90,9 +98,9 @@ class QueryExpression<T> {
             throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
         }
 
-        protected ConditionValue mergeTo(CollectionConditionValue collectionConditionValue) {
-            throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
-        }
+//        protected ConditionValue mergeTo(CollectionConditionValue collectionConditionValue) {
+//            throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
+//        }
 
         public boolean isIntently() {
             return intently;
@@ -120,12 +128,12 @@ class QueryExpression<T> {
             return !isIntently() && Objects.equals(propertyValue, beanClass.getConverter().tryConvert(type, value));
         }
 
-//        @Override
-//        public Producer<?> buildProducer(FactorySet factorySet, Builder<T>.BeanFactoryProducer beanFactoryProducer) {
+        @Override
+        public Producer<?> buildProducer(FactorySet factorySet) {
 //            if (isIntently())
 //                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
-//            return new DestinedValueProducer<>(value);
-//        }
+            return new FixedValueProducer<>(value);
+        }
 
         @Override
         public ConditionValue merge(ConditionValue conditionValue) {
@@ -164,23 +172,24 @@ class QueryExpression<T> {
                     .allMatch(queryExpression -> queryExpression.matches(propertyValue));
         }
 
-//        @Override
-//        public Producer<?> buildProducer(FactorySet factorySet, Builder<T>.BeanFactoryProducer beanFactoryProducer) {
+        @Override
+        public Producer<?> buildProducer(FactorySet factorySet) {
 //            if (isIntently())
 //                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
-//            Collection<?> collection = toBuilder(factorySet, beanClass.getPropertyReader(property).getElementOrPropertyType()).queryAll();
-//            if (collection.isEmpty())
-//                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
-//            else
-//                return new DestinedValueProducer<>(collection.iterator().next());
-//        }
+            Collection<?> collection = toBuilder(factorySet, beanClass.getPropertyReader(property).getElementOrPropertyType()).queryAll();
+            if (collection.isEmpty())
+                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).toProducer(property);
+            else
+                return new FixedValueProducer<>(collection.iterator().next());
+        }
 
-//        private Builder<?> toBuilder(FactorySet factorySet, Class<?> propertyType) {
+        private Builder<?> toBuilder(FactorySet factorySet, Class<?> propertyType) {
 //            return (definition != null ?
 //                    factorySet.toBuild(definition)
 //                    : factorySet.type(propertyType))
 //                    .mixIn(mixIns).properties(conditionValues);
-//        }
+            return factorySet.type(propertyType).properties(conditionValues);
+        }
 
         @Override
         public ConditionValue merge(ConditionValue conditionValue) {
@@ -217,40 +226,40 @@ class QueryExpression<T> {
         }
     }
 
-    private class CollectionConditionValue extends ConditionValue {
-        private final Map<Integer, ConditionValue> conditionValueIndexMap = new LinkedHashMap<>();
-
-        public CollectionConditionValue(int index, ConditionValue conditionValue) {
-            conditionValueIndexMap.put(index, conditionValue);
-        }
-
-        @Override
-        public boolean matches(Class<?> type, Object propertyValue) {
-            List<Object> elements = BeanClass.arrayCollectionToStream(propertyValue).collect(Collectors.toList());
-            return conditionValueIndexMap.entrySet().stream()
-                    .allMatch(e -> e.getValue().matches(type, elements.get(e.getKey())));
-        }
-
-//        @Override
-//        public Producer<?> buildProducer(FactorySet factorySet, Builder<T>.BeanFactoryProducer beanFactoryProducer) {
-//            CollectionProducer<?> producer = beanFactoryProducer.getOrAddCollectionProducer(property);
-//            conditionValueIndexMap.forEach((k, v) -> producer.setElementProducer(k, v.buildProducer(factorySet, beanFactoryProducer)));
-//            return producer;
+//    private class CollectionConditionValue extends ConditionValue {
+//        private final Map<Integer, ConditionValue> conditionValueIndexMap = new LinkedHashMap<>();
+//
+//        public CollectionConditionValue(int index, ConditionValue conditionValue) {
+//            conditionValueIndexMap.put(index, conditionValue);
 //        }
-
-        @Override
-        public ConditionValue merge(ConditionValue conditionValue) {
-            return conditionValue.mergeTo(this);
-        }
-
-        @Override
-        protected ConditionValue mergeTo(CollectionConditionValue collectionConditionValue) {
-            collectionConditionValue.conditionValueIndexMap.forEach((k, v) ->
-                    conditionValueIndexMap.put(k, conditionValueIndexMap.containsKey(k) ?
-                            conditionValueIndexMap.get(k).merge(v)
-                            : v));
-            return this;
-        }
-    }
+//
+//        @Override
+//        public boolean matches(Class<?> type, Object propertyValue) {
+//            List<Object> elements = BeanClass.arrayCollectionToStream(propertyValue).collect(Collectors.toList());
+//            return conditionValueIndexMap.entrySet().stream()
+//                    .allMatch(e -> e.getValue().matches(type, elements.get(e.getKey())));
+//        }
+//
+////        @Override
+////        public Producer<?> buildProducer(FactorySet factorySet, Builder<T>.BeanFactoryProducer beanFactoryProducer) {
+////            CollectionProducer<?> producer = beanFactoryProducer.getOrAddCollectionProducer(property);
+////            conditionValueIndexMap.forEach((k, v) -> producer.setElementProducer(k, v.buildProducer(factorySet, beanFactoryProducer)));
+////            return producer;
+////        }
+//
+//        @Override
+//        public ConditionValue merge(ConditionValue conditionValue) {
+//            return conditionValue.mergeTo(this);
+//        }
+//
+//        @Override
+//        protected ConditionValue mergeTo(CollectionConditionValue collectionConditionValue) {
+//            collectionConditionValue.conditionValueIndexMap.forEach((k, v) ->
+//                    conditionValueIndexMap.put(k, conditionValueIndexMap.containsKey(k) ?
+//                            conditionValueIndexMap.get(k).merge(v)
+//                            : v));
+//            return this;
+//        }
+//    }
 }
 
