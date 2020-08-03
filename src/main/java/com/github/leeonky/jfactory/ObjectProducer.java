@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class ObjectProducer<T> extends Producer<T> {
@@ -9,12 +10,12 @@ class ObjectProducer<T> extends Producer<T> {
     private final Instance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
 
-    public ObjectProducer(ObjectFactory<T> objectFactory, Map<String, Object> properties, FactorySet factorySet) {
+    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, Map<String, Object> properties, List<String> mixIns) {
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
         instance = new Instance<>(factorySet.sequence(objectFactory.getType()), new Specification<T>().setObjectProducer(this));
         collectPropertyDefaultProducer(factorySet.getObjectFactorySet());
-        objectFactory.collectSpecification(instance);
+        objectFactory.collectSpecification(mixIns, instance);
         QueryExpression.createQueryExpressions(objectFactory.getType(), properties)
                 .forEach(exp -> addChild(exp.getProperty(), exp.buildProducer(factorySet)));
     }

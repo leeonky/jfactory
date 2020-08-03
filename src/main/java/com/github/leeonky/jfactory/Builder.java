@@ -15,4 +15,6 @@ public interface Builder<T> {
     Collection<T> queryAll();
 
     ObjectProducer<T> toProducer(String property);
+
+    Builder<T> mixIn(String name);
 }

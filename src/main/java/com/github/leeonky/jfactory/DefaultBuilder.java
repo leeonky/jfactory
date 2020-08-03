@@ -1,13 +1,12 @@
 package com.github.leeonky.jfactory;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
     private final Map<String, Object> properties = new LinkedHashMap<>();
+    private final List<String> mixIns = new ArrayList<>();
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
         this.factorySet = factorySet;
@@ -21,7 +20,14 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public ObjectProducer<T> toProducer(String property) {
-        return new ObjectProducer<>(objectFactory, properties, factorySet);
+        return new ObjectProducer<>(factorySet, objectFactory, properties, mixIns);
+    }
+
+    @Override
+    public Builder<T> mixIn(String name) {
+        DefaultBuilder<T> newBuilder = copy();
+        newBuilder.mixIns.add(name);
+        return newBuilder;
     }
 
     @Override
@@ -34,6 +40,7 @@ class DefaultBuilder<T> implements Builder<T> {
     private DefaultBuilder<T> copy() {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, factorySet);
         builder.properties.putAll(properties);
+        builder.mixIns.addAll(mixIns);
         return builder;
     }
 

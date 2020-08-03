@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class _04_CustomizedFactory {
     private FactorySet factorySet = new FactorySet();
@@ -18,6 +19,21 @@ public class _04_CustomizedFactory {
 
         assertThat(factorySet.type(Bean.class).create())
                 .hasFieldOrPropertyWithValue("stringValue", "hello");
+    }
+
+    @Test
+    void support_define_mix_in() {
+        factorySet.factory(Bean.class).specification("100", instance -> {
+            instance.spec().property("intValue").value(100);
+        });
+
+        assertThat(factorySet.type(Bean.class).mixIn("100").create())
+                .hasFieldOrPropertyWithValue("intValue", 100);
+    }
+
+    @Test
+    void raise_error_when_mixin_not_exist() {
+        assertThrows(IllegalArgumentException.class, () -> factorySet.type(Bean.class).mixIn("not exist").create());
     }
 
     @Getter

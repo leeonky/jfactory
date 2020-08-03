@@ -7,4 +7,7 @@ public interface Factory<T> {
     Factory<T> constructor(Function<Instance<T>, T> constructor);
 
     Factory<T> specification(Consumer<Instance<T>> instance);
+
+    Factory<T> specification(String name, Consumer<Instance<T>> instance);
+
 }

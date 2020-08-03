@@ -3,6 +3,8 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -13,6 +15,7 @@ class ObjectFactory<T> implements Factory<T> {
     private Function<Instance<T>, T> constructor = this::construct;
     private Consumer<Instance<T>> specification = (instance) -> {
     };
+    private Map<String, Consumer<Instance<T>>> mixIns = new HashMap<>();
 
     public ObjectFactory(BeanClass<T> type) {
         this.type = type;
@@ -27,6 +30,12 @@ class ObjectFactory<T> implements Factory<T> {
     @Override
     public Factory<T> specification(Consumer<Instance<T>> specification) {
         this.specification = Objects.requireNonNull(specification);
+        return this;
+    }
+
+    @Override
+    public Factory<T> specification(String name, Consumer<Instance<T>> mixIn) {
+        mixIns.put(name, Objects.requireNonNull(mixIn));
         return this;
     }
 
@@ -46,7 +55,11 @@ class ObjectFactory<T> implements Factory<T> {
         return type.getPropertyWriters();
     }
 
-    public void collectSpecification(Instance<T> instance) {
+    public void collectSpecification(List<String> mixIns, Instance<T> instance) {
         specification.accept(instance);
+        mixIns.stream().peek(name -> {
+            if (!this.mixIns.containsKey(name))
+                throw new IllegalArgumentException("Mix-in `" + name + "` not exist");
+        }).map(this.mixIns::get).forEach(specification -> specification.accept(instance));
     }
 }
