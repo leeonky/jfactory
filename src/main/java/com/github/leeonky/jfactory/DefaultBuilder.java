@@ -2,11 +2,13 @@ package com.github.leeonky.jfactory;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
     private final Map<String, Object> properties = new LinkedHashMap<>();
-    private final List<String> mixIns = new ArrayList<>();
+    private final Set<String> mixIns = new LinkedHashSet<>();
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
         this.factorySet = factorySet;
@@ -24,9 +26,9 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
-    public Builder<T> mixIn(String name) {
+    public Builder<T> mixIn(String... mixIns) {
         DefaultBuilder<T> newBuilder = copy();
-        newBuilder.mixIns.add(name);
+        newBuilder.mixIns.addAll(asList(mixIns));
         return newBuilder;
     }
 

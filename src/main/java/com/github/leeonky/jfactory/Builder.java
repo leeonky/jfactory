@@ -16,5 +16,5 @@ public interface Builder<T> {
 
     ObjectProducer<T> toProducer(String property);
 
-    Builder<T> mixIn(String name);
+    Builder<T> mixIn(String... mixIns);
 }

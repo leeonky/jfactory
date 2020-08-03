@@ -3,16 +3,16 @@ package com.github.leeonky.jfactory;
 public class Instance<T> {
     private final int sequence;
     private final String property;
-    private final Specification<T> specification;
+    private final Spec<T> spec;
 
-    public Instance(int sequence, Specification<T> specification) {
-        this(sequence, null, specification);
+    public Instance(int sequence, Spec<T> spec) {
+        this(sequence, null, spec);
     }
 
-    private Instance(int sequence, String property, Specification<T> specification) {
+    private Instance(int sequence, String property, Spec<T> spec) {
         this.sequence = sequence;
         this.property = property;
-        this.specification = specification;
+        this.spec = spec;
     }
 
     public int getSequence() {
@@ -20,14 +20,14 @@ public class Instance<T> {
     }
 
     public Instance<T> nested(String property) {
-        return new Instance<>(sequence, property, specification);
+        return new Instance<>(sequence, property, spec);
     }
 
     public String getProperty() {
         return property;
     }
 
-    public Specification<T> spec() {
-        return specification;
+    public Spec<T> spec() {
+        return spec;
     }
 }

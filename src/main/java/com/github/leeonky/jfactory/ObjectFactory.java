@@ -3,8 +3,8 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -12,6 +12,7 @@ import java.util.function.Function;
 
 class ObjectFactory<T> implements Factory<T> {
     private final BeanClass<T> type;
+    private final Spec<T> spec = new Spec<>();
     private Function<Instance<T>, T> constructor = this::construct;
     private Consumer<Instance<T>> specification = (instance) -> {
     };
@@ -21,6 +22,10 @@ class ObjectFactory<T> implements Factory<T> {
         this.type = type;
     }
 
+    protected Spec<T> getSpec() {
+        return spec;
+    }
+
     @Override
     public Factory<T> constructor(Function<Instance<T>, T> constructor) {
         this.constructor = Objects.requireNonNull(constructor);
@@ -28,13 +33,13 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> specification(Consumer<Instance<T>> specification) {
+    public Factory<T> spec(Consumer<Instance<T>> specification) {
         this.specification = Objects.requireNonNull(specification);
         return this;
     }
 
     @Override
-    public Factory<T> specification(String name, Consumer<Instance<T>> mixIn) {
+    public Factory<T> spec(String name, Consumer<Instance<T>> mixIn) {
         mixIns.put(name, Objects.requireNonNull(mixIn));
         return this;
     }
@@ -55,7 +60,7 @@ class ObjectFactory<T> implements Factory<T> {
         return type.getPropertyWriters();
     }
 
-    public void collectSpecification(List<String> mixIns, Instance<T> instance) {
+    public void collectSpecification(Collection<String> mixIns, Instance<T> instance) {
         specification.accept(instance);
         mixIns.stream().peek(name -> {
             if (!this.mixIns.containsKey(name))
