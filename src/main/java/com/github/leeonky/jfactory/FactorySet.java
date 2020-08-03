@@ -38,4 +38,8 @@ public class FactorySet {
     public <T> Factory<T> factory(Class<T> type) {
         return objectFactorySet.queryObjectFactory(type);
     }
+
+    public <T> Builder<T> spec(Class<? extends Spec<T>> specClass) {
+        return new DefaultBuilder<>(new SpecClassFactory<>(specClass), this);
+    }
 }
