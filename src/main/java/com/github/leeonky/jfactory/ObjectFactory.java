@@ -12,7 +12,6 @@ import java.util.function.Function;
 
 class ObjectFactory<T> implements Factory<T> {
     private final BeanClass<T> type;
-    private final Spec<T> spec = new Spec<>();
     private Function<Instance<T>, T> constructor = this::construct;
     private Consumer<Instance<T>> specification = (instance) -> {
     };
@@ -22,8 +21,8 @@ class ObjectFactory<T> implements Factory<T> {
         this.type = type;
     }
 
-    protected Spec<T> getSpec() {
-        return spec;
+    public Spec<T> createSpec() {
+        return new Spec<>();
     }
 
     @Override

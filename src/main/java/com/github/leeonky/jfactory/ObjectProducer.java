@@ -13,7 +13,7 @@ class ObjectProducer<T> extends Producer<T> {
     public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, Map<String, Object> properties, Collection<String> mixIns) {
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
-        instance = new Instance<>(factorySet.sequence(objectFactory.getType()), objectFactory.getSpec());
+        instance = new Instance<>(factorySet.sequence(objectFactory.getType()), objectFactory.createSpec());
         collectPropertyDefaultProducer(factorySet.getObjectFactorySet());
         objectFactory.collectSpecification(mixIns, instance);
         instance.spec().apply(this);

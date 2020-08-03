@@ -13,7 +13,7 @@ public class _04_CustomizedFactory {
 
     @Test
     void support_define_build() {
-        factorySet.factory(Bean.class).specification(instance -> {
+        factorySet.factory(Bean.class).spec(instance -> {
             instance.spec().property("stringValue").value("hello");
         });
 
@@ -23,7 +23,7 @@ public class _04_CustomizedFactory {
 
     @Test
     void support_define_mix_in() {
-        factorySet.factory(Bean.class).specification("100", instance -> {
+        factorySet.factory(Bean.class).spec("100", instance -> {
             instance.spec().property("intValue").value(100);
         });
 
