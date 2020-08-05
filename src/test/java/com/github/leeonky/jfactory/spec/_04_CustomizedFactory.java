@@ -97,7 +97,7 @@ public class _04_CustomizedFactory {
 
 
         @Test
-        void should_call_type_base_construct_and_definition() {
+        void should_call_type_base_constructor_and_main_specification() {
             factorySet.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> {
                 instance.spec().property("intValue").value(50);
             });

@@ -4,6 +4,8 @@ import com.github.leeonky.util.BeanClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 class SpecClassFactory<T> extends ObjectFactory<T> {
@@ -44,5 +46,11 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
         return annotation.value().isEmpty() ?
                 method.getName()
                 : annotation.value();
+    }
+
+    @Override
+    public void collectSpecification(Collection<String> mixIns, Instance<T> instance) {
+        base.collectSpecification(Collections.emptyList(), instance);
+        super.collectSpecification(mixIns, instance);
     }
 }
