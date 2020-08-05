@@ -7,12 +7,15 @@ import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 class SpecClassFactory<T> extends ObjectFactory<T> {
+    private final ObjectFactory<T> base;
     private final Class<? extends Spec<T>> specClass;
 
-    public SpecClassFactory(Class<? extends Spec<T>> specClass) {
+    public SpecClassFactory(ObjectFactory<T> base, Class<? extends Spec<T>> specClass) {
         super(BeanClass.create(BeanClass.newInstance(specClass).getType()));
         this.specClass = specClass;
+        this.base = base;
         registerMixIns();
+        constructor(base::create);
     }
 
     @Override

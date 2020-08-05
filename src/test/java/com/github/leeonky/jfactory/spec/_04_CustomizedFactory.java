@@ -86,5 +86,25 @@ public class _04_CustomizedFactory {
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
+
+        @Test
+        void support_use_mix_in_in_java_code() {
+            assertThat(factorySet.create(new ABean().int100().strHello()))
+                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100);
+        }
+
+
+        @Test
+        void should_call_type_base_construct_and_definition() {
+            factorySet.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> {
+                instance.spec().property("intValue").value(50);
+            });
+
+            assertThat(factorySet.create(new ABean()))
+                    .isInstanceOf(BeanSub.class)
+                    .hasFieldOrPropertyWithValue("intValue", 50);
+        }
     }
 }
