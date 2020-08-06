@@ -106,5 +106,18 @@ public class _04_CustomizedFactory {
                     .isInstanceOf(BeanSub.class)
                     .hasFieldOrPropertyWithValue("intValue", 50);
         }
+
+        @Test
+        void support_build_through_spec_name() {
+            factorySet.spec(ABean.class);
+
+            assertThat((Bean) factorySet.create("ABean"))
+                    .hasFieldOrPropertyWithValue("content", "this is a bean");
+        }
+
+        @Test
+        void should_raise_error_when_definition_or_mix_in_not_exist() {
+            assertThrows(IllegalArgumentException.class, () -> factorySet.create("ABean"));
+        }
     }
 }

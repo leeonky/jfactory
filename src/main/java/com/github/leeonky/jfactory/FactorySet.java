@@ -40,8 +40,7 @@ public class FactorySet {
     }
 
     public <T> Builder<T> spec(Class<? extends Spec<T>> specClass) {
-        return new DefaultBuilder<>(
-                new SpecClassFactory<>(objectFactorySet.queryObjectFactory(BeanClass.newInstance(specClass).getType()), specClass), this);
+        return new DefaultBuilder<>(objectFactorySet.registerSpecClassFactory(specClass), this);
     }
 
     public <T> T create(Spec<T> spec) {
@@ -50,5 +49,13 @@ public class FactorySet {
 
     private <T> Builder<T> spec(Spec<T> spec) {
         return new DefaultBuilder<>(new SpecFactory<>(objectFactorySet.queryObjectFactory(spec.getType()), spec), this);
+    }
+
+    public <T> T create(String specName) {
+        return this.<T>spec(specName).create();
+    }
+
+    private <T> Builder<T> spec(String specName) {
+        return new DefaultBuilder<>(objectFactorySet.querySpecClassFactory(specName), this);
     }
 }

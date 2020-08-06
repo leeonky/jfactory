@@ -31,6 +31,10 @@ public class Spec<T> {
                 .getRawType();
     }
 
+    String getName() {
+        return getClass().getSimpleName();
+    }
+
     public class PropertySpecification {
         private final String name;
 
