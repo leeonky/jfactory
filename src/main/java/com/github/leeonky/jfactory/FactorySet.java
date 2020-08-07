@@ -1,7 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
-
 public class FactorySet {
     private final TypeSequence typeSequence = new TypeSequence();
     private final ObjectFactorySet objectFactorySet = new ObjectFactorySet();
@@ -11,24 +9,12 @@ public class FactorySet {
         dataRepository = new HashMapDataRepository();
     }
 
-    public <T> Builder<T> type(Class<T> type) {
-        return new DefaultBuilder<>(objectFactorySet.queryObjectFactory(type), this);
-    }
-
-    ObjectFactorySet getObjectFactorySet() {
+    public ObjectFactorySet getObjectFactorySet() {
         return objectFactorySet;
     }
 
-    <T> int sequence(BeanClass<T> type) {
-        return typeSequence.generate(type.getType());
-    }
-
-    public <T> T create(Class<T> type) {
-        return type(type).create();
-    }
-
-    public void clearRepo() {
-        dataRepository.clear();
+    public TypeSequence getTypeSequence() {
+        return typeSequence;
     }
 
     public DataRepository getDataRepository() {
@@ -39,23 +25,31 @@ public class FactorySet {
         return objectFactorySet.queryObjectFactory(type);
     }
 
-    public <T> Builder<T> spec(Class<? extends Spec<T>> specClass) {
-        return new DefaultBuilder<>(objectFactorySet.registerSpecClassFactory(specClass), this);
+    public <T> Builder<T> type(Class<T> type) {
+        return new DefaultBuilder<>(objectFactorySet.queryObjectFactory(type), this);
     }
 
-    public <T> T create(Spec<T> spec) {
-        return spec(spec).create();
+    public <T> Builder<T> spec(Class<? extends Spec<T>> specClass) {
+        return new DefaultBuilder<>(objectFactorySet.registerSpecClassFactory(specClass), this);
     }
 
     private <T> Builder<T> spec(Spec<T> spec) {
         return new DefaultBuilder<>(new SpecFactory<>(objectFactorySet.queryObjectFactory(spec.getType()), spec), this);
     }
 
-    public <T> T create(String specName) {
-        return this.<T>spec(specName).create();
-    }
-
     private <T> Builder<T> spec(String specName) {
         return new DefaultBuilder<>(objectFactorySet.querySpecClassFactory(specName), this);
+    }
+
+    public <T> T create(Class<T> type) {
+        return type(type).create();
+    }
+
+    public <T> T create(Spec<T> spec) {
+        return spec(spec).create();
+    }
+
+    public <T> T create(String specName) {
+        return this.<T>spec(specName).create();
     }
 }

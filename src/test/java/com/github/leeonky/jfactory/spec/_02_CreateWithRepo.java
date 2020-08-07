@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class _03_CreateWithRepo {
+public class _02_CreateWithRepo {
     private FactorySet factorySet = new FactorySet();
 
     @Test
@@ -19,7 +19,7 @@ public class _03_CreateWithRepo {
 
         assertThat(builder.query()).isEqualTo(created);
 
-        factorySet.clearRepo();
+        factorySet.getDataRepository().clear();
 
         assertThat(builder.query()).isNull();
     }

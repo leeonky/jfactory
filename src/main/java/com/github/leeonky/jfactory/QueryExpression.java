@@ -178,7 +178,7 @@ class QueryExpression<T> {
 //                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
             Collection<?> collection = toBuilder(factorySet, beanClass.getPropertyReader(property).getElementOrPropertyType()).queryAll();
             if (collection.isEmpty())
-                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).toProducer(property);
+                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).createProducer(property);
             else
                 return new FixedValueProducer<>(collection.iterator().next());
         }

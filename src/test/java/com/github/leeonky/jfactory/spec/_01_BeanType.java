@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class _02_BeanType {
+class _01_BeanType {
     private FactorySet factorySet = new FactorySet();
 
     @Test

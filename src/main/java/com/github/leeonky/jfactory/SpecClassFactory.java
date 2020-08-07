@@ -49,8 +49,8 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
-    public void collectSpecification(Collection<String> mixIns, Instance<T> instance) {
-        base.collectSpecification(Collections.emptyList(), instance);
-        super.collectSpecification(mixIns, instance);
+    public void collectSpec(Collection<String> mixIns, Instance<T> instance) {
+        base.collectSpec(Collections.emptyList(), instance);
+        super.collectSpec(mixIns, instance);
     }
 }

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class _04_CustomizedFactory {
+public class _03_CustomizedFactory {
     private FactorySet factorySet = new FactorySet();
 
     @Getter
@@ -51,7 +51,7 @@ public class _04_CustomizedFactory {
     class SpecInLambda {
 
         @Test
-        void support_define_specification_for_all_build_of_type() {
+        void support_define_spec_for_all_build_of_type() {
             factorySet.factory(Bean.class).spec(instance -> {
                 instance.spec().property("stringValue").value("hello");
             });
@@ -80,7 +80,7 @@ public class _04_CustomizedFactory {
     class SpecInClass {
 
         @Test
-        void support_define_specification_in_class() {
+        void support_define_spec_in_class() {
             assertThat(factorySet.spec(ABean.class).mixIn("int100", "hello").create())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
@@ -97,7 +97,7 @@ public class _04_CustomizedFactory {
 
 
         @Test
-        void should_call_type_base_constructor_and_main_specification() {
+        void should_call_type_base_constructor_and_main_spec() {
             factorySet.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> {
                 instance.spec().property("intValue").value(50);
             });

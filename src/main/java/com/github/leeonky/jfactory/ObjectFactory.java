@@ -1,7 +1,6 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyWriter;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.function.Function;
 class ObjectFactory<T> implements Factory<T> {
     private final BeanClass<T> type;
     private Function<Instance<T>, T> constructor = this::construct;
-    private Consumer<Instance<T>> specification = (instance) -> {
+    private Consumer<Instance<T>> spec = (instance) -> {
     };
     private Map<String, Consumer<Instance<T>>> mixIns = new HashMap<>();
 
@@ -32,8 +31,8 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> spec(Consumer<Instance<T>> specification) {
-        this.specification = Objects.requireNonNull(specification);
+    public Factory<T> spec(Consumer<Instance<T>> spec) {
+        this.spec = Objects.requireNonNull(spec);
         return this;
     }
 
@@ -55,15 +54,14 @@ class ObjectFactory<T> implements Factory<T> {
         return type;
     }
 
-    public Map<String, PropertyWriter<T>> getProperties() {
-        return type.getPropertyWriters();
+    public void collectSpec(Collection<String> mixIns, Instance<T> instance) {
+        spec.accept(instance);
+        mixIns.stream().map(name -> this.mixIns.computeIfAbsent(name, k -> {
+            throw new IllegalArgumentException("Mix-in `" + k + "` not exist");
+        })).forEach(spec -> spec.accept(instance));
     }
 
-    public void collectSpecification(Collection<String> mixIns, Instance<T> instance) {
-        specification.accept(instance);
-        mixIns.stream().peek(name -> {
-            if (!this.mixIns.containsKey(name))
-                throw new IllegalArgumentException("Mix-in `" + name + "` not exist");
-        }).map(this.mixIns::get).forEach(specification -> specification.accept(instance));
+    public Instance<T> createInstance(TypeSequence typeSequence) {
+        return new Instance<>(typeSequence.generate(getType().getType()), createSpec());
     }
 }

@@ -5,7 +5,7 @@ public class Instance<T> {
     private final String property;
     private final Spec<T> spec;
 
-    public Instance(int sequence, Spec<T> spec) {
+    Instance(int sequence, Spec<T> spec) {
         this(sequence, null, spec);
     }
 
@@ -19,7 +19,7 @@ public class Instance<T> {
         return sequence;
     }
 
-    public Instance<T> nested(String property) {
+    Instance<T> nested(String property) {
         return new Instance<>(sequence, property, spec);
     }
 

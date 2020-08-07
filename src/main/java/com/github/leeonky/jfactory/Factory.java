@@ -9,5 +9,4 @@ public interface Factory<T> {
     Factory<T> spec(Consumer<Instance<T>> instance);
 
     Factory<T> spec(String name, Consumer<Instance<T>> instance);
-
 }
