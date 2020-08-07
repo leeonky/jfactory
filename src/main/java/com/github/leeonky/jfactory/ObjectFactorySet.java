@@ -6,23 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+
 class ObjectFactorySet {
-    private final ValueFactorySet valueFactorySet = new ValueFactorySet();
+    private final Map<Class<?>, PropertyValueBuilder<?>> propertyValueBuilders = new HashMap<Class<?>, PropertyValueBuilder<?>>() {{
+        put(String.class, (type, instance) -> String.format("%s#%d", instance.getProperty(), instance.getSequence()));
+    }};
     private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
     private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public <T> ObjectFactory<T> queryObjectFactory(Class<T> type) {
-        return (ObjectFactory<T>) objectFactories.computeIfAbsent(type, this::create);
-    }
-
-    private <T> ObjectFactory<T> create(Class<T> type) {
-        return valueFactorySet.get(type).orElseGet(() -> new ObjectFactory<>(BeanClass.create(type)));
-    }
-
-    public <T> Optional<ObjectFactory<T>> queryValueFactory(Class<T> type) {
-        return valueFactorySet.get(type);
+        return (ObjectFactory<T>) objectFactories.computeIfAbsent(type, key -> new ObjectFactory<>(BeanClass.create(key)));
     }
 
     @SuppressWarnings("unchecked")
@@ -39,5 +35,10 @@ class ObjectFactorySet {
         return (SpecClassFactory<T>) specClassFactoriesWithName.computeIfAbsent(specName, key -> {
             throw new IllegalArgumentException("Spec `" + specName + "` not exist");
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Optional<PropertyValueBuilder<T>> queryPropertyValueFactory(Class<T> propertyType) {
+        return ofNullable((PropertyValueBuilder<T>) propertyValueBuilders.get(propertyType));
     }
 }

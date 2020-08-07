@@ -23,10 +23,8 @@ class ObjectProducer<T> extends Producer<T> {
 
     private void collectPropertyDefaultProducer(ObjectFactorySet objectFactorySet) {
         objectFactory.getProperties().forEach((name, propertyWriter) ->
-                objectFactorySet.queryValueFactory(propertyWriter.getPropertyType()).ifPresent(factory ->
-                        //TODO Redesign ValueFactory logic
-                        addChild(name, new ValueProducer(factory, instance.nested(name)))
-                ));
+                objectFactorySet.queryPropertyValueFactory(propertyWriter.getPropertyType()).ifPresent(propertyValueFactory ->
+                        addChild(name, new PropertyValueProducer<>(objectFactory.getType(), propertyValueFactory, instance.nested(name)))));
     }
 
     public void addChild(String name, Producer<?> producer) {
