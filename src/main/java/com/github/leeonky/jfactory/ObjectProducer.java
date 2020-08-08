@@ -34,7 +34,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     private void buildProducersFromSpec(Collection<String> mixIns) {
         objectFactory.collectSpec(mixIns, instance);
-        instance.spec().apply(this);
+        instance.spec().apply(factorySet, this);
     }
 
     private void buildPropertyValueProducers(ObjectFactorySet objectFactorySet) {

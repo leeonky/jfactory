@@ -41,6 +41,6 @@ public class Instance<T> {
     }
 
     public Supplier<T> reference() {
-        return () -> reference.get();
+        return reference::get;
     }
 }
