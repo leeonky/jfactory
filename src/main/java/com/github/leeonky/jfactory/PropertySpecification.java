@@ -41,4 +41,14 @@ public class PropertySpecification<T> {
         return spec.append((factorySet, objectProducer) ->
                 objectProducer.addChild(name, builder.apply(factorySet.spec(specClass)).createProducer(name)));
     }
+
+    public Spec<T> asDefault() {
+        return spec.append((factorySet, objectProducer) ->
+                objectProducer.addChild(name, factorySet.type(objectProducer.getType().getPropertyWriter(name).getPropertyType()).createProducer(name)));
+    }
+
+    public Spec<T> asDefault(Function<Builder<?>, Builder<?>> builder) {
+        return spec.append((factorySet, objectProducer) ->
+                objectProducer.addChild(name, builder.apply(factorySet.type(objectProducer.getType().getPropertyWriter(name).getPropertyType())).createProducer(name)));
+    }
 }

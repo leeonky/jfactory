@@ -120,4 +120,27 @@ class _04_Spec {
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
     }
+
+    @Nested
+    class DefaultTypeBuild {
+
+        @Test
+        void support_create_property_with_default() {
+            factorySet.factory(Beans.class).spec(instance ->
+                    instance.spec().property("bean").asDefault());
+
+            assertThat(factorySet.create(Beans.class).getBean())
+                    .isInstanceOf(Bean.class)
+            ;
+        }
+
+        @Test
+        void support_specify_customized_builder_args() {
+            factorySet.factory(Beans.class).spec(instance ->
+                    instance.spec().property("bean").asDefault(builder -> builder.property("intValue", 100)));
+
+            assertThat(factorySet.create(Beans.class).getBean())
+                    .hasFieldOrPropertyWithValue("intValue", 100);
+        }
+    }
 }

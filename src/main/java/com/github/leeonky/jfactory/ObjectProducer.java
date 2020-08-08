@@ -55,4 +55,8 @@ class ObjectProducer<T> extends Producer<T> {
         factorySet.getDataRepository().save(obj);
         return obj;
     }
+
+    public BeanClass<T> getType() {
+        return type;
+    }
 }
