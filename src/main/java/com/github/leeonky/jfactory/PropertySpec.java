@@ -1,25 +1,27 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class PropertySpecification<T> {
+public class PropertySpec<T> {
     private final String name;
     private final Spec<T> spec;
 
-    PropertySpecification(String name, Spec<T> spec) {
+    PropertySpec(String name, Spec<T> spec) {
         this.name = name;
         this.spec = spec;
     }
 
     public Spec<T> value(Object value) {
-        return spec.append((factorySet, objectProducer) ->
-                objectProducer.addChild(name, new UnFixedValueProducer<>(() -> value)));
+        return value(() -> value);
     }
 
+    @SuppressWarnings("unchecked")
     public <V> Spec<T> value(Supplier<V> value) {
         return spec.append((factorySet, objectProducer) ->
-                objectProducer.addChild(name, new UnFixedValueProducer<>(value)));
+                objectProducer.addChild(name, new UnFixedValueProducer<>(value, (BeanClass<V>) objectProducer.getType().getPropertyWriter(name).getPropertyTypeWrapper())));
     }
 
     public <V> Spec<T> spec(Class<? extends Spec<V>> specClass) {
@@ -43,8 +45,7 @@ public class PropertySpecification<T> {
     }
 
     public Spec<T> asDefault() {
-        return spec.append((factorySet, objectProducer) ->
-                objectProducer.addChild(name, factorySet.type(objectProducer.getType().getPropertyWriter(name).getPropertyType()).createProducer(name)));
+        return asDefault(b -> b);
     }
 
     public Spec<T> asDefault(Function<Builder<?>, Builder<?>> builder) {

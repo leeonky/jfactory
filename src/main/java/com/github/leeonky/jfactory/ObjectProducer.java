@@ -1,7 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,13 +9,12 @@ class ObjectProducer<T> extends Producer<T> {
     private final FactorySet factorySet;
     private final Instance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
-    private final BeanClass<T> type;
 
     public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, Map<String, Object> properties, Collection<String> mixIns) {
+        super(objectFactory.getType());
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
         instance = objectFactory.createInstance(factorySet.getTypeSequence());
-        type = objectFactory.getType();
         establishProducers(factorySet, properties, mixIns);
     }
 
@@ -28,8 +25,8 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private void buildProducerFromInputProperties(FactorySet factorySet, Map<String, Object> properties) {
-        QueryExpression.createQueryExpressions(type, properties)
-                .forEach(exp -> addChild(exp.getProperty(), exp.buildProducer(factorySet)));
+        QueryExpression.createQueryExpressions(getType(), properties)
+                .forEach(exp -> addChild(exp.getProperty(), exp.buildProducer(factorySet, this)));
     }
 
     private void buildProducersFromSpec(Collection<String> mixIns) {
@@ -38,25 +35,27 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private void buildPropertyValueProducers(ObjectFactorySet objectFactorySet) {
-        type.getPropertyWriters().forEach((name, propertyWriter) ->
+        getType().getPropertyWriters().forEach((name, propertyWriter) ->
                 objectFactorySet.queryPropertyValueFactory(propertyWriter.getPropertyType()).ifPresent(propertyValueFactory ->
-                        addChild(name, new PropertyValueProducer<>(type, propertyValueFactory, instance.nested(name)))));
+                        addChild(name, new PropertyValueProducer<>(getType(), propertyValueFactory, instance.nested(name)))));
     }
 
-    public void addChild(String name, Producer<?> producer) {
-        children.put(name, producer);
+    @Override
+    public void addChild(Object name, Producer<?> producer) {
+        children.put((String) name, producer);
+    }
+
+    @Override
+    public Producer<?> getChild(Object index) {
+        return children.get(index);
     }
 
     @Override
     protected T produce() {
         T obj = objectFactory.create(instance);
         instance.giveValue(obj);
-        children.forEach((property, producer) -> type.setPropertyValue(obj, property, producer.produce()));
+        children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.produce()));
         factorySet.getDataRepository().save(obj);
         return obj;
-    }
-
-    public BeanClass<T> getType() {
-        return type;
     }
 }

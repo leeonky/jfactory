@@ -8,6 +8,7 @@ class PropertyValueProducer<T, V> extends Producer<V> {
     private final Instance<T> instance;
 
     public PropertyValueProducer(BeanClass<T> objectType, PropertyValueBuilder<V> propertyValueBuilder, Instance<T> instance) {
+        super(BeanClass.create(propertyValueBuilder.getType()));
         this.objectType = objectType;
         this.propertyValueBuilder = propertyValueBuilder;
         this.instance = instance;

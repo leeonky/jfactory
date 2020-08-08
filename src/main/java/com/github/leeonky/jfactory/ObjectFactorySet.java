@@ -10,7 +10,7 @@ import static java.util.Optional.ofNullable;
 
 class ObjectFactorySet {
     private final Map<Class<?>, PropertyValueBuilder<?>> propertyValueBuilders = new HashMap<Class<?>, PropertyValueBuilder<?>>() {{
-        put(String.class, (type, instance) -> String.format("%s#%d", instance.getProperty(), instance.getSequence()));
+        put(String.class, new PropertyValueBuilders.StringPropertyValueBuilder());
     }};
     private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
