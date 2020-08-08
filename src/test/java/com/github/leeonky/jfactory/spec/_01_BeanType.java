@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class _01_BeanType {
@@ -25,13 +23,9 @@ class _01_BeanType {
 
     @Test
     void support_specify_properties_in_building() {
-        assertThat(factorySet.type(Bean.class).property("stringValue", "hello").create())
-                .hasFieldOrPropertyWithValue("stringValue", "hello");
-
-        assertThat(factorySet.type(Bean.class).properties(new HashMap<String, Object>() {{
-            put("stringValue", "hello");
-            put("intValue", 100);
-        }}).create())
+        assertThat(factorySet.type(Bean.class)
+                .property("stringValue", "hello")
+                .property("intValue", 100).create())
                 .hasFieldOrPropertyWithValue("stringValue", "hello")
                 .hasFieldOrPropertyWithValue("intValue", 100);
     }

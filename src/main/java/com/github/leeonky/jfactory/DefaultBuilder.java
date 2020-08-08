@@ -32,13 +32,6 @@ class DefaultBuilder<T> implements Builder<T> {
         return newBuilder;
     }
 
-    @Override
-    public Builder<T> property(String property, Object value) {
-        DefaultBuilder<T> newBuilder = copy();
-        newBuilder.properties.put(property, value);
-        return newBuilder;
-    }
-
     private DefaultBuilder<T> copy() {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, factorySet);
         builder.properties.putAll(properties);

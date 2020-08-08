@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory;
 
+import java.util.Arrays;
+
 public class FactorySet {
     private final TypeSequence typeSequence = new TypeSequence();
     private final ObjectFactorySet objectFactorySet = new ObjectFactorySet();
@@ -49,7 +51,8 @@ public class FactorySet {
         return spec(spec).create();
     }
 
-    public <T> T create(String specName) {
-        return this.<T>spec(specName).create();
+    public <T> T create(String... mixInsAndSpec) {
+        return this.<T>spec(mixInsAndSpec[mixInsAndSpec.length - 1])
+                .mixIn(Arrays.copyOf(mixInsAndSpec, mixInsAndSpec.length - 1)).create();
     }
 }

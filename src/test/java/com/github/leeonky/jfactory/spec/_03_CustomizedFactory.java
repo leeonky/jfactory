@@ -51,7 +51,7 @@ public class _03_CustomizedFactory {
     class SpecInLambda {
 
         @Test
-        void support_define_spec_for_all_build_of_type() {
+        void support_define_spec_of_type() {
             factorySet.factory(Bean.class).spec(instance -> {
                 instance.spec().property("stringValue").value("hello");
             });
@@ -88,7 +88,7 @@ public class _03_CustomizedFactory {
         }
 
         @Test
-        void support_use_mix_in_in_java_code() {
+        void support_pass_spec_arg_in_java_code() {
             assertThat(factorySet.create(new ABean().int100().strHello()))
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
@@ -111,8 +111,9 @@ public class _03_CustomizedFactory {
         void support_build_through_spec_name() {
             factorySet.spec(ABean.class);
 
-            assertThat((Bean) factorySet.create("ABean"))
-                    .hasFieldOrPropertyWithValue("content", "this is a bean");
+            assertThat((Bean) factorySet.create("hello", "ABean"))
+                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
 
         @Test
