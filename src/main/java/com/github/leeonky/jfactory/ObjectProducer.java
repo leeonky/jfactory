@@ -50,6 +50,7 @@ class ObjectProducer<T> extends Producer<T> {
     @Override
     protected T produce() {
         T obj = objectFactory.create(instance);
+        instance.giveValue(obj);
         children.forEach((property, producer) -> type.setPropertyValue(obj, property, producer.produce()));
         factorySet.getDataRepository().save(obj);
         return obj;

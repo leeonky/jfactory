@@ -5,6 +5,7 @@ import com.github.leeonky.util.GenericType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Spec<T> {
     private List<Consumer<ObjectProducer<T>>> operations = new ArrayList<>();
@@ -44,6 +45,11 @@ public class Spec<T> {
 
         public Spec<T> value(Object value) {
             operations.add(objectProducer -> objectProducer.addChild(name, new UnFixedValueProducer<>(() -> value)));
+            return Spec.this;
+        }
+
+        public Spec<T> value(Supplier<?> value) {
+            operations.add(objectProducer -> objectProducer.addChild(name, new UnFixedValueProducer<>(value)));
             return Spec.this;
         }
     }

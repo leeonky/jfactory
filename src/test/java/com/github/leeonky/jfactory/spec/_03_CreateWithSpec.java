@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class _03_CustomizedFactory {
+public class _03_CreateWithSpec {
     private FactorySet factorySet = new FactorySet();
 
     @Getter
