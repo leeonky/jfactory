@@ -29,11 +29,11 @@ class _05_ComplexPropertyArgs {
                     .containsOnly("hello");
         }
 
-//        @Test
-//        void default_element_value_should_generated_from_value_factory() {
-//            assertThat(factorySet.type(Strings.class).property("strings[1]", "hello").create().getStrings()[0])
-//                    .isInstanceOf(String.class);
-//        }
+        @Test
+        void should_create_default_element_value_when_not_specfid() {
+            assertThat(factorySet.type(Strings.class).property("strings[1]", "hello").create().getStrings())
+                    .containsOnly("strings#1[0]", "hello");
+        }
 
 //        @Test
 //        void support_element_in_build() {

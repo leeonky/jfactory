@@ -73,8 +73,8 @@ class QueryExpression<T> {
         return conditionValue.matches(propertyReader.getElementOrPropertyType(), propertyReader.getValue(object));
     }
 
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent) {
-        return conditionValue.buildProducer(factorySet, parent);
+    public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
+        return conditionValue.buildProducer(factorySet, parent, instance);
     }
 
 //    public void queryOrCreateNested(FactorySet factorySet, ObjectProducer<T> objectProducer) {
@@ -86,7 +86,7 @@ class QueryExpression<T> {
 
         public abstract boolean matches(Class<?> type, Object propertyValue);
 
-        public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent);
+        public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance);
 
         public abstract ConditionValue merge(ConditionValue conditionValue);
 
@@ -130,7 +130,7 @@ class QueryExpression<T> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent) {
+        public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
 //            if (isIntently())
 //                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
             return new FixedValueProducer(parent.getType().getPropertyWriter(property).getPropertyTypeWrapper(), value);
@@ -175,7 +175,7 @@ class QueryExpression<T> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent) {
+        public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
 //            if (isIntently())
 //                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
             Collection<?> collection = toBuilder(factorySet, beanClass.getPropertyReader(property).getElementOrPropertyType()).queryAll();
@@ -243,16 +243,16 @@ class QueryExpression<T> {
         }
 
         @Override
-        public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent) {
-            CollectionProducer<?> producer = getCollectionProducer(parent);
-            conditionValueIndexMap.forEach((k, v) -> producer.addChild(k, v.buildProducer(factorySet, parent)));
+        public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
+            CollectionProducer<?> producer = getCollectionProducer(factorySet.getObjectFactorySet(), parent, instance);
+            conditionValueIndexMap.forEach((k, v) -> producer.addChild(k, v.buildProducer(factorySet, parent, instance)));
             return producer;
         }
 
-        private CollectionProducer<?> getCollectionProducer(Producer<T> parent) {
+        private CollectionProducer<?> getCollectionProducer(ObjectFactorySet objectFactorySet, Producer<T> parent, Instance<T> instance) {
             CollectionProducer<?> producer = (CollectionProducer<?>) parent.getChild(property);
             if (producer == null)
-                producer = new CollectionProducer<>(parent.getType().getPropertyWriter(property).getPropertyTypeWrapper());
+                producer = new CollectionProducer<>(objectFactorySet, parent.getType().getPropertyWriter(property), instance);
             return producer;
         }
 
