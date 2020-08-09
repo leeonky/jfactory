@@ -20,4 +20,22 @@ class PropertyValueBuilders {
             return String.class;
         }
     }
+
+    public static class DefaultValueBuilder<T> implements PropertyValueBuilder<T> {
+        private final Class<T> type;
+
+        public DefaultValueBuilder(Class<T> type) {
+            this.type = type;
+        }
+
+        @Override
+        public T create(BeanClass type, Instance instance) {
+            return BeanClass.create(this.type).createDefault();
+        }
+
+        @Override
+        public Class<T> getType() {
+            return type;
+        }
+    }
 }

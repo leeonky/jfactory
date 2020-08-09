@@ -18,51 +18,58 @@ class QueryExpression<T> {
     private static final int GROUP_INTENTLY = 7;
     private static final int GROUP_CONDITION = 9;
     private final BeanClass<T> beanClass;
-    private String property;
-    private ConditionValue conditionValue;
+    private final String property;
+    private final ConditionValue conditionValue;
 
     public QueryExpression(BeanClass<T> beanClass, String chain, Object value) {
         this.beanClass = beanClass;
-        parsePropertyAndConditionValue(chain, value);
+        Matcher matcher = parse(chain);
+        property = matcher.group(GROUP_PROPERTY);
+        conditionValue = buildConditionValue(value, matcher, beanClass);
     }
 
-    public static <T> List<QueryExpression<T>> createQueryExpressions(BeanClass<T> beanClass, Map<String, Object> criteria) {
+    public QueryExpression(BeanClass<T> beanClass, String property, ConditionValue conditionValue) {
+        this.beanClass = beanClass;
+        this.property = property;
+        this.conditionValue = conditionValue;
+    }
+
+    public static <T> Map<String, QueryExpression<T>> createQueryExpressions(BeanClass<T> beanClass, Map<String, Object> criteria) {
         return criteria.entrySet().stream()
                 .map(e -> new QueryExpression<>(beanClass, e.getKey(), e.getValue()))
                 .collect(Collectors.groupingBy(expression -> expression.property)).values().stream()
                 .map(QueryExpression::mergeToSingle)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(q -> q.property, q -> q));
     }
 
     private static <T> QueryExpression<T> mergeToSingle(List<QueryExpression<T>> expressions) {
-        for (int i = 1; i < expressions.size(); i++)
-            expressions.get(0).conditionValue = expressions.get(0).conditionValue.merge(expressions.get(i).conditionValue);
-        return expressions.get(0);
+        return expressions.stream().reduce((q1, q2) -> new QueryExpression<>(q1.beanClass, q1.property, q1.conditionValue.merge(q2.conditionValue))).get();
     }
 
-    public String getProperty() {
-        return property;
+    private ConditionValue buildConditionValue(Object value, Matcher matcher, BeanClass<T> beanClass) {
+        String property = matcher.group(GROUP_PROPERTY);
+        ConditionValue conditionValue = createConditionValue(value,
+                matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
+                matcher.group(GROUP_DEFINITION), matcher.group(GROUP_CONDITION), property, beanClass)
+                .setIntently(matcher.group(GROUP_INTENTLY) != null);
+
+        if (matcher.group(GROUP_COLLECTION_INDEX) != null)
+            conditionValue = new CollectionConditionValue(Integer.valueOf(matcher.group(GROUP_COLLECTION_INDEX)), conditionValue, property, beanClass);
+        return conditionValue;
     }
 
-    private void parsePropertyAndConditionValue(String chain, Object value) {
+    private Matcher parse(String chain) {
         Matcher matcher = Pattern.compile("([^.(!\\[]+)(\\[(\\d+)])?(\\(([^, ]*[, ])*(.+)\\))?(!)?(\\.(.+))?").matcher(chain);
-        if (matcher.matches()) {
-            property = matcher.group(GROUP_PROPERTY);
-
-            conditionValue = createConditionValue(value,
-                    matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
-                    matcher.group(GROUP_DEFINITION), matcher.group(GROUP_CONDITION))
-                    .setIntently(matcher.group(GROUP_INTENTLY) != null);
-
-            if (matcher.group(GROUP_COLLECTION_INDEX) != null)
-                conditionValue = new CollectionConditionValue(Integer.valueOf(matcher.group(GROUP_COLLECTION_INDEX)), conditionValue);
+        if (!matcher.matches()) {
+            //TODO not matched should throw exception
         }
+        return matcher;
     }
 
-    private ConditionValue createConditionValue(Object value, String[] mixIn, String definition, String condition) {
+    private ConditionValue createConditionValue(Object value, String[] mixIn, String definition, String condition, String property, BeanClass<T> beanClass) {
         return condition != null ?
-                new ConditionValueSet(condition, value, mixIn, definition)
-                : new SingleValue(value, mixIn, definition);
+                new ConditionValueSet(condition, value, mixIn, definition, property, beanClass)
+                : new SingleValue(value, mixIn, definition, property, beanClass);
     }
 
     @SuppressWarnings("unchecked")
@@ -77,30 +84,34 @@ class QueryExpression<T> {
         return conditionValue.buildProducer(factorySet, parent, instance);
     }
 
-//    public void queryOrCreateNested(FactorySet factorySet, ObjectProducer<T> objectProducer) {
-//        objectProducer.addProducer(property, conditionValue.buildProducer(factorySet, objectProducer));
-//    }
+    public static abstract class ConditionValue<T> {
+        protected final String property;
+        protected final BeanClass<T> beanClass;
 
-    public abstract class ConditionValue {
         private boolean intently = false;
+
+        public ConditionValue(String property, BeanClass<T> beanClass) {
+            this.property = property;
+            this.beanClass = beanClass;
+        }
 
         public abstract boolean matches(Class<?> type, Object propertyValue);
 
         public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance);
 
-        public abstract ConditionValue merge(ConditionValue conditionValue);
+        public abstract ConditionValue<T> merge(ConditionValue<T> conditionValue);
 
-        protected ConditionValue mergeTo(SingleValue singleValue) {
+        protected ConditionValue<T> mergeTo(SingleValue<T> singleValue) {
             throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
         }
 
-        protected ConditionValue mergeTo(ConditionValueSet conditionValueSet) {
+        protected ConditionValue<T> mergeTo(ConditionValueSet<T> conditionValueSet) {
             throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
         }
 
-//        protected ConditionValue mergeTo(CollectionConditionValue collectionConditionValue) {
-//            throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
-//        }
+        protected ConditionValue<T> mergeTo(CollectionConditionValue<T> collectionConditionValue) {
+            throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
+        }
 
         public boolean isIntently() {
             return intently;
@@ -112,12 +123,13 @@ class QueryExpression<T> {
         }
     }
 
-    private class SingleValue extends ConditionValue {
+    private static class SingleValue<T> extends ConditionValue<T> {
         private final Object value;
         private final String[] mixIns;
         private final String definition;
 
-        public SingleValue(Object value, String[] mixIns, String definition) {
+        public SingleValue(Object value, String[] mixIns, String definition, String property, BeanClass<T> beanClass) {
+            super(property, beanClass);
             this.value = value;
             this.mixIns = mixIns;
             this.definition = definition;
@@ -137,12 +149,12 @@ class QueryExpression<T> {
         }
 
         @Override
-        public ConditionValue merge(ConditionValue conditionValue) {
+        public ConditionValue<T> merge(ConditionValue<T> conditionValue) {
             return conditionValue.mergeTo(this);
         }
 
         @Override
-        protected ConditionValue mergeTo(SingleValue singleValue) {
+        protected ConditionValue<T> mergeTo(SingleValue<T> singleValue) {
             return this;
         }
 
@@ -154,12 +166,13 @@ class QueryExpression<T> {
 //        }
     }
 
-    private class ConditionValueSet extends ConditionValue {
+    private static class ConditionValueSet<T> extends ConditionValue<T> {
         private final Map<String, Object> conditionValues = new LinkedHashMap<>();
         private String[] mixIns;
         private String definition;
 
-        public ConditionValueSet(String condition, Object value, String[] mixIns, String definition) {
+        public ConditionValueSet(String condition, Object value, String[] mixIns, String definition, String property, BeanClass<T> beanClass) {
+            super(property, beanClass);
             this.mixIns = mixIns;
             this.definition = definition;
             conditionValues.put(condition, value);
@@ -194,12 +207,12 @@ class QueryExpression<T> {
         }
 
         @Override
-        public ConditionValue merge(ConditionValue conditionValue) {
+        public ConditionValue<T> merge(ConditionValue<T> conditionValue) {
             return conditionValue.mergeTo(this);
         }
 
         @Override
-        protected ConditionValue mergeTo(ConditionValueSet conditionValueSet) {
+        protected ConditionValue<T> mergeTo(ConditionValueSet<T> conditionValueSet) {
             conditionValueSet.conditionValues.putAll(conditionValues);
             conditionValues.clear();
             conditionValues.putAll(conditionValueSet.conditionValues);
@@ -218,7 +231,7 @@ class QueryExpression<T> {
                 mixIns = another.mixIns;
         }
 
-        private void mergeDefinition(ConditionValueSet another) {
+        private void mergeDefinition(ConditionValueSet<T> another) {
             if (definition != null && another.definition != null
                     && !Objects.equals(definition, another.definition))
                 throw new IllegalArgumentException(String.format("Cannot merge different definition `%s` and `%s` for %s.%s",
@@ -228,10 +241,11 @@ class QueryExpression<T> {
         }
     }
 
-    private class CollectionConditionValue extends ConditionValue {
-        private final Map<Integer, ConditionValue> conditionValueIndexMap = new LinkedHashMap<>();
+    private static class CollectionConditionValue<T> extends ConditionValue<T> {
+        private final Map<Integer, ConditionValue<T>> conditionValueIndexMap = new LinkedHashMap<>();
 
-        public CollectionConditionValue(int index, ConditionValue conditionValue) {
+        public CollectionConditionValue(int index, ConditionValue<T> conditionValue, String property, BeanClass<T> beanClass) {
+            super(property, beanClass);
             conditionValueIndexMap.put(index, conditionValue);
         }
 
@@ -244,32 +258,31 @@ class QueryExpression<T> {
 
         @Override
         public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
-            CollectionProducer<?> producer = getCollectionProducer(factorySet.getObjectFactorySet(), parent, instance);
+            CollectionProducer<?, ?> producer = getCollectionProducer(factorySet.getObjectFactorySet(), parent, instance);
             conditionValueIndexMap.forEach((k, v) -> producer.addChild(k, v.buildProducer(factorySet, parent, instance)));
             return producer;
         }
 
-        private CollectionProducer<?> getCollectionProducer(ObjectFactorySet objectFactorySet, Producer<T> parent, Instance<T> instance) {
-            CollectionProducer<?> producer = (CollectionProducer<?>) parent.getChild(property);
+        private CollectionProducer<?, ?> getCollectionProducer(ObjectFactorySet objectFactorySet, Producer<T> parent, Instance<T> instance) {
+            CollectionProducer<?, ?> producer = (CollectionProducer<?, ?>) parent.getChild(property);
             if (producer == null)
                 producer = new CollectionProducer<>(objectFactorySet, parent.getType().getPropertyWriter(property), instance);
             return producer;
         }
 
         @Override
-        public ConditionValue merge(ConditionValue conditionValue) {
-            return null;
-//            return conditionValue.mergeTo(this);
+        public ConditionValue<T> merge(ConditionValue<T> conditionValue) {
+            return conditionValue.mergeTo(this);
         }
-//
-//        @Override
-//        protected ConditionValue mergeTo(CollectionConditionValue collectionConditionValue) {
-//            collectionConditionValue.conditionValueIndexMap.forEach((k, v) ->
-//                    conditionValueIndexMap.put(k, conditionValueIndexMap.containsKey(k) ?
-//                            conditionValueIndexMap.get(k).merge(v)
-//                            : v));
-//            return this;
-//        }
+
+        @Override
+        protected ConditionValue<T> mergeTo(CollectionConditionValue<T> collectionConditionValue) {
+            collectionConditionValue.conditionValueIndexMap.forEach((k, v) ->
+                    conditionValueIndexMap.put(k, conditionValueIndexMap.containsKey(k) ?
+                            conditionValueIndexMap.get(k).merge(v)
+                            : v));
+            return this;
+        }
     }
 }
 

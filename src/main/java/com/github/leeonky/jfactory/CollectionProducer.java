@@ -7,14 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class CollectionProducer<C> extends Producer<C> {
+class CollectionProducer<T, C> extends Producer<C> {
     private final ObjectFactorySet objectFactorySet;
-    private final PropertyWriter<?> propertyWriter;
-    private final Instance<?> instance;
+    private final PropertyWriter<T> propertyWriter;
+    private final Instance<T> instance;
     private List<Producer<?>> children = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
-    public <T> CollectionProducer(ObjectFactorySet objectFactorySet, PropertyWriter<T> propertyWriter, Instance<T> instance) {
+    public CollectionProducer(ObjectFactorySet objectFactorySet, PropertyWriter<T> propertyWriter, Instance<T> instance) {
+        // TODO BeanClass can get generic type params
         super((BeanClass<C>) propertyWriter.getPropertyTypeWrapper());
         this.objectFactorySet = objectFactorySet;
         this.propertyWriter = propertyWriter;
@@ -34,13 +35,16 @@ class CollectionProducer<C> extends Producer<C> {
         children.set(intIndex, producer);
     }
 
-    @SuppressWarnings("unchecked")
     private void fillCollectionWithDefaultValue(int index) {
-        for (int i = children.size(); i <= index; i++) {
-            children.add(new PropertyValueProducer(propertyWriter.getPropertyTypeWrapper(),
-                    //TODO to process non value type
-                    objectFactorySet.queryPropertyValueFactory(propertyWriter.getElementType()).get(), instance.element(i)));
-        }
+        for (int i = children.size(); i <= index; i++)
+            children.add(new PropertyValueProducer<>(propertyWriter.getBeanClass(),
+                    getPropertyValueBuilder(propertyWriter.getElementType()),
+                    instance.element(i)));
+    }
+
+    private <E> PropertyValueBuilder<E> getPropertyValueBuilder(Class<E> elementType) {
+        return objectFactorySet.queryPropertyValueFactory(elementType)
+                .orElseGet(() -> new PropertyValueBuilders.DefaultValueBuilder<>(elementType));
     }
 
     //TODO set child

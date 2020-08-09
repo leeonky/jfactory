@@ -26,7 +26,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     private void buildProducerFromInputProperties(FactorySet factorySet, Map<String, Object> properties) {
         QueryExpression.createQueryExpressions(getType(), properties)
-                .forEach(exp -> addChild(exp.getProperty(), exp.buildProducer(factorySet, this, instance.nested(exp.getProperty()))));
+                .forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, this, instance.nested(p))));
     }
 
     private void buildProducersFromSpec(Collection<String> mixIns) {

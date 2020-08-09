@@ -7,6 +7,8 @@ import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class _05_ComplexPropertyArgs {
@@ -15,9 +17,22 @@ class _05_ComplexPropertyArgs {
 
     @Getter
     @Setter
+    public static class Bean {
+        private String content, stringValue;
+        private int intValue;
+    }
+
+    @Getter
+    @Setter
     @Accessors(chain = true)
     public static class Strings {
         public String[] strings;
+    }
+
+    @Getter
+    @Setter
+    public static class BeanCollection {
+        private List<Bean> list;
     }
 
     @Nested
@@ -33,6 +48,21 @@ class _05_ComplexPropertyArgs {
         void should_create_default_element_value_when_not_specfid() {
             assertThat(factorySet.type(Strings.class).property("strings[1]", "hello").create().getStrings())
                     .containsOnly("strings#1[0]", "hello");
+        }
+
+        @Test
+        void support_nested_element_creation_in_collection() {
+            BeanCollection beanCollection = factorySet.type(BeanCollection.class)
+                    .property("list[0].stringValue", "hello")
+                    .property("list[0].intValue", 100)
+                    .create();
+
+            assertThat(beanCollection.getList().size()).isEqualTo(1);
+
+            assertThat(beanCollection.getList().get(0))
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+            ;
         }
 
 //        @Test

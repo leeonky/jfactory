@@ -28,6 +28,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     private void registerMixIns() {
         Stream.of(specClass.getMethods())
                 .filter(method -> method.getAnnotation(MixIn.class) != null)
+                // TODO helper for call method without try catch
                 .forEach(method -> spec(getMixInName(method), instance -> {
                     try {
                         method.invoke(instance.spec());

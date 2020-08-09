@@ -9,6 +9,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 
 class ObjectFactorySet {
+    //TODO move this to PropertyValueBuilders
     private final Map<Class<?>, PropertyValueBuilder<?>> propertyValueBuilders = new HashMap<Class<?>, PropertyValueBuilder<?>>() {{
         put(String.class, new PropertyValueBuilders.StringPropertyValueBuilder());
     }};
