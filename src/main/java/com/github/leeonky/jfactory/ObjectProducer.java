@@ -36,7 +36,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     private void buildPropertyValueProducers(ObjectFactorySet objectFactorySet) {
         getType().getPropertyWriters().forEach((name, propertyWriter) ->
-                objectFactorySet.queryPropertyValueFactory(propertyWriter.getPropertyType()).ifPresent(propertyValueFactory ->
+                objectFactorySet.queryPropertyValueFactory(propertyWriter.getType()).ifPresent(propertyValueFactory ->
                         addChild(name, new PropertyValueProducer<>(getType(), propertyValueFactory, instance.nested(name)))));
     }
 

@@ -20,8 +20,8 @@ public class PropertySpec<T> {
 
     @SuppressWarnings("unchecked")
     public <V> Spec<T> value(Supplier<V> value) {
-        return spec.append((factorySet, objectProducer) ->
-                objectProducer.addChild(name, new UnFixedValueProducer<>(value, (BeanClass<V>) objectProducer.getType().getPropertyWriter(name).getPropertyTypeWrapper())));
+        return spec.append((factorySet, objectProducer) -> objectProducer.addChild(name, new UnFixedValueProducer<>(value,
+                (BeanClass<V>) objectProducer.getType().getPropertyWriter(name).getType())));
     }
 
     public <V> Spec<T> spec(Class<? extends Spec<V>> specClass) {
@@ -49,7 +49,7 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> asDefault(Function<Builder<?>, Builder<?>> builder) {
-        return spec.append((factorySet, objectProducer) ->
-                objectProducer.addChild(name, builder.apply(factorySet.type(objectProducer.getType().getPropertyWriter(name).getPropertyType())).createProducer(name)));
+        return spec.append((factorySet, objectProducer) -> objectProducer.addChild(name,
+                builder.apply(factorySet.type(objectProducer.getType().getPropertyWriter(name).getTypeClass())).createProducer(name)));
     }
 }

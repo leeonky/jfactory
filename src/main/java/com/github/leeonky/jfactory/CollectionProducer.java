@@ -1,7 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyWriter;
+import com.github.leeonky.util.Property;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,17 +9,16 @@ import java.util.stream.Collectors;
 
 class CollectionProducer<T, C> extends Producer<C> {
     private final ObjectFactorySet objectFactorySet;
-    private final PropertyWriter<T> propertyWriter;
     private final Instance<T> instance;
+    private final BeanClass<T> beanType;
     private List<Producer<?>> children = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
-    public CollectionProducer(ObjectFactorySet objectFactorySet, PropertyWriter<T> propertyWriter, Instance<T> instance) {
-        // TODO BeanClass can get generic type params
-        super((BeanClass<C>) propertyWriter.getPropertyTypeWrapper());
+    public CollectionProducer(ObjectFactorySet objectFactorySet, Property<T> property, Instance<T> instance) {
+        super((BeanClass<C>) property.getType());
         this.objectFactorySet = objectFactorySet;
-        this.propertyWriter = propertyWriter;
         this.instance = instance.inCollection();
+        beanType = property.getBeanType();
     }
 
     @Override
@@ -37,12 +36,11 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     private void fillCollectionWithDefaultValue(int index) {
         for (int i = children.size(); i <= index; i++)
-            children.add(new PropertyValueProducer<>(propertyWriter.getBeanClass(),
-                    getPropertyValueBuilder(propertyWriter.getElementType()),
-                    instance.element(i)));
+            children.add(new PropertyValueProducer<>(beanType,
+                    getPropertyValueBuilder(getType().getElementType()), instance.element(i)));
     }
 
-    private <E> PropertyValueBuilder<E> getPropertyValueBuilder(Class<E> elementType) {
+    private <E> PropertyValueBuilder<E> getPropertyValueBuilder(BeanClass<E> elementType) {
         return objectFactorySet.queryPropertyValueFactory(elementType)
                 .orElseGet(() -> new PropertyValueBuilders.DefaultValueBuilder<>(elementType));
     }

@@ -39,7 +39,7 @@ class ObjectFactorySet {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Optional<PropertyValueBuilder<T>> queryPropertyValueFactory(Class<T> propertyType) {
-        return ofNullable((PropertyValueBuilder<T>) propertyValueBuilders.get(propertyType));
+    public <T> Optional<PropertyValueBuilder<T>> queryPropertyValueFactory(BeanClass<T> propertyType) {
+        return ofNullable((PropertyValueBuilder<T>) propertyValueBuilders.get(propertyType.getType()));
     }
 }

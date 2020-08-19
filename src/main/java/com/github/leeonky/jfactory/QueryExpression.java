@@ -19,7 +19,7 @@ class QueryExpression<T> {
     private static final int GROUP_CONDITION = 9;
     private final BeanClass<T> beanClass;
     private final String property;
-    private final ConditionValue conditionValue;
+    private final ConditionValue<T> conditionValue;
 
     public QueryExpression(BeanClass<T> beanClass, String chain, Object value) {
         this.beanClass = beanClass;
@@ -28,7 +28,7 @@ class QueryExpression<T> {
         conditionValue = buildConditionValue(value, matcher, beanClass);
     }
 
-    public QueryExpression(BeanClass<T> beanClass, String property, ConditionValue conditionValue) {
+    public QueryExpression(BeanClass<T> beanClass, String property, ConditionValue<T> conditionValue) {
         this.beanClass = beanClass;
         this.property = property;
         this.conditionValue = conditionValue;
@@ -46,15 +46,15 @@ class QueryExpression<T> {
         return expressions.stream().reduce((q1, q2) -> new QueryExpression<>(q1.beanClass, q1.property, q1.conditionValue.merge(q2.conditionValue))).get();
     }
 
-    private ConditionValue buildConditionValue(Object value, Matcher matcher, BeanClass<T> beanClass) {
+    private ConditionValue<T> buildConditionValue(Object value, Matcher matcher, BeanClass<T> beanClass) {
         String property = matcher.group(GROUP_PROPERTY);
-        ConditionValue conditionValue = createConditionValue(value,
+        ConditionValue<T> conditionValue = createConditionValue(value,
                 matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
                 matcher.group(GROUP_DEFINITION), matcher.group(GROUP_CONDITION), property, beanClass)
                 .setIntently(matcher.group(GROUP_INTENTLY) != null);
 
         if (matcher.group(GROUP_COLLECTION_INDEX) != null)
-            conditionValue = new CollectionConditionValue(Integer.valueOf(matcher.group(GROUP_COLLECTION_INDEX)), conditionValue, property, beanClass);
+            conditionValue = new CollectionConditionValue<>(Integer.valueOf(matcher.group(GROUP_COLLECTION_INDEX)), conditionValue, property, beanClass);
         return conditionValue;
     }
 
@@ -66,10 +66,10 @@ class QueryExpression<T> {
         return matcher;
     }
 
-    private ConditionValue createConditionValue(Object value, String[] mixIn, String definition, String condition, String property, BeanClass<T> beanClass) {
+    private ConditionValue<T> createConditionValue(Object value, String[] mixIn, String definition, String condition, String property, BeanClass<T> beanClass) {
         return condition != null ?
-                new ConditionValueSet(condition, value, mixIn, definition, property, beanClass)
-                : new SingleValue(value, mixIn, definition, property, beanClass);
+                new ConditionValueSet<>(condition, value, mixIn, definition, property, beanClass)
+                : new SingleValue<>(value, mixIn, definition, property, beanClass);
     }
 
     @SuppressWarnings("unchecked")
@@ -77,7 +77,7 @@ class QueryExpression<T> {
         if (object == null)
             return false;
         PropertyReader propertyReader = beanClass.getPropertyReader(property);
-        return conditionValue.matches(propertyReader.getElementOrPropertyType(), propertyReader.getValue(object));
+        return conditionValue.matches(propertyReader.getType().getElementOrPropertyType(), propertyReader.getValue(object));
     }
 
     public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
@@ -95,7 +95,7 @@ class QueryExpression<T> {
             this.beanClass = beanClass;
         }
 
-        public abstract boolean matches(Class<?> type, Object propertyValue);
+        public abstract boolean matches(BeanClass<?> type, Object propertyValue);
 
         public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance);
 
@@ -117,7 +117,7 @@ class QueryExpression<T> {
             return intently;
         }
 
-        public ConditionValue setIntently(boolean intently) {
+        public ConditionValue<T> setIntently(boolean intently) {
             this.intently = intently;
             return this;
         }
@@ -136,8 +136,8 @@ class QueryExpression<T> {
         }
 
         @Override
-        public boolean matches(Class<?> type, Object propertyValue) {
-            return !isIntently() && Objects.equals(propertyValue, beanClass.getConverter().tryConvert(type, value));
+        public boolean matches(BeanClass<?> type, Object propertyValue) {
+            return !isIntently() && Objects.equals(propertyValue, beanClass.getConverter().tryConvert(type.getType(), value));
         }
 
         @Override
@@ -145,7 +145,7 @@ class QueryExpression<T> {
         public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
 //            if (isIntently())
 //                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
-            return new FixedValueProducer(parent.getType().getPropertyWriter(property).getPropertyTypeWrapper(), value);
+            return new FixedValueProducer(parent.getType().getPropertyWriter(property).getType(), value);
         }
 
         @Override
@@ -180,9 +180,9 @@ class QueryExpression<T> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public boolean matches(Class<?> type, Object propertyValue) {
+        public boolean matches(BeanClass<?> type, Object propertyValue) {
             return conditionValues.entrySet().stream()
-                    .map(conditionValue -> new QueryExpression(BeanClass.create(type), conditionValue.getKey(), conditionValue.getValue()))
+                    .map(conditionValue -> new QueryExpression(type, conditionValue.getKey(), conditionValue.getValue()))
                     .allMatch(queryExpression -> queryExpression.matches(propertyValue));
         }
 
@@ -191,19 +191,19 @@ class QueryExpression<T> {
         public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
 //            if (isIntently())
 //                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
-            Collection<?> collection = toBuilder(factorySet, beanClass.getPropertyReader(property).getElementOrPropertyType()).queryAll();
+            Collection<?> collection = toBuilder(factorySet, beanClass.getPropertyReader(property).getType().getElementOrPropertyType()).queryAll();
             if (collection.isEmpty())
-                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).createProducer(property);
+                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getType().getElementOrPropertyType()).createProducer(property);
             else
-                return new FixedValueProducer(parent.getType().getPropertyWriter(property).getPropertyTypeWrapper(), collection.iterator().next());
+                return new FixedValueProducer(parent.getType().getPropertyWriter(property).getType(), collection.iterator().next());
         }
 
-        private Builder<?> toBuilder(FactorySet factorySet, Class<?> propertyType) {
+        private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
 //            return (definition != null ?
 //                    factorySet.toBuild(definition)
 //                    : factorySet.type(propertyType))
 //                    .mixIn(mixIns).properties(conditionValues);
-            return factorySet.type(propertyType).properties(conditionValues);
+            return factorySet.type(propertyType.getType()).properties(conditionValues);
         }
 
         @Override
@@ -250,7 +250,7 @@ class QueryExpression<T> {
         }
 
         @Override
-        public boolean matches(Class<?> type, Object propertyValue) {
+        public boolean matches(BeanClass<?> type, Object propertyValue) {
             List<Object> elements = BeanClass.arrayCollectionToStream(propertyValue).collect(Collectors.toList());
             return conditionValueIndexMap.entrySet().stream()
                     .allMatch(e -> e.getValue().matches(type, elements.get(e.getKey())));

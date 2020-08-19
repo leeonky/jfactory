@@ -1,6 +1,6 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.GenericType;
+import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +31,9 @@ public class Spec<T> {
 
     @SuppressWarnings("unchecked")
     Class<T> getType() {
-        return (Class<T>) GenericType.createGenericType(getClass().getGenericSuperclass()).getGenericTypeParameter(0)
-                .orElseThrow(() -> new IllegalStateException(String.format("Invalid Spec '%s', should specify generic type or override getType() method", getClass().getName())))
-                .getRawType();
+        return (Class<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
+                .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"))
+                .getType();
     }
 
     String getName() {

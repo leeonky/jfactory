@@ -1,8 +1,8 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Suppressor;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,25 +28,13 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     private void registerMixIns() {
         Stream.of(specClass.getMethods())
                 .filter(method -> method.getAnnotation(MixIn.class) != null)
-                // TODO helper for call method without try catch
-                .forEach(method -> spec(getMixInName(method), instance -> {
-                    try {
-                        method.invoke(instance.spec());
-                    } catch (IllegalAccessException e) {
-                        throw new IllegalStateException(e);
-                    } catch (InvocationTargetException e) {
-                        if (e.getTargetException() instanceof RuntimeException)
-                            throw (RuntimeException) e.getTargetException();
-                        throw new IllegalStateException(e);
-                    }
-                }));
+                .forEach(method -> spec(getMixInName(method),
+                        instance -> Suppressor.run(() -> method.invoke(instance.spec()))));
     }
 
     private String getMixInName(Method method) {
         MixIn annotation = method.getAnnotation(MixIn.class);
-        return annotation.value().isEmpty() ?
-                method.getName()
-                : annotation.value();
+        return annotation.value().isEmpty() ? method.getName() : annotation.value();
     }
 
     @Override
