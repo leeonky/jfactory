@@ -6,13 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
-
 class ObjectFactorySet {
-    //TODO move this to PropertyValueBuilders
-    private final Map<Class<?>, PropertyValueBuilder<?>> propertyValueBuilders = new HashMap<Class<?>, PropertyValueBuilder<?>>() {{
-        put(String.class, new PropertyValueBuilders.StringPropertyValueBuilder());
-    }};
+    private final PropertyValueBuilders propertyValueBuilders = new PropertyValueBuilders();
     private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
     private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new HashMap<>();
@@ -38,8 +33,7 @@ class ObjectFactorySet {
         });
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Optional<PropertyValueBuilder<T>> queryPropertyValueFactory(BeanClass<T> propertyType) {
-        return ofNullable((PropertyValueBuilder<T>) propertyValueBuilders.get(propertyType.getType()));
+        return propertyValueBuilders.queryPropertyValueFactory(propertyType.getType());
     }
 }
