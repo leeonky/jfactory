@@ -12,9 +12,9 @@ public interface DataRepository {
     <T> Collection<T> queryAll(Class<T> type);
 
     default <T> Collection<T> query(BeanClass<T> beanClass, Map<String, Object> criteria) {
-        Collection<QueryExpression<T>> expressions = QueryExpression.createQueryExpressions(beanClass, criteria).values();
+        Collection<PropertyExpression<T>> expressions = PropertyExpression.createPropertyExpressions(beanClass, criteria).values();
         return queryAll(beanClass.getType()).stream()
-                .filter(o -> expressions.stream().allMatch(e -> e.matches(o)))
+                .filter(o -> expressions.stream().allMatch(e -> e.objectMatches(o)))
                 .collect(Collectors.toList());
     }
 
