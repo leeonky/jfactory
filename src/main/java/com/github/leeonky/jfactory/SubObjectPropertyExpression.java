@@ -6,12 +6,12 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
-class KeyValueCollectionPropertyExpression<T> extends PropertyExpression<T> {
+class SubObjectPropertyExpression<T> extends PropertyExpression<T> {
     private final Map<String, Object> conditionValues = new LinkedHashMap<>();
     private String[] mixIns;
     private String definition;
 
-    public KeyValueCollectionPropertyExpression(String condition, Object value, String[] mixIns, String definition, String property, BeanClass<T> beanClass) {
+    public SubObjectPropertyExpression(String condition, Object value, String[] mixIns, String definition, String property, BeanClass<T> beanClass) {
         super(property, beanClass);
         this.mixIns = mixIns;
         this.definition = definition;
@@ -19,10 +19,10 @@ class KeyValueCollectionPropertyExpression<T> extends PropertyExpression<T> {
     }
 
     @Override
-    public boolean matches(BeanClass<?> type, Object propertyValue) {
+    public boolean isMatch(BeanClass<?> propertyType, Object propertyValue) {
         return conditionValues.entrySet().stream()
-                .map(conditionValue -> create(type, conditionValue.getKey(), conditionValue.getValue()))
-                .allMatch(queryExpression -> queryExpression.objectMatches(propertyValue));
+                .map(conditionValue -> create(propertyType, conditionValue.getKey(), conditionValue.getValue()))
+                .allMatch(queryExpression -> queryExpression.isMatch(propertyValue));
     }
 
     @Override
@@ -51,7 +51,7 @@ class KeyValueCollectionPropertyExpression<T> extends PropertyExpression<T> {
     }
 
     @Override
-    protected PropertyExpression<T> mergeTo(KeyValueCollectionPropertyExpression<T> conditionValueSet) {
+    protected PropertyExpression<T> mergeTo(SubObjectPropertyExpression<T> conditionValueSet) {
         conditionValueSet.conditionValues.putAll(conditionValues);
         conditionValues.clear();
         conditionValues.putAll(conditionValueSet.conditionValues);
@@ -61,7 +61,7 @@ class KeyValueCollectionPropertyExpression<T> extends PropertyExpression<T> {
         return this;
     }
 
-    private void mergeMixIn(KeyValueCollectionPropertyExpression another) {
+    private void mergeMixIn(SubObjectPropertyExpression another) {
         if (mixIns.length != 0 && another.mixIns.length != 0
                 && !new HashSet<>(asList(mixIns)).equals(new HashSet<>(asList(another.mixIns))))
             throw new IllegalArgumentException(String.format("Cannot merge different mix-in %s and %s for %s.%s",
@@ -70,7 +70,7 @@ class KeyValueCollectionPropertyExpression<T> extends PropertyExpression<T> {
             mixIns = another.mixIns;
     }
 
-    private void mergeDefinition(KeyValueCollectionPropertyExpression<T> another) {
+    private void mergeDefinition(SubObjectPropertyExpression<T> another) {
         if (definition != null && another.definition != null
                 && !Objects.equals(definition, another.definition))
             throw new IllegalArgumentException(String.format("Cannot merge different definition `%s` and `%s` for %s.%s",

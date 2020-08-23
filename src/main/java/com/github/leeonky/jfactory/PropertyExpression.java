@@ -1,7 +1,6 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyReader;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -9,7 +8,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 abstract class PropertyExpression<T> {
-
     private static final int GROUP_PROPERTY = 1;
     private static final int GROUP_COLLECTION_INDEX = 3;
     private static final int GROUP_MIX_IN = 5;
@@ -25,18 +23,13 @@ abstract class PropertyExpression<T> {
         this.beanClass = beanClass;
     }
 
-    private static Matcher parse(String chain) {
+    public static <T> PropertyExpression<T> create(BeanClass<T> beanClass, String chain, Object value) {
         Matcher matcher = Pattern.compile("([^.(!\\[]+)(\\[(\\d+)])?(\\(([^, ]*[, ])*(.+)\\))?(!)?(\\.(.+))?").matcher(chain);
         if (!matcher.matches()) {
             //TODO not matched should throw exception
         }
-        return matcher;
-    }
-
-    public static <T> PropertyExpression<T> create(BeanClass<T> beanClass, String chain, Object value) {
-        Matcher matcher = parse(chain);
         String property = matcher.group(GROUP_PROPERTY);
-        PropertyExpression<T> propertyExpression = createConditionValue(value,
+        PropertyExpression<T> propertyExpression = create(value,
                 matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
                 matcher.group(GROUP_DEFINITION), matcher.group(GROUP_CONDITION), property, beanClass)
                 .setIntently(matcher.group(GROUP_INTENTLY) != null);
@@ -46,9 +39,9 @@ abstract class PropertyExpression<T> {
         return propertyExpression;
     }
 
-    private static <T> PropertyExpression<T> createConditionValue(Object value, String[] mixIn, String definition, String condition, String property, BeanClass<T> beanClass) {
+    private static <T> PropertyExpression<T> create(Object value, String[] mixIn, String definition, String condition, String property, BeanClass<T> beanClass) {
         return condition != null ?
-                new KeyValueCollectionPropertyExpression<>(condition, value, mixIn, definition, property, beanClass)
+                new SubObjectPropertyExpression<>(condition, value, mixIn, definition, property, beanClass)
                 : new SingleValuePropertyExpression<>(value, mixIn, definition, property, beanClass);
     }
 
@@ -61,27 +54,23 @@ abstract class PropertyExpression<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean objectMatches(Object object) {
+    public boolean isMatch(Object object) {
         if (object == null)
             return false;
-        return matches(getExpressionType(), beanClass.getPropertyValue((T) object, property));
+        return isMatch(beanClass.getPropertyReader(property).getType(), beanClass.getPropertyValue((T) object, property));
     }
 
-    protected BeanClass<?> getExpressionType() {
-        return ((PropertyReader) beanClass.getPropertyReader(property)).getType();
-    }
-
-    public abstract boolean matches(BeanClass<?> type, Object propertyValue);
+    protected abstract boolean isMatch(BeanClass<?> propertyType, Object propertyValue);
 
     public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance);
 
-    public abstract PropertyExpression<T> merge(PropertyExpression<T> propertyExpression);
+    protected abstract PropertyExpression<T> merge(PropertyExpression<T> propertyExpression);
 
     protected PropertyExpression<T> mergeTo(SingleValuePropertyExpression<T> singleValuePropertyExpression) {
         throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
     }
 
-    protected PropertyExpression<T> mergeTo(KeyValueCollectionPropertyExpression<T> conditionValueSet) {
+    protected PropertyExpression<T> mergeTo(SubObjectPropertyExpression<T> conditionValueSet) {
         throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
     }
 
@@ -89,11 +78,11 @@ abstract class PropertyExpression<T> {
         throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
     }
 
-    public boolean isIntently() {
+    protected boolean isIntently() {
         return intently;
     }
 
-    public PropertyExpression<T> setIntently(boolean intently) {
+    protected PropertyExpression<T> setIntently(boolean intently) {
         this.intently = intently;
         return this;
     }

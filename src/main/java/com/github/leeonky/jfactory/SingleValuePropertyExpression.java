@@ -17,8 +17,8 @@ class SingleValuePropertyExpression<T> extends PropertyExpression<T> {
     }
 
     @Override
-    public boolean matches(BeanClass<?> type, Object propertyValue) {
-        return !isIntently() && Objects.equals(propertyValue, beanClass.getConverter().tryConvert(type.getType(), value));
+    public boolean isMatch(BeanClass<?> propertyType, Object propertyValue) {
+        return !isIntently() && Objects.equals(propertyValue, beanClass.getConverter().tryConvert(propertyType.getType(), value));
     }
 
     @Override
