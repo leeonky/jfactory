@@ -30,7 +30,7 @@ public class Instance<T> {
         return sequence;
     }
 
-    Instance<T> nested(String property) {
+    Instance<T> sub(String property) {
         return new Instance<>(sequence, property, spec, reference, indexes);
     }
 

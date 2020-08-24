@@ -11,7 +11,9 @@ import static java.util.Optional.ofNullable;
 
 class PropertyValueBuilders {
     private final Map<Class<?>, PropertyValueBuilder<?>> propertyValueBuilders = new HashMap<Class<?>, PropertyValueBuilder<?>>() {{
-        put(String.class, new PropertyValueBuilders.StringPropertyValueBuilder());
+        put(String.class, new StringPropertyValueBuilder());
+        put(Integer.class, new IntegerPropertyValueBuilder());
+        put(int.class, get(Integer.class));
     }};
 
     @SuppressWarnings("unchecked")
@@ -25,6 +27,14 @@ class PropertyValueBuilders {
         public <T> String create(BeanClass<T> type, Instance<T> instance) {
             return String.format("%s#%d%s", instance.getProperty(), instance.getSequence(),
                     instance.getIndexes().stream().map(i -> String.format("[%d]", i)).collect(Collectors.joining()));
+        }
+    }
+
+    public static class IntegerPropertyValueBuilder implements PropertyValueBuilder<Integer> {
+
+        @Override
+        public <T> Integer create(BeanClass<T> type, Instance<T> instance) {
+            return instance.getSequence();
         }
     }
 

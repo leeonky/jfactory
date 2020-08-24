@@ -26,7 +26,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     private void buildProducerFromInputProperties(FactorySet factorySet, Map<String, Object> properties) {
         PropertyExpression.createPropertyExpressions(getType(), properties)
-                .forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, this, instance.nested(p))));
+                .forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, this, instance.sub(p))));
     }
 
     private void buildProducersFromSpec(Collection<String> mixIns) {
@@ -37,7 +37,7 @@ class ObjectProducer<T> extends Producer<T> {
     private void buildPropertyValueProducers(ObjectFactorySet objectFactorySet) {
         getType().getPropertyWriters().forEach((name, propertyWriter) ->
                 objectFactorySet.queryPropertyValueFactory(propertyWriter.getType()).ifPresent(propertyValueFactory ->
-                        addChild(name, new PropertyValueProducer<>(getType(), propertyValueFactory, instance.nested(name)))));
+                        addChild(name, new PropertyValueProducer<>(getType(), propertyValueFactory, instance.sub(name)))));
     }
 
     @Override
