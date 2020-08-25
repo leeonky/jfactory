@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class _01_BeanType {
     private FactorySet factorySet = new FactorySet();
@@ -28,6 +29,12 @@ class _01_BeanType {
                 .property("intValue", 100).create())
                 .hasFieldOrPropertyWithValue("stringValue", "hello")
                 .hasFieldOrPropertyWithValue("intValue", 100);
+    }
+
+    @Test
+    void should_raise_error_when_property_expression_invalid() {
+        assertThrows(IllegalArgumentException.class, () -> factorySet.type(Bean.class)
+                .property(".a", 100).create());
     }
 
     @Getter

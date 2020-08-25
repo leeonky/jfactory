@@ -8,6 +8,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 abstract class PropertyExpression<T> {
+    private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
+    private static final String PATTERN_COLLECTION_INDEX = "(\\[(\\d+)])?";
+    private static final String PATTERN_MIX_IN_DEFINITION = "(\\(([^, ]*[, ])*(.+)\\))?";
+    private static final String PATTERN_INTENTLY = "(!)?";
+    private static final String PATTERN_CONDITION = "(\\.(.+))?";
     private static final int GROUP_PROPERTY = 1;
     private static final int GROUP_COLLECTION_INDEX = 3;
     private static final int GROUP_MIX_IN = 5;
@@ -24,10 +29,13 @@ abstract class PropertyExpression<T> {
     }
 
     public static <T> PropertyExpression<T> create(BeanClass<T> beanClass, String chain, Object value) {
-        Matcher matcher = Pattern.compile("([^.(!\\[]+)(\\[(\\d+)])?(\\(([^, ]*[, ])*(.+)\\))?(!)?(\\.(.+))?").matcher(chain);
-        if (!matcher.matches()) {
-            //TODO not matched should throw exception
-        }
+        Matcher matcher = Pattern.compile(PATTERN_PROPERTY +
+                PATTERN_COLLECTION_INDEX +
+                PATTERN_MIX_IN_DEFINITION +
+                PATTERN_INTENTLY +
+                PATTERN_CONDITION).matcher(chain);
+        if (!matcher.matches())
+            throw new IllegalArgumentException(String.format("Invalid property `%s` for %s creation.", chain, beanClass.getName()));
         String property = matcher.group(GROUP_PROPERTY);
         PropertyExpression<T> propertyExpression = create(value,
                 matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
