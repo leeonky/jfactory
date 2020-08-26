@@ -2,6 +2,8 @@ package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.Builder;
 import com.github.leeonky.jfactory.FactorySet;
+import com.github.leeonky.jfactory.MixIn;
+import com.github.leeonky.jfactory.Spec;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -21,6 +23,7 @@ class _05_ComplexPropertyArgs {
     public static class Bean {
         private String content, stringValue;
         private int intValue;
+        private long longValue;
     }
 
     @Getter
@@ -28,6 +31,25 @@ class _05_ComplexPropertyArgs {
     @Accessors(chain = true)
     public static class Strings {
         public String[] strings;
+    }
+
+    public static class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+            property("content").value("this is a bean");
+        }
+
+        @MixIn
+        public ABean int100() {
+            property("intValue").value(100);
+            return this;
+        }
+
+        @MixIn
+        public ABean long1000() {
+            property("longValue").value(1000);
+            return this;
+        }
     }
 
     @Getter
@@ -87,26 +109,27 @@ class _05_ComplexPropertyArgs {
 
             assertThat(builder.queryAll()).containsOnly(beanCollection);
         }
-//
-//        @Test
-//        void also_support_definition_and_mix_in_in_element() {
-//            factorySet.define(ABean.class);
-//
-//            BeanCollection beanCollection = factorySet.type(BeanCollection.class)
-//                    .property("list[0](int100 ABean).stringValue", "hello")
-//                    .create();
-//
-//            assertThat(beanCollection.getList().get(0))
-//                    .hasFieldOrPropertyWithValue("content", "this is a bean")
-//                    .hasFieldOrPropertyWithValue("stringValue", "hello")
-//                    .hasFieldOrPropertyWithValue("intValue", 100)
-//            ;
-//
-//            assertThat(factorySet.type(BeanCollection.class)
-//                    .property("list[0](int100 ABean).stringValue", "hello").queryAll())
-//                    .containsOnly(beanCollection);
-//        }
-//
+
+        @Test
+        void also_support_definition_and_mix_in_in_element() {
+            factorySet.spec(ABean.class);
+
+            BeanCollection beanCollection = factorySet.type(BeanCollection.class)
+                    .property("list[0](int100 long1000 ABean).stringValue", "hello")
+                    .create();
+
+            assertThat(beanCollection.getList().get(0))
+                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+                    .hasFieldOrPropertyWithValue("longValue", 1000L)
+            ;
+
+            assertThat(factorySet.type(BeanCollection.class)
+                    .property("list[0](int100 long1000 ABean).stringValue", "hello").queryAll())
+                    .containsOnly(beanCollection);
+        }
+
 //        @Test
 //        void support_different_type_in_each_element() {
 //            Bean bean = new Bean();

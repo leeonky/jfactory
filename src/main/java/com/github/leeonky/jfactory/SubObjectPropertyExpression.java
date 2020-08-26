@@ -38,11 +38,8 @@ class SubObjectPropertyExpression<T> extends PropertyExpression<T> {
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-//            return (definition != null ?
-//                    factorySet.toBuild(definition)
-//                    : factorySet.type(propertyType))
-//                    .mixIn(mixIns).properties(conditionValues);
-        return factorySet.type(propertyType.getType()).properties(conditionValues);
+        return (definition != null ? factorySet.spec(definition) : factorySet.type(propertyType.getType()))
+                .mixIn(mixIns).properties(conditionValues);
     }
 
     @Override
