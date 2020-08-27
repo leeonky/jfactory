@@ -10,15 +10,17 @@ import java.util.stream.Collectors;
 abstract class PropertyExpression<T> {
     private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
     private static final String PATTERN_COLLECTION_INDEX = "(\\[(\\d+)])?";
-    private static final String PATTERN_MIX_IN_DEFINITION = "(\\((([^, ]*[, ])*)(.+)\\))?";
+    private static final String PATTERN_MIX_IN = "(([^, ]+[, ])([^, ]+[, ])*)?";
+    private static final String PATTERN_SPEC = "(.+)";
+    private static final String PATTERN_MIX_IN_DEFINITION = "(\\(" + PATTERN_MIX_IN + PATTERN_SPEC + "\\))?";
     private static final String PATTERN_INTENTLY = "(!)?";
-    private static final String PATTERN_CONDITION = "(\\.(.+))?";
+    private static final String PATTERN_CONDITION = "(\\." + PATTERN_SPEC + ")?";
     private static final int GROUP_PROPERTY = 1;
     private static final int GROUP_COLLECTION_INDEX = 3;
     private static final int GROUP_MIX_IN = 5;
-    private static final int GROUP_DEFINITION = 7;
-    private static final int GROUP_INTENTLY = 8;
-    private static final int GROUP_CONDITION = 10;
+    private static final int GROUP_SPEC = 8;
+    private static final int GROUP_INTENTLY = 9;
+    private static final int GROUP_CONDITION = 11;
     protected final String property;
     protected final BeanClass<T> beanClass;
     private boolean intently = false;
@@ -39,7 +41,7 @@ abstract class PropertyExpression<T> {
         String property = matcher.group(GROUP_PROPERTY);
         PropertyExpression<T> propertyExpression = create(value,
                 matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
-                matcher.group(GROUP_DEFINITION), matcher.group(GROUP_CONDITION), property, beanClass)
+                matcher.group(GROUP_SPEC), matcher.group(GROUP_CONDITION), property, beanClass)
                 .setIntently(matcher.group(GROUP_INTENTLY) != null);
 
         if (matcher.group(GROUP_COLLECTION_INDEX) != null)

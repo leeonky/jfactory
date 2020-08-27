@@ -32,10 +32,10 @@ public class FactorySet {
     }
 
     public <T> Builder<T> spec(Class<? extends Spec<T>> specClass) {
-        return new DefaultBuilder<>(registerSpec(specClass), this);
+        return new DefaultBuilder<>(register(specClass), this);
     }
 
-    public <T> SpecClassFactory<T> registerSpec(Class<? extends Spec<T>> specClass) {
+    public <T> SpecClassFactory<T> register(Class<? extends Spec<T>> specClass) {
         return objectFactorySet.registerSpecClassFactory(specClass);
     }
 

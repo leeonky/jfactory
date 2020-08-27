@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class _05_ComplexPropertyArgs {
 
@@ -24,6 +25,12 @@ class _05_ComplexPropertyArgs {
         private String content, stringValue;
         private int intValue;
         private long longValue;
+    }
+
+    @Getter
+    @Setter
+    public static class Beans {
+        private Bean bean;
     }
 
     @Getter
@@ -50,12 +57,142 @@ class _05_ComplexPropertyArgs {
             property("longValue").value(1000);
             return this;
         }
+
+        @MixIn
+        public ABean hello() {
+            property("stringValue").value("hello");
+            return this;
+        }
+    }
+
+    public static class AnotherBean extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            property("content").value("this is another bean");
+        }
+
+        @MixIn
+        public void int200() {
+            property("intValue").value(200);
+        }
+
+    }
+
+    @Getter
+    @Setter
+    public static class BeansPair {
+        private Beans beans1, beans2;
     }
 
     @Getter
     @Setter
     public static class BeanCollection {
         private List<Bean> list;
+    }
+
+    @Getter
+    @Setter
+    public static class BeansWrapper {
+        private Beans beans;
+    }
+
+    @Nested
+    class MergeProperty {
+
+        @Test
+        void support_specify_multi_properties_in_nested_property_creation_and_query() {
+            Builder<BeansWrapper> builder = factorySet.type(BeansWrapper.class)
+                    .property("beans.bean.content", "hello")
+                    .property("beans.bean.intValue", 100);
+
+            BeansWrapper beansWrapper = builder.create();
+
+            assertThat(beansWrapper.getBeans().getBean())
+                    .hasFieldOrPropertyWithValue("content", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+            ;
+
+            assertThat(builder.query()).isEqualTo(beansWrapper);
+        }
+
+        @Test
+        void should_raise_error_when_property_has_different_spec() {
+            factorySet.register(ABean.class);
+            factorySet.register(AnotherBean.class);
+
+            assertThrows(IllegalArgumentException.class, () -> factorySet.type(BeansWrapper.class)
+                    .property("beans.bean(ABean).content", "hello")
+                    .property("beans.bean(AnotherBean).intValue", 100)
+                    .create());
+        }
+
+        @Test
+        void support_merge_with_has_spec_and_no_spec() {
+            factorySet.register(ABean.class);
+            factorySet.register(AnotherBean.class);
+
+            assertThat(factorySet.type(BeansWrapper.class)
+                    .property("beans.bean(ABean).stringValue", "hello")
+                    .property("beans.bean.intValue", 100)
+                    .create().getBeans().getBean())
+                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+            ;
+
+            assertThat(factorySet.type(BeansWrapper.class)
+                    .property("beans.bean.stringValue", "hello")
+                    .property("beans.bean(ABean).intValue", 100)
+                    .create().getBeans().getBean())
+                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+            ;
+        }
+
+        @Test
+        void should_raise_error_when_property_has_different_mix_in() {
+            factorySet.register(ABean.class);
+
+            assertThrows(IllegalArgumentException.class, () -> factorySet.type(BeansWrapper.class)
+                    .property("beans.bean(hello ABean).content", "xxx")
+                    .property("beans.bean(int100 ABean).intValue", 10)
+                    .create());
+        }
+
+        @Test
+        void support_merge_with_mix_in_and_empty_mix_in() {
+            factorySet.register(ABean.class);
+
+            assertThat(factorySet.type(BeansWrapper.class)
+                    .property("beans.bean(hello ABean).content", "any")
+                    .property("beans.bean(ABean).intValue", 10)
+                    .create().getBeans().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 10)
+            ;
+
+            assertThat(factorySet.type(BeansWrapper.class)
+                    .property("beans.bean(ABean).intValue", 10)
+                    .property("beans.bean(hello ABean).content", "any")
+                    .create().getBeans().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 10)
+            ;
+        }
+
+        @Test
+        void should_not_merge_when_not_specify_properties() {
+            factorySet.factory(BeansPair.class).spec(instance -> {
+                instance.spec().property("beans1").asDefault();
+                instance.spec().property("beans2").asDefault();
+            });
+
+            BeansPair beansPair = factorySet.create(BeansPair.class);
+
+            assertThat(beansPair.beans1).isNotEqualTo(beansPair.beans2);
+        }
     }
 
     @Nested
@@ -111,7 +248,7 @@ class _05_ComplexPropertyArgs {
         }
 
         @Test
-        void also_support_definition_and_mix_in_in_element() {
+        void also_support_spec_and_mix_in_in_element() {
             factorySet.spec(ABean.class);
 
             BeanCollection beanCollection = factorySet.type(BeanCollection.class)
@@ -130,24 +267,24 @@ class _05_ComplexPropertyArgs {
                     .containsOnly(beanCollection);
         }
 
-//        @Test
-//        void support_different_type_in_each_element() {
-//            Bean bean = new Bean();
-//            Builder<BeanCollection> builder = factorySet.type(BeanCollection.class)
-//                    .property("list[0].stringValue", "hello")
-//                    .property("list[1]", bean);
-//
-//            BeanCollection beanCollection = builder.create();
-//
-//            assertThat(beanCollection.getList().get(0))
-//                    .hasFieldOrPropertyWithValue("stringValue", "hello")
-//            ;
-//
-//            assertThat(beanCollection.getList().get(1))
-//                    .isEqualTo(bean)
-//            ;
-//
-//            assertThat(builder.queryAll()).containsOnly(beanCollection);
-//        }
+        @Test
+        void support_different_type_in_each_element() {
+            Bean bean = new Bean();
+            Builder<BeanCollection> builder = factorySet.type(BeanCollection.class)
+                    .property("list[0].stringValue", "hello")
+                    .property("list[1]", bean);
+
+            BeanCollection beanCollection = builder.create();
+
+            assertThat(beanCollection.getList().get(0))
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+            ;
+
+            assertThat(beanCollection.getList().get(1))
+                    .isEqualTo(bean)
+            ;
+
+            assertThat(builder.queryAll()).containsOnly(beanCollection);
+        }
     }
 }

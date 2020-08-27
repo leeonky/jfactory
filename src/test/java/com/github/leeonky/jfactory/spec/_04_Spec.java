@@ -100,7 +100,7 @@ class _04_Spec {
 
         @Test
         void support_specify_spec_name() {
-            factorySet.registerSpec(ABean.class);
+            factorySet.register(ABean.class);
 
             factorySet.factory(Beans.class).spec(instance ->
                     instance.spec().property("bean").spec("int100", "ABean"));
