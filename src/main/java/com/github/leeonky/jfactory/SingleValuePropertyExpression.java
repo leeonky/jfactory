@@ -24,8 +24,8 @@ class SingleValuePropertyExpression<T> extends PropertyExpression<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
-//            if (isIntently())
-//                return toBuilder(factorySet, beanClass.getPropertyWriter(property).getElementOrPropertyType()).producer(property);
+        if (isIntently())
+            return toBuilder(factorySet, beanClass.getPropertyWriter(property).getType().getElementOrPropertyType().getType()).createProducer(property);
         return new FixedValueProducer(parent.getType().getPropertyWriter(property).getType(), value);
     }
 
@@ -39,10 +39,10 @@ class SingleValuePropertyExpression<T> extends PropertyExpression<T> {
         return this;
     }
 
-//        private Builder<?> toBuilder(FactorySet factorySet, Class<?> propertyType) {
-//            return (definition != null ?
-//                    factorySet.toBuild(definition)
-//                    : factorySet.type(propertyType))
-//                    .mixIn(mixIns);
-//        }
+    private Builder<?> toBuilder(FactorySet factorySet, Class<?> propertyType) {
+        return (definition != null ?
+                factorySet.spec(definition)
+                : factorySet.type(propertyType))
+                .mixIn(mixIns);
+    }
 }

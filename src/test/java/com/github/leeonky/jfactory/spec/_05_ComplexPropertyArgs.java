@@ -287,4 +287,65 @@ class _05_ComplexPropertyArgs {
             assertThat(builder.queryAll()).containsOnly(beanCollection);
         }
     }
+
+    @Nested
+    class IntentlyCreate {
+
+        @Test
+        void intently_query_should_return_empty() {
+            factorySet.type(Bean.class)
+                    .property("stringValue", "hello")
+                    .create();
+
+            assertThat(factorySet.type(Bean.class)
+                    .property("stringValue!", "hello")
+                    .queryAll()).isEmpty();
+
+            factorySet.type(BeanCollection.class)
+                    .property("list[0]!.stringValue", "hello")
+                    .create();
+
+            assertThat(factorySet.type(BeanCollection.class)
+                    .property("list[0]!.stringValue", "hello")
+                    .queryAll()).isEmpty();
+        }
+
+//        @Test
+//        void create_nested_object_intently() {
+//            Bean bean = factorySet.type(Bean.class)
+//                    .property("stringValue", "hello")
+//                    .property("intValue", 100)
+//                    .create();
+//
+//            assertThat(factorySet.type(Beans.class)
+//                    .property("bean!.stringValue", "hello")
+//                    .create().getBean()).isNotEqualTo(bean);
+//
+//            assertThat(factorySet.type(BeanCollection.class)
+//                    .property("list[0]!.stringValue", "hello")
+//                    .property("list[0].intValue", 100).create().getList().get(0)).isNotEqualTo(bean);
+//
+//            assertThat(factorySet.type(BeanCollection.class)
+//                    .property("list[0].stringValue", "hello")
+//                    .property("list[0]!.intValue", 100).create().getList().get(0)).isNotEqualTo(bean);
+//        }
+//
+//        @Test
+//        void support_create_object_only_with_definition_and_mix_in_and_ignore_value() {
+//            factorySet.register(ABean.class);
+//
+//            assertThat(factorySet.type(Beans.class)
+//                    .property("bean(int100 ABean)!", "")
+//                    .create().getBean())
+//                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+//                    .hasFieldOrPropertyWithValue("intValue", 100)
+//            ;
+//
+//            assertThat(factorySet.type(Beans.class)
+//                    .property("bean(ABean)!", "")
+//                    .create().getBean())
+//                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+//            ;
+//        }
+    }
 }
