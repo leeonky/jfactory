@@ -16,10 +16,10 @@ class CollectionPropertyExpression<T> extends PropertyExpression<T> {
     }
 
     @Override
-    public boolean isMatch(BeanClass<?> propertyType, Object propertyValue) {
+    protected boolean isMatch(BeanClass<?> propertyType, Object propertyValue) {
         List<Object> elements = BeanClass.arrayCollectionToStream(propertyValue).collect(Collectors.toList());
         return conditionValueIndexMap.entrySet().stream()
-                .allMatch(e -> e.getValue().isMatch(propertyType.getElementType(), elements.get(e.getKey())));
+                .allMatch(e -> elements.get(e.getKey()) != null && !e.getValue().isIntently() && e.getValue().isMatch(propertyType.getElementType(), elements.get(e.getKey())));
     }
 
     @Override

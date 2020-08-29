@@ -65,9 +65,7 @@ abstract class PropertyExpression<T> {
 
     @SuppressWarnings("unchecked")
     public boolean isMatch(Object object) {
-        if (object == null)
-            return false;
-        return isMatch(beanClass.getPropertyReader(property).getType(), beanClass.getPropertyValue((T) object, property));
+        return object != null && !isIntently() && isMatch(beanClass.getPropertyReader(property).getType(), beanClass.getPropertyValue((T) object, property));
     }
 
     protected abstract boolean isMatch(BeanClass<?> propertyType, Object propertyValue);
