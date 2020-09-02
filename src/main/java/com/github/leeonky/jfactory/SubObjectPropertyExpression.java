@@ -21,7 +21,7 @@ class SubObjectPropertyExpression<T> extends PropertyExpression<T> {
     @Override
     protected boolean isMatch(BeanClass<?> propertyType, Object propertyValue) {
         return conditionValues.entrySet().stream()
-                .map(conditionValue -> create(propertyType, conditionValue.getKey(), conditionValue.getValue()))
+                .map(conditionValue -> ExpressionParser.parse(propertyType, conditionValue.getKey(), conditionValue.getValue()))
                 .allMatch(queryExpression -> queryExpression.isMatch(propertyValue));
     }
 
