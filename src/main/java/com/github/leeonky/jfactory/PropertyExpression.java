@@ -6,13 +6,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 abstract class PropertyExpression<T> {
-    protected final String property;
+    protected final String property, field;
     protected final BeanClass<T> beanClass;
     private boolean intently = false;
 
-    public PropertyExpression(String property, BeanClass<T> beanClass) {
+    public PropertyExpression(String property, BeanClass<T> beanClass, String field) {
         this.property = property;
         this.beanClass = beanClass;
+        this.field = field;
     }
 
     public static <T> Map<String, PropertyExpression<T>> createPropertyExpressions(BeanClass<T> beanClass, Map<String, Object> criteria) {

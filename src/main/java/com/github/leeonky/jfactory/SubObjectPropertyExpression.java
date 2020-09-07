@@ -11,8 +11,8 @@ class SubObjectPropertyExpression<T> extends PropertyExpression<T> {
     private String[] mixIns;
     private String definition;
 
-    public SubObjectPropertyExpression(String condition, Object value, String[] mixIns, String definition, String property, BeanClass<T> beanClass) {
-        super(property, beanClass);
+    public SubObjectPropertyExpression(String condition, Object value, String[] mixIns, String definition, String property, BeanClass<T> beanClass, String field) {
+        super(property, beanClass, field);
         this.mixIns = mixIns;
         this.definition = definition;
         conditionValues.put(condition, value);

@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 class CollectionPropertyExpression<T> extends PropertyExpression<T> {
     private final Map<Integer, PropertyExpression<T>> conditionValueIndexMap = new LinkedHashMap<>();
 
-    public CollectionPropertyExpression(int index, PropertyExpression<T> propertyExpression, String property, BeanClass<T> beanClass) {
-        super(property, beanClass);
+    public CollectionPropertyExpression(int index, PropertyExpression<T> propertyExpression, String property, BeanClass<T> beanClass, String field) {
+        super(property, beanClass, field);
         conditionValueIndexMap.put(index, propertyExpression);
     }
 

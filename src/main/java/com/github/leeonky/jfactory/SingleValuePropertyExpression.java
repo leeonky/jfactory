@@ -9,8 +9,8 @@ class SingleValuePropertyExpression<T> extends PropertyExpression<T> {
     private final String[] mixIns;
     private final String definition;
 
-    public SingleValuePropertyExpression(Object value, String[] mixIns, String definition, String property, BeanClass<T> beanClass) {
-        super(property, beanClass);
+    public SingleValuePropertyExpression(Object value, String[] mixIns, String definition, String property, BeanClass<T> beanClass, String field) {
+        super(property, beanClass, field);
         this.value = value;
         this.mixIns = mixIns;
         this.definition = definition;
