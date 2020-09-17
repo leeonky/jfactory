@@ -26,7 +26,7 @@ class SingleValuePropertyExpression<T> extends PropertyExpression<T> {
     public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
         if (isIntently())
             return toBuilder(factorySet, beanClass.getPropertyWriter(property).getType().getElementOrPropertyType().getType()).createProducer(property);
-        return new FixedValueProducer(parent.getType().getPropertyWriter(property).getType(), value);
+        return new FixedValueProducer(beanClass.getPropertyWriter(property).getType(), value);
     }
 
     @Override

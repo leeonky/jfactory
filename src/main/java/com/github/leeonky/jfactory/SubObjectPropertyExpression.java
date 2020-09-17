@@ -34,7 +34,7 @@ class SubObjectPropertyExpression<T> extends PropertyExpression<T> {
         if (collection.isEmpty())
             return toBuilder(factorySet, beanClass.getPropertyWriter(property).getType().getElementOrPropertyType()).createProducer(property);
         else
-            return new FixedValueProducer(parent.getType().getPropertyWriter(property).getType(), collection.iterator().next());
+            return new FixedValueProducer(beanClass.getPropertyWriter(property).getType(), collection.iterator().next());
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {

@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 class CollectionPropertyExpression<T> extends PropertyExpression<T> {
-    private final Map<Integer, PropertyExpression<T>> conditionValueIndexMap = new LinkedHashMap<>();
+    private final Map<Integer, PropertyExpression> conditionValueIndexMap = new LinkedHashMap<>();
 
-    public CollectionPropertyExpression(int index, PropertyExpression<T> propertyExpression, String property, BeanClass<T> beanClass, String field) {
+    public CollectionPropertyExpression(int index, PropertyExpression<?> propertyExpression, String property, BeanClass<T> beanClass, String field) {
         super(property, beanClass, field);
         conditionValueIndexMap.put(index, propertyExpression);
     }
@@ -42,6 +42,7 @@ class CollectionPropertyExpression<T> extends PropertyExpression<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected PropertyExpression<T> mergeTo(CollectionPropertyExpression<T> collectionConditionValue) {
         collectionConditionValue.conditionValueIndexMap.forEach((k, v) ->
                 conditionValueIndexMap.put(k, conditionValueIndexMap.containsKey(k) ?

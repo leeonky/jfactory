@@ -31,7 +31,8 @@ abstract class PropertyExpression<T> {
 
     protected abstract boolean isMatch(BeanClass<?> propertyType, Object propertyValue);
 
-    public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance);
+    //TODO remove parameter parent
+    public abstract Producer<?> buildProducer(FactorySet factorySet, @Deprecated Producer<T> parent, Instance<T> instance);
 
     protected abstract PropertyExpression<T> merge(PropertyExpression<T> propertyExpression);
 
