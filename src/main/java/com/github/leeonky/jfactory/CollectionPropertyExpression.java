@@ -23,16 +23,9 @@ class CollectionPropertyExpression<T> extends PropertyExpression<T> {
     }
 
     @Override
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<T> parent, Instance<T> instance) {
-        CollectionProducer<?, ?> producer = getCollectionProducer(factorySet.getObjectFactorySet(), parent, instance);
-        conditionValueIndexMap.forEach((k, v) -> producer.addChild(k, v.buildProducer(factorySet, parent, instance)));
-        return producer;
-    }
-
-    private CollectionProducer<?, ?> getCollectionProducer(ObjectFactorySet objectFactorySet, Producer<T> parent, Instance<T> instance) {
-        CollectionProducer<?, ?> producer = (CollectionProducer<?, ?>) parent.getChild(property);
-        if (producer == null)
-            producer = new CollectionProducer<>(objectFactorySet, parent.getType().getPropertyWriter(property), instance);
+    public Producer<?> buildProducer(FactorySet factorySet, Instance<T> instance) {
+        CollectionProducer<?, ?> producer = new CollectionProducer<>(factorySet.getObjectFactorySet(), beanClass, beanClass.getPropertyWriter(property).getType(), instance);
+        conditionValueIndexMap.forEach((k, v) -> producer.addChild(k, v.buildProducer(factorySet, instance)));
         return producer;
     }
 

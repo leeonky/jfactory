@@ -1,7 +1,6 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.Property;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +12,11 @@ class CollectionProducer<T, C> extends Producer<C> {
     private final BeanClass<T> beanType;
     private List<Producer<?>> children = new ArrayList<>();
 
-    @SuppressWarnings("unchecked")
-    public CollectionProducer(ObjectFactorySet objectFactorySet, Property<T> property, Instance<T> instance) {
-        super((BeanClass<C>) property.getType());
+    public CollectionProducer(ObjectFactorySet objectFactorySet, BeanClass<T> beanType, BeanClass<C> collectionType, Instance<T> instance) {
+        super(collectionType);
         this.objectFactorySet = objectFactorySet;
         this.instance = instance.inCollection();
-        beanType = property.getBeanType();
+        this.beanType = beanType;
     }
 
     @Override

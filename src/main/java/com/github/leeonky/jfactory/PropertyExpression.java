@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 abstract class PropertyExpression<T> {
+    //TODO use field in default value creation in Collection property
     protected final String property, field;
     protected final BeanClass<T> beanClass;
     private boolean intently = false;
@@ -31,8 +32,7 @@ abstract class PropertyExpression<T> {
 
     protected abstract boolean isMatch(BeanClass<?> propertyType, Object propertyValue);
 
-    //TODO remove parameter parent
-    public abstract Producer<?> buildProducer(FactorySet factorySet, @Deprecated Producer<T> parent, Instance<T> instance);
+    public abstract Producer<?> buildProducer(FactorySet factorySet, Instance<T> instance);
 
     protected abstract PropertyExpression<T> merge(PropertyExpression<T> propertyExpression);
 
