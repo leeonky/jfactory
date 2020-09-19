@@ -30,32 +30,35 @@ class ExpressionParser<T> {
                 PATTERN_INTENTLY +
                 PATTERN_CONDITION).matcher(expression);
         if (!matcher.matches())
-            throw new IllegalArgumentException(String.format("Invalid property `%s` for %s creation.", expression, beanClass.getName()));
+            throw new IllegalArgumentException(String.format("Invalid property `%s` for %s creation.",
+                    expression, beanClass.getName()));
     }
 
-    public static <T> PropertyExpression<T> parse(BeanClass<T> beanClass, String expression, Object value) {
+    public static <T> PropertyExpression<T, T> parse(BeanClass<T> beanClass, String expression, Object value) {
         return new ExpressionParser<>(beanClass, expression).create(value);
     }
 
-    private PropertyExpression<T> create(Object value) {
+    private PropertyExpression<T, T> create(Object value) {
         String property = matcher.group(GROUP_PROPERTY);
         String index = matcher.group(GROUP_COLLECTION_INDEX);
+        boolean intently = matcher.group(GROUP_INTENTLY) != null;
+        String[] mixIn = matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0];
+        String group = matcher.group(GROUP_SPEC);
+        String condition = matcher.group(GROUP_CONDITION);
+
         if (index != null) {
-            PropertyExpression<?> propertyExpression = create(value,
-                    matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
-                    matcher.group(GROUP_SPEC), matcher.group(GROUP_CONDITION), index, beanClass.getPropertyWriter(property).getType(), index)
-                    .setIntently(matcher.group(GROUP_INTENTLY) != null);
-            return new CollectionPropertyExpression<>(Integer.valueOf(index), propertyExpression, property, beanClass, property);
+            return new CollectionPropertyExpression<>(Integer.valueOf(index),
+                    create(value, mixIn, group, condition, index, beanClass.getPropertyWriter(property).getType(), beanClass)
+                            .setIntently(intently),
+                    property, beanClass, beanClass);
         }
-        return create(value,
-                matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
-                matcher.group(GROUP_SPEC), matcher.group(GROUP_CONDITION), property, beanClass, property)
-                .setIntently(matcher.group(GROUP_INTENTLY) != null);
+        return create(value, mixIn, group, condition, property, beanClass, beanClass).setIntently(intently);
     }
 
-    private <T> PropertyExpression<T> create(Object value, String[] mixIn, String definition, String condition, String property, BeanClass<T> beanClass, String field) {
+    private <H, B> PropertyExpression<H, B> create(Object value, String[] mixIn, String definition, String condition,
+                                                   String property, BeanClass<H> hostClass, BeanClass<B> beanClass) {
         return condition != null ?
-                new SubObjectPropertyExpression<>(condition, value, mixIn, definition, property, beanClass, field)
-                : new SingleValuePropertyExpression<>(value, mixIn, definition, property, beanClass, field);
+                new SubObjectPropertyExpression<>(condition, value, mixIn, definition, property, hostClass, beanClass)
+                : new SingleValuePropertyExpression<>(value, mixIn, definition, property, hostClass, beanClass);
     }
 }

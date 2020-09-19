@@ -5,19 +5,19 @@ import com.github.leeonky.util.BeanClass;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-abstract class PropertyExpression<T> {
-    //TODO use field in default value creation in Collection property
-    protected final String property, field;
-    protected final BeanClass<T> beanClass;
+abstract class PropertyExpression<H, B> {
+    protected final String property;
+    protected final BeanClass<H> hostClass;
+    protected final BeanClass<B> beanClass;
     private boolean intently = false;
 
-    public PropertyExpression(String property, BeanClass<T> beanClass, String field) {
+    public PropertyExpression(String property, BeanClass<H> hostClass, BeanClass<B> beanClass) {
         this.property = property;
+        this.hostClass = hostClass;
         this.beanClass = beanClass;
-        this.field = field;
     }
 
-    public static <T> Map<String, PropertyExpression<T>> createPropertyExpressions(BeanClass<T> beanClass, Map<String, Object> criteria) {
+    public static <T> Map<String, PropertyExpression<T, T>> createPropertyExpressions(BeanClass<T> beanClass, Map<String, Object> criteria) {
         return criteria.entrySet().stream()
                 .map(e -> ExpressionParser.parse(beanClass, e.getKey(), e.getValue()))
                 .collect(Collectors.groupingBy(expression -> expression.property)).values().stream()
@@ -26,33 +26,34 @@ abstract class PropertyExpression<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean isMatch(Object object) {
-        return object != null && !isIntently() && isMatch(beanClass.getPropertyReader(property).getType(), beanClass.getPropertyValue((T) object, property));
+    public boolean isMatch(H object) {
+        return object != null && !isIntently() && isMatch((BeanClass) hostClass.getPropertyReader(property).getType(),
+                hostClass.getPropertyValue(object, property));
     }
 
-    protected abstract boolean isMatch(BeanClass<?> propertyType, Object propertyValue);
+    protected abstract <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue);
 
-    public abstract Producer<?> buildProducer(FactorySet factorySet, Instance<T> instance);
+    public abstract Producer<?> buildProducer(FactorySet factorySet, Instance<B> instance);
 
-    protected abstract PropertyExpression<T> merge(PropertyExpression<T> propertyExpression);
+    protected abstract PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression);
 
-    protected PropertyExpression<T> mergeTo(SingleValuePropertyExpression<T> singleValuePropertyExpression) {
-        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
+    protected PropertyExpression<H, B> mergeTo(SingleValuePropertyExpression<H, B> singleValuePropertyExpression) {
+        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", hostClass.getName(), property));
     }
 
-    protected PropertyExpression<T> mergeTo(SubObjectPropertyExpression<T> conditionValueSet) {
-        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
+    protected PropertyExpression<H, B> mergeTo(SubObjectPropertyExpression<H, B> conditionValueSet) {
+        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", hostClass.getName(), property));
     }
 
-    protected PropertyExpression<T> mergeTo(CollectionPropertyExpression<T> collectionConditionValue) {
-        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", beanClass.getName(), property));
+    protected PropertyExpression<H, B> mergeTo(CollectionPropertyExpression<H, B> collectionConditionValue) {
+        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", hostClass.getName(), property));
     }
 
     protected boolean isIntently() {
         return intently;
     }
 
-    protected PropertyExpression<T> setIntently(boolean intently) {
+    protected PropertyExpression<H, B> setIntently(boolean intently) {
         this.intently = intently;
         return this;
     }
