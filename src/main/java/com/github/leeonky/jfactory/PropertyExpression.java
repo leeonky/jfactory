@@ -45,7 +45,7 @@ abstract class PropertyExpression<H, B> {
         throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", hostClass.getName(), property));
     }
 
-    protected PropertyExpression<H, B> mergeTo(CollectionPropertyExpression<H, B> collectionConditionValue) {
+    protected PropertyExpression<H, B> mergeTo(CollectionPropertyExpression<H, ?, B> collectionConditionValue) {
         throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", hostClass.getName(), property));
     }
 

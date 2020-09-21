@@ -29,13 +29,14 @@ class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Instance<B> instance) {
+        BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
         if (isIntently())
-            return toBuilder(factorySet, hostClass.getPropertyWriter(property).getType().getElementOrPropertyType()).createProducer(property);
-        Collection<?> collection = toBuilder(factorySet, hostClass.getPropertyReader(property).getType().getElementOrPropertyType()).queryAll();
+            return toBuilder(factorySet, propertyType).createProducer(property);
+        Collection<?> collection = toBuilder(factorySet, hostClass.getPropertyReader(property).getType()).queryAll();
         if (collection.isEmpty())
-            return toBuilder(factorySet, hostClass.getPropertyWriter(property).getType().getElementOrPropertyType()).createProducer(property);
+            return toBuilder(factorySet, propertyType).createProducer(property);
         else
-            return new FixedValueProducer(hostClass.getPropertyWriter(property).getType(), collection.iterator().next());
+            return new FixedValueProducer(propertyType, collection.iterator().next());
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {

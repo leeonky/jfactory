@@ -25,9 +25,10 @@ class SingleValuePropertyExpression<H, B> extends PropertyExpression<H, B> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Instance<B> instance) {
+        BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
         if (isIntently())
-            return toBuilder(factorySet, hostClass.getPropertyWriter(property).getType().getElementOrPropertyType().getType()).createProducer(property);
-        return new FixedValueProducer(hostClass.getPropertyWriter(property).getType(), value);
+            return toBuilder(factorySet, propertyType.getType()).createProducer(property);
+        return new FixedValueProducer(propertyType, value);
     }
 
     @Override
