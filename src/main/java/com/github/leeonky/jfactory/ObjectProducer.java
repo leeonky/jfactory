@@ -1,6 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,27 +9,26 @@ class ObjectProducer<T> extends Producer<T> {
     private final Instance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
 
-    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, Map<String, Object> properties, Collection<String> mixIns) {
+    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder) {
         super(objectFactory.getType());
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
         instance = objectFactory.createInstance(factorySet.getTypeSequence());
-        establishProducers(factorySet, properties, mixIns);
+        establishProducers(factorySet, builder);
     }
 
-    private void establishProducers(FactorySet factorySet, Map<String, Object> properties, Collection<String> mixIns) {
+    private void establishProducers(FactorySet factorySet, DefaultBuilder<T> builder) {
         buildPropertyValueProducers(factorySet.getObjectFactorySet());
-        buildProducersFromSpec(mixIns);
-        buildProducerFromInputProperties(factorySet, properties);
+        buildProducersFromSpec(builder);
+        buildProducerFromInputProperties(factorySet, builder);
     }
 
-    private void buildProducerFromInputProperties(FactorySet factorySet, Map<String, Object> properties) {
-        PropertyExpression.createPropertyExpressions(getType(), properties)
-                .forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, instance.sub(p))));
+    private void buildProducerFromInputProperties(FactorySet factorySet, DefaultBuilder<T> builder) {
+        builder.toExpressions().forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, instance.sub(p))));
     }
 
-    private void buildProducersFromSpec(Collection<String> mixIns) {
-        objectFactory.collectSpec(mixIns, instance);
+    private void buildProducersFromSpec(DefaultBuilder<T> builder) {
+        builder.collectSpec(instance);
         instance.spec().apply(factorySet, this);
     }
 

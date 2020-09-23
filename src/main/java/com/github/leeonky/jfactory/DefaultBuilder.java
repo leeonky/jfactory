@@ -22,7 +22,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Producer<T> createProducer(String property) {
-        return new ObjectProducer<>(factorySet, objectFactory, properties, mixIns);
+        return new ObjectProducer<>(factorySet, objectFactory, this);
     }
 
     @Override
@@ -54,5 +54,13 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Collection<T> queryAll() {
         return factorySet.getDataRepository().query(objectFactory.getType(), properties);
+    }
+
+    public void collectSpec(Instance<T> instance) {
+        objectFactory.collectSpec(mixIns, instance);
+    }
+
+    public Map<String, PropertyExpression<T, T>> toExpressions() {
+        return PropertyExpression.createPropertyExpressions(objectFactory.getType(), properties);
     }
 }
