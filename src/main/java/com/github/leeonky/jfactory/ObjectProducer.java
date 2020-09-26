@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> objectFactory;
@@ -39,13 +40,13 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    public void addChild(Object name, Producer<?> producer) {
-        children.put((String) name, producer);
+    public void addChild(String property, Producer<?> producer) {
+        children.put(property, producer);
     }
 
     @Override
-    public Producer<?> getChild(Object index) {
-        return children.get(index);
+    public Producer<?> getChild(String property) {
+        return children.get(property);
     }
 
     @Override
@@ -55,5 +56,8 @@ class ObjectProducer<T> extends Producer<T> {
         children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.produce()));
         factorySet.getDataRepository().save(obj);
         return obj;
+    }
+
+    public void addDependency(String property, String dependency, Function<Object, Object> function) {
     }
 }

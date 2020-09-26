@@ -26,9 +26,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public void addChild(Object index, Producer<?> producer) {
-        int intIndex = (int) index;
-        fillCollectionWithDefaultValue((int) index);
+    public void addChild(String property, Producer<?> producer) {
+        int intIndex = Integer.valueOf(property);
+        fillCollectionWithDefaultValue(intIndex);
         children.set(intIndex, producer);
     }
 

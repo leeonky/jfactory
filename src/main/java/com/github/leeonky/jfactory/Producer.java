@@ -15,10 +15,10 @@ abstract class Producer<T> {
         return produce();
     }
 
-    public void addChild(Object index, Producer<?> producer) {
+    public void addChild(String property, Producer<?> producer) {
     }
 
-    public Producer<?> getChild(Object index) {
+    public Producer<?> getChild(String property) {
         return null;
     }
 

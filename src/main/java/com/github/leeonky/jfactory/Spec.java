@@ -16,8 +16,8 @@ public class Spec<T> {
     public void main() {
     }
 
-    public PropertySpec<T> property(String name) {
-        return new PropertySpec<>(name, this);
+    public PropertySpec<T> property(String property) {
+        return new PropertySpec<>(property, this);
     }
 
     Spec<T> append(BiConsumer<FactorySet, ObjectProducer<T>> operation) {

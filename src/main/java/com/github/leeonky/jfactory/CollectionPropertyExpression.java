@@ -29,7 +29,7 @@ class CollectionPropertyExpression<H, E, B> extends PropertyExpression<H, B> {
     public Producer<?> buildProducer(FactorySet factorySet, Instance<B> instance) {
         CollectionProducer<?, ?> producer = new CollectionProducer<>(factorySet.getObjectFactorySet(), beanClass,
                 hostClass.getPropertyWriter(property).getType(), instance);
-        conditionValueIndexMap.forEach((k, v) -> producer.addChild(k, v.buildProducer(factorySet, instance)));
+        conditionValueIndexMap.forEach((k, v) -> producer.addChild(k.toString(), v.buildProducer(factorySet, instance)));
         return producer;
     }
 
