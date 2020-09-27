@@ -1,6 +1,8 @@
 package com.github.leeonky.jfactory;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -9,6 +11,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final FactorySet factorySet;
     private final Instance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
+    private Map<List<String>, Dependency<?>> dependencies = new LinkedHashMap<>();
 
     public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder) {
         super(objectFactory.getType());
@@ -53,11 +56,18 @@ class ObjectProducer<T> extends Producer<T> {
     protected T produce() {
         T obj = objectFactory.create(instance);
         instance.giveValue(obj);
-        children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.produce()));
+        children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.getValue()));
         factorySet.getDataRepository().save(obj);
         return obj;
     }
 
-    public void addDependency(String property, String dependency, Function<Object, Object> function) {
+    public void addDependency(String property, List<String> dependencies, Function<Object[], Object> function) {
+        Dependency<?> dependency = new Dependency<>(property, dependencies, function);
+        this.dependencies.put(dependency.getProperty(), dependency);
+    }
+
+    public ObjectProducer<T> processSpec() {
+        dependencies.values().forEach(dependency -> dependency.process(this, instance));
+        return this;
     }
 }

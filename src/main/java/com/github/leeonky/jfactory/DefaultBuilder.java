@@ -17,11 +17,11 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        return createProducer(null).getValue();
+        return createProducer(null).processSpec().getValue();
     }
 
     @Override
-    public Producer<T> createProducer(String property) {
+    public ObjectProducer<T> createProducer(String property) {
         return new ObjectProducer<>(factorySet, objectFactory, this);
     }
 

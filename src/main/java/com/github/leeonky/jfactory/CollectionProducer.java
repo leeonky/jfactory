@@ -12,7 +12,8 @@ class CollectionProducer<T, C> extends Producer<C> {
     private final BeanClass<T> beanType;
     private List<Producer<?>> children = new ArrayList<>();
 
-    public CollectionProducer(ObjectFactorySet objectFactorySet, BeanClass<T> beanType, BeanClass<C> collectionType, Instance<T> instance) {
+    public CollectionProducer(ObjectFactorySet objectFactorySet, BeanClass<T> beanType,
+                              BeanClass<C> collectionType, Instance<T> instance) {
         super(collectionType);
         this.objectFactorySet = objectFactorySet;
         this.instance = instance.inCollection();
@@ -22,7 +23,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     @SuppressWarnings("unchecked")
     protected C produce() {
-        return (C) getType().createCollection(children.stream().map(Producer::produce).collect(Collectors.toList()));
+        return (C) getType().createCollection(children.stream().map(Producer::getValue).collect(Collectors.toList()));
     }
 
     @Override

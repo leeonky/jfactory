@@ -2,8 +2,11 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static java.util.Collections.singletonList;
 
 public class PropertySpec<T> {
     private final String property;
@@ -54,6 +57,10 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> dependsOn(String dependency, Function<Object, Object> function) {
-        return spec.append((factorySet, objectProducer) -> objectProducer.addDependency(property, dependency, function));
+        return dependsOn(singletonList(dependency), objs -> function.apply(objs[0]));
+    }
+
+    public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> function) {
+        return spec.append((factorySet, objectProducer) -> objectProducer.addDependency(property, dependencies, function::apply));
     }
 }

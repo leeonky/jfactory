@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +24,7 @@ public class _06_Dependency {
     @Nested
     class FlattenDependency {
 
-        //        @Test
+        @Test
         void depends_on_one_property() {
             factorySet.factory(Bean.class).spec(instance ->
                     instance.spec().property("content").dependsOn("intValue", Object::toString));
