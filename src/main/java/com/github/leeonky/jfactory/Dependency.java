@@ -2,13 +2,12 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
 
 class Dependency<T> {
     // TODO test for property chain
@@ -24,8 +23,8 @@ class Dependency<T> {
         this.function = function;
     }
 
-    private List<String> toChain(String s) {
-        return asList(s);
+    private List<String> toChain(String property) {
+        return Arrays.stream(property.split("[\\[\\].]")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
     }
 
     public List<String> getProperty() {
@@ -42,7 +41,7 @@ class Dependency<T> {
         Producer<?> producer = objectProducer.getChild(linkedProperty).get();
 
         BeanClass<T> type = (BeanClass<T>) producer.getType().getPropertyWriter(p).getType();
-        producer.addChild(p, new DependencyProducer<>(dependencies.stream().map(dependency ->
+        producer.changeChild(p, new DependencyProducer<>(dependencies.stream().map(dependency ->
                 // TODO dependency is read from instance: no producer
                 (Supplier<Object>) () -> objectProducer.getChild(new LinkedList<>(dependency)).get().getValue()).collect(Collectors.toList()),
                 function, type));

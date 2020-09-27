@@ -39,4 +39,14 @@ abstract class Producer<T> {
         //TODO producer maybe null
         return producer.getChild(propertyChain);
     }
+
+    @SuppressWarnings("unchecked")
+    public <T> void changeChild(String property, Producer<T> producer) {
+        Producer<T> original = (Producer<T>) getChild(property);
+        addChild(property, original == null ? producer : original.changeTo(producer));
+    }
+
+    protected Producer<T> changeTo(Producer<T> newProducer) {
+        return newProducer;
+    }
 }

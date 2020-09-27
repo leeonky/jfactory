@@ -44,11 +44,10 @@ class CollectionProducer<T, C> extends Producer<C> {
                 .orElseGet(() -> new PropertyValueBuilders.DefaultValueBuilder<>(elementType));
     }
 
-    //TODO set child
-//    @Override
-//    public Producer<?> getChild(Object index) {
-//        int intIndex = (int) index;
-//        fillCollectionWithDefaultValue(intIndex);
-//        return children.get(intIndex);
-//    }
+    @Override
+    public Producer<?> getChild(String property) {
+        int index = Integer.valueOf(property);
+        fillCollectionWithDefaultValue(index);
+        return children.get(index);
+    }
 }

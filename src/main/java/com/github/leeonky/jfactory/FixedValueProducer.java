@@ -14,4 +14,10 @@ class FixedValueProducer<T> extends Producer<T> {
     protected T produce() {
         return value;
     }
+
+    @Override
+    protected Producer<T> changeTo(Producer<T> newProducer) {
+        //TODO link producer may changeTo
+        return this;
+    }
 }
