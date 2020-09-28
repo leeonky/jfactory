@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,7 +51,15 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public Producer<?> getChild(String property) {
-        return children.get(property);
+        Producer<?> producer = children.get(property);
+        if (producer == null) {
+            BeanClass<?> propertyType = getType().getPropertyWriter(property).getType();
+            if (propertyType.isCollection()) {
+                addChild(property, producer = new CollectionProducer<>(
+                        factorySet.getObjectFactorySet(), getType(), propertyType, instance.sub(property)));
+            }
+        }
+        return producer;
     }
 
     @Override

@@ -140,19 +140,20 @@ public class _06_Dependency {
                     .containsOnly(bean, bean, bean);
         }
 
-//        @Test
-//        void dependency_chain_with_array_and_property() {
-//            factorySet.factory(BeanArray.class).define((argument, spec) -> {
-//                spec.property("beans[1]").dependsOn("beans[0]", obj -> obj);
-//                spec.property("beans[0]").dependsOn("bean", obj -> obj);
-//            });
-//
-//            Bean bean = new Bean();
-//
-//            BeanArray beanArray = factorySet.type(BeanArray.class).property("bean", bean).create();
-//            assertThat(beanArray.getBeans()).containsOnly(bean, bean);
-//            assertThat(beanArray.getBean()).isEqualTo(bean);
-//        }
+        @Test
+        void dependency_chain_with_array_and_property() {
+            factorySet.factory(BeanArray.class).spec(instance -> {
+                instance.spec()
+                        .property("beans[1]").dependsOn("beans[0]", obj -> obj)
+                        .property("beans[0]").dependsOn("bean", obj -> obj);
+            });
+
+            Bean bean = new Bean();
+
+            BeanArray beanArray = factorySet.type(BeanArray.class).property("bean", bean).create();
+            assertThat(beanArray.getBeans()).containsOnly(bean, bean);
+            assertThat(beanArray.getBean()).isEqualTo(bean);
+        }
 //
 //        @Nested
 //        class Override {
