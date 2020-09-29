@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class _04_Spec {
@@ -40,6 +42,19 @@ class _04_Spec {
             property("intValue").value(100);
             return this;
         }
+    }
+
+    @Getter
+    @Setter
+    public static class Table {
+        private List<Row> rows;
+    }
+
+    @Getter
+    @Setter
+    public static class Row {
+        private Table table;
+        private int value;
     }
 
     @Nested
@@ -141,6 +156,24 @@ class _04_Spec {
 
             assertThat(factorySet.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("intValue", 100);
+        }
+    }
+
+    @Nested
+    class CollectionProperty {
+
+        @Test
+        void support_define_collection_element_spec() {
+            factorySet.factory(Table.class).spec(instance ->
+                    instance.spec().property("rows[0]").asDefault(builder -> builder.property("value", 100)));
+
+            Table table = factorySet.create(Table.class);
+
+            assertThat(table.getRows())
+                    .hasSize(1);
+
+            assertThat(table.getRows().get(0))
+                    .hasFieldOrPropertyWithValue("value", 100);
         }
     }
 }

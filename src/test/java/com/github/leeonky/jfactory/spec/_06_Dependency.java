@@ -154,16 +154,15 @@ public class _06_Dependency {
             assertThat(beanArray.getBeans()).containsOnly(bean, bean);
             assertThat(beanArray.getBean()).isEqualTo(bean);
         }
-//
+
 //        @Nested
 //        class Override {
 //
 //            @Test
 //            void ignore_original_spec_when_dependency_override_spec() {
-//                factorySet.factory(BeanArray.class).define((argument, spec) -> {
-//                    spec.property("beans[1]").type(Bean.class);
-//                    spec.property("beans[1]").dependsOn("beans[0]", obj -> obj);
-//                });
+//                factorySet.factory(BeanArray.class).spec(instance -> instance.spec()
+//                        .property("beans[1]").asDefault()
+//                        .property("beans[1]").dependsOn("beans[0]", obj -> obj));
 //
 //                Bean bean = new Bean();
 //
@@ -185,6 +184,6 @@ public class _06_Dependency {
 //                        .create().getBeans())
 //                        .containsOnly(bean, null);
 //            }
-//        }
+//    }
     }
 }

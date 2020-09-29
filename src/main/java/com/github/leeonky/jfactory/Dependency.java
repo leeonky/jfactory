@@ -2,7 +2,6 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -17,14 +16,10 @@ class Dependency<T> {
     private final List<List<String>> dependencies;
     private final Function<Object[], T> function;
 
-    public Dependency(String property, List<String> dependencies, Function<Object[], T> function) {
-        this.property = toChain(property);
-        this.dependencies = dependencies.stream().map(this::toChain).collect(Collectors.toList());
+    public Dependency(List<String> property, List<List<String>> dependencies, Function<Object[], T> function) {
+        this.property = property;
+        this.dependencies = dependencies;
         this.function = function;
-    }
-
-    private List<String> toChain(String property) {
-        return Arrays.stream(property.split("[\\[\\].]")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
     }
 
     public List<String> getProperty() {
@@ -33,17 +28,9 @@ class Dependency<T> {
 
     @SuppressWarnings("unchecked")
     public <B> void process(ObjectProducer<B> objectProducer, Instance<B> instance) {
-
-        LinkedList<String> linkedProperty = new LinkedList<>(property);
-        String p = linkedProperty.removeLast();
-
-        // TODO property in sub is readonly: no producer
-        Producer<?> producer = objectProducer.getChild(linkedProperty).get();
-
-        BeanClass<T> type = (BeanClass<T>) producer.getType().getPropertyWriter(p).getType();
-        producer.changeChild(p, new DependencyProducer<>(dependencies.stream().map(dependency ->
+        objectProducer.changeChild(property, (producer, property) -> new DependencyProducer<>(dependencies.stream().map(dependency ->
                 // TODO dependency is read from instance: no producer
                 (Supplier<Object>) () -> objectProducer.getChild(new LinkedList<>(dependency)).get().getValue()).collect(Collectors.toList()),
-                function, type));
+                function, (BeanClass<T>) producer.getType().getPropertyWriter(property).getType()));
     }
 }

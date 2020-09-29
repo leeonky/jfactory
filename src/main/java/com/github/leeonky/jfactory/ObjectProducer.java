@@ -71,7 +71,7 @@ class ObjectProducer<T> extends Producer<T> {
         return obj;
     }
 
-    public void addDependency(String property, List<String> dependencies, Function<Object[], Object> function) {
+    public void addDependency(List<String> property, List<List<String>> dependencies, Function<Object[], Object> function) {
         Dependency<?> dependency = new Dependency<>(property, dependencies, function);
         this.dependencies.put(dependency.getProperty(), dependency);
     }

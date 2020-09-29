@@ -3,7 +3,9 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import static java.util.Optional.of;
 
@@ -40,13 +42,23 @@ abstract class Producer<T> {
         return producer.getChild(propertyChain);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> void changeChild(String property, Producer<T> producer) {
-        Producer<T> original = (Producer<T>) getChild(property);
-        addChild(property, original == null ? producer : original.changeTo(producer));
-    }
-
     protected Producer<T> changeTo(Producer<T> newProducer) {
         return newProducer;
+    }
+
+    public void changeChild(List<String> property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
+        LinkedList<String> linkedProperty = new LinkedList<>(property);
+        String p = linkedProperty.removeLast();
+
+        // TODO property in sub is readonly: no producer
+        Producer<?> producer = getChild(linkedProperty).get();
+
+        producer.changeChild(p, producerGenerator.apply(producer, p));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void changeChild(String property, Producer<T> producer) {
+        Producer<T> original = (Producer<T>) getChild(property);
+        addChild(property, original == null ? producer : original.changeTo(producer));
     }
 }
