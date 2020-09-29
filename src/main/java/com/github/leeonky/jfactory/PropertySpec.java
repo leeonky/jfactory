@@ -2,7 +2,6 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -11,16 +10,12 @@ import java.util.stream.Collectors;
 import static java.util.Collections.singletonList;
 
 public class PropertySpec<T> {
-    private final List<String> property;
     private final Spec<T> spec;
+    private final PropertyChain property;
 
-    PropertySpec(String property, Spec<T> spec) {
+    PropertySpec(Spec<T> spec, PropertyChain property) {
         this.spec = spec;
-        this.property = toChain(property);
-    }
-
-    private List<String> toChain(String property) {
-        return Arrays.stream(property.split("[\\[\\].]")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+        this.property = property;
     }
 
     public Spec<T> value(Object value) {
@@ -68,12 +63,14 @@ public class PropertySpec<T> {
 
     public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> function) {
         return spec.append((factorySet, objectProducer) ->
-                objectProducer.addDependency(property, dependencies.stream().map(this::toChain).collect(Collectors.toList()), function));
+                objectProducer.addDependency(property, function, dependencies.stream().map(PropertyChain::new).collect(Collectors.toList())));
     }
 
     private Spec<T> appendProducer(Fuc<FactorySet, Producer<?>, String, Producer<?>> producerGenerator) {
-        return spec.append((factorySet, objectProducer) -> objectProducer.changeChild(property, ((producer, property) ->
-                producerGenerator.apply(factorySet, producer, property))));
+        if (property.isSingle() || property.isTopLevelPropertyCollection())
+            return spec.append((factorySet, objectProducer) -> objectProducer.changeChild(property, ((producer, property) ->
+                    producerGenerator.apply(factorySet, producer, property))));
+        throw new IllegalArgumentException(String.format("Not support property chain '%s' in current operation", property.toString()));
     }
 
     @FunctionalInterface

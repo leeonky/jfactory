@@ -2,12 +2,8 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
-
-import static java.util.Optional.of;
 
 abstract class Producer<T> {
     private final BeanClass<T> type;
@@ -33,29 +29,26 @@ abstract class Producer<T> {
         return type;
     }
 
-    public Optional<Producer<?>> getChild(LinkedList<String> propertyChain) {
-        if (propertyChain.isEmpty())
-            return of(this);
-        Producer<?> producer = getChild(propertyChain.removeFirst());
-
-        //TODO producer maybe null
-        return producer.getChild(propertyChain);
+    public Optional<Producer<?>> getChild(PropertyChain property) {
+        return property.getProducer(this);
     }
 
     protected Producer<T> changeTo(Producer<T> newProducer) {
         return newProducer;
     }
 
-    public void changeChild(List<String> property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
-        LinkedList<String> linkedProperty = new LinkedList<>(property);
-        String p = linkedProperty.removeLast();
+    //TODO property move to class
+    public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
+        //TODO producer maybe null
+        String p = property.getTail();
 
         // TODO property in sub is readonly: no producer
-        Producer<?> producer = getChild(linkedProperty).get();
+        Producer<?> producer = getChild(property.removeTail()).get();
 
         producer.changeChild(p, producerGenerator.apply(producer, p));
     }
 
+    //TODO to be inlined
     @SuppressWarnings("unchecked")
     private <T> void changeChild(String property, Producer<T> producer) {
         Producer<T> original = (Producer<T>) getChild(property);

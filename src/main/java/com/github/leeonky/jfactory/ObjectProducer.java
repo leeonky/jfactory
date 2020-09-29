@@ -13,7 +13,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final FactorySet factorySet;
     private final Instance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
-    private Map<List<String>, Dependency<?>> dependencies = new LinkedHashMap<>();
+    private Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
 
     public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder) {
         super(objectFactory.getType());
@@ -71,9 +71,9 @@ class ObjectProducer<T> extends Producer<T> {
         return obj;
     }
 
-    public void addDependency(List<String> property, List<List<String>> dependencies, Function<Object[], Object> function) {
-        Dependency<?> dependency = new Dependency<>(property, dependencies, function);
-        this.dependencies.put(dependency.getProperty(), dependency);
+    public void addDependency(PropertyChain property, Function<Object[], Object> function, List<PropertyChain> propertyChains) {
+        Dependency<?> dependency = new Dependency<>(function, property, propertyChains);
+        dependencies.put(dependency.getProperty(), dependency);
     }
 
     public ObjectProducer<T> processSpec() {
