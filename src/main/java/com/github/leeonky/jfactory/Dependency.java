@@ -18,9 +18,7 @@ class Dependency<T> {
 
     public Dependency(Function<Object[], T> function, PropertyChain property, List<PropertyChain> propertyChains) {
         this.function = function;
-        // TODO test for property chain
         this.property = property;
-        // TODO test for dependency chain
         this.propertyChains = propertyChains;
     }
 

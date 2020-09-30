@@ -37,7 +37,6 @@ abstract class Producer<T> {
         return newProducer;
     }
 
-    //TODO property move to class
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
         //TODO producer maybe null
         String p = property.getTail();
@@ -48,7 +47,6 @@ abstract class Producer<T> {
         producer.changeChild(p, producerGenerator.apply(producer, p));
     }
 
-    //TODO to be inlined
     @SuppressWarnings("unchecked")
     private <T> void changeChild(String property, Producer<T> producer) {
         Producer<T> original = (Producer<T>) getChild(property);

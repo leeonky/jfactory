@@ -155,35 +155,34 @@ public class _06_Dependency {
             assertThat(beanArray.getBean()).isEqualTo(bean);
         }
 
-//        @Nested
-//        class Override {
-//
-//            @Test
-//            void ignore_original_spec_when_dependency_override_spec() {
-//                factorySet.factory(BeanArray.class).spec(instance -> instance.spec()
-//                        .property("beans[1]").asDefault()
-//                        .property("beans[1]").dependsOn("beans[0]", obj -> obj));
-//
-//                Bean bean = new Bean();
-//
-//                assertThat(factorySet.type(BeanArray.class).property("beans[0]", bean).create().getBeans())
-//                        .containsOnly(bean, bean);
-//            }
-//
-//            @Test
-//            void ignore_dependency_when_input_property_override_dependency() {
-//                factorySet.factory(BeanArray.class).define((argument, spec) -> {
-//                    spec.property("beans[1]").dependsOn("beans[0]", obj -> obj);
-//                });
-//
-//                Bean bean = new Bean();
-//
-//                assertThat(factorySet.type(BeanArray.class)
-//                        .property("beans[0]", bean)
-//                        .property("beans[1]", null)
-//                        .create().getBeans())
-//                        .containsOnly(bean, null);
-//            }
-//    }
+        @Nested
+        class Override {
+
+            @Test
+            void ignore_original_spec_when_dependency_override_spec() {
+                factorySet.factory(BeanArray.class).spec(instance -> instance.spec()
+                        .property("beans[1]").asDefault()
+                        .property("beans[1]").dependsOn("beans[0]", obj -> obj));
+
+                Bean bean = new Bean();
+
+                assertThat(factorySet.type(BeanArray.class).property("beans[0]", bean).create().getBeans())
+                        .containsOnly(bean, bean);
+            }
+
+            @Test
+            void ignore_dependency_when_input_property_override_dependency() {
+                factorySet.factory(BeanArray.class).spec(instance ->
+                        instance.spec().property("beans[1]").dependsOn("beans[0]", obj -> obj));
+
+                Bean bean = new Bean();
+
+                assertThat(factorySet.type(BeanArray.class)
+                        .property("beans[0]", bean)
+                        .property("beans[1]", null)
+                        .create().getBeans())
+                        .containsOnly(bean, null);
+            }
+        }
     }
 }
