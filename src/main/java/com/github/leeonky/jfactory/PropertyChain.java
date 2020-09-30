@@ -6,27 +6,26 @@ import java.util.stream.Collectors;
 import static java.util.Optional.of;
 
 class PropertyChain {
-    public final List<String> property;
+    public final List<Object> property;
 
     public PropertyChain(String property) {
-        this.property = Arrays.stream(property.split("[\\[\\].]")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+        this.property = Arrays.stream(property.split("[\\[\\].]"))
+                .filter(s -> !s.isEmpty())
+                .map(s -> {
+                    try {
+                        return Integer.valueOf(s);
+                    } catch (Exception ignore) {
+                        return s;
+                    }
+                }).collect(Collectors.toList());
     }
 
-    public PropertyChain(List<String> propertyChain) {
+    public PropertyChain(List<Object> propertyChain) {
         property = new ArrayList<>(propertyChain);
     }
 
     public boolean isTopLevelPropertyCollection() {
-        return property.size() == 2 && isNumber(property.get(1));
-    }
-
-    private boolean isNumber(String str) {
-        try {
-            Integer.valueOf(str);
-            return true;
-        } catch (Exception ignore) {
-            return false;
-        }
+        return property.size() == 2 && (property.get(1) instanceof Integer);
     }
 
     public boolean isSingle() {
@@ -48,14 +47,18 @@ class PropertyChain {
 
     @Override
     public String toString() {
-        return String.join(".", property);
+        return property.stream().map(c -> {
+            if (c instanceof Integer)
+                return String.format("[%d]", c);
+            return c.toString();
+        }).collect(Collectors.joining(".")).replace(".[", "[");
     }
 
     public Optional<Producer<?>> getProducer(Producer<?> producer) {
         //TODO producer maybe null
         if (property.isEmpty())
             return of(producer);
-        return removeHead().getProducer(producer.getChild(property.get(0)));
+        return removeHead().getProducer(producer.getChild(property.get(0).toString()));
     }
 
     private PropertyChain removeHead() {
@@ -63,7 +66,7 @@ class PropertyChain {
     }
 
     public String getTail() {
-        return property.get(property.size() - 1);
+        return property.get(property.size() - 1).toString();
     }
 
     public PropertyChain removeTail() {
