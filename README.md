@@ -1,0 +1,2 @@
+# jfactory
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a18fbc62236f405887af708352c5e73b)](https://app.codacy.com/gh/leeonky/jfactory?utm_source=github.com&utm_medium=referral&utm_content=leeonky/jfactory&utm_campaign=Badge_Grade)
