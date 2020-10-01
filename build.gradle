@@ -54,6 +54,8 @@ dependencies {
     testImplementation 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.1'
+
+    pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }
 
 test {
@@ -63,8 +65,11 @@ test {
 pitest {
     targetClasses = ['com.github.leeonky.jfactory.*']
     excludedClasses = ['com.github.leeonky.jfactory.spec.*']
+    outputFormats = ['HTML2']
     junit5PluginVersion = "0.12"
 }
+
+build.dependsOn 'pitest'
 
 publishing {
     publications {
