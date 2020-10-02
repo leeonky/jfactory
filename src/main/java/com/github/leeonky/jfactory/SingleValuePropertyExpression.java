@@ -31,16 +31,6 @@ class SingleValuePropertyExpression<H, B> extends PropertyExpression<H, B> {
         return new FixedValueProducer(propertyType, value);
     }
 
-    @Override
-    public PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression) {
-        return propertyExpression.mergeTo(this);
-    }
-
-    @Override
-    protected PropertyExpression<H, B> mergeTo(SingleValuePropertyExpression<H, B> singleValuePropertyExpression) {
-        return this;
-    }
-
     private Builder<?> toBuilder(FactorySet factorySet, Class<?> propertyType) {
         return (definition != null ?
                 factorySet.spec(definition)

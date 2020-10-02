@@ -93,6 +93,12 @@ class _05_ComplexPropertyArgs {
 
     @Getter
     @Setter
+    public static class BeanCollections {
+        private List<BeanCollection> list;
+    }
+
+    @Getter
+    @Setter
     public static class BeansWrapper {
         private Beans beans;
     }
@@ -192,6 +198,41 @@ class _05_ComplexPropertyArgs {
             BeansPair beansPair = factorySet.create(BeansPair.class);
 
             assertThat(beansPair.beans1).isNotEqualTo(beansPair.beans2);
+        }
+
+        @Nested
+        class OverrideThroughMerge {
+
+            @Test
+            void new_property_should_override_old_property_1() {
+                BeanCollection beans = factorySet.type(BeanCollection.class)
+                        .property("list[0]", null)
+                        .property("list[0].intValue", 1)
+                        .create();
+
+                assertThat(beans.list.get(0))
+                        .hasFieldOrPropertyWithValue("intValue", 1);
+            }
+
+            @Test
+            void new_property_should_override_old_property_2() {
+                BeanCollection beans = factorySet.type(BeanCollection.class)
+                        .property("list[0].intValue", 1)
+                        .property("list[0]", null)
+                        .create();
+
+                assertThat(beans.list.get(0)).isNull();
+            }
+
+            @Test
+            void new_property_should_override_old_property_3() {
+                BeanCollections beans = factorySet.type(BeanCollections.class)
+                        .property("list[0].list[0].intValue", 1)
+                        .property("list[0].list", null)
+                        .create();
+
+                assertThat(beans.list.get(0).getList()).isNull();
+            }
         }
     }
 

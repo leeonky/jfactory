@@ -46,11 +46,11 @@ class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
 
     @Override
     public PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression) {
-        return propertyExpression.mergeTo(this);
+        return propertyExpression.mergeBy(this);
     }
 
     @Override
-    protected PropertyExpression<H, B> mergeTo(SubObjectPropertyExpression<H, B> conditionValueSet) {
+    protected PropertyExpression<H, B> mergeBy(SubObjectPropertyExpression<H, B> conditionValueSet) {
         conditionValueSet.conditionValues.putAll(conditionValues);
         conditionValues.clear();
         conditionValues.putAll(conditionValueSet.conditionValues);

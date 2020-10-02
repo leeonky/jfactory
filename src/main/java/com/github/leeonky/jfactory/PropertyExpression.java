@@ -35,18 +35,16 @@ abstract class PropertyExpression<H, B> {
 
     public abstract Producer<?> buildProducer(FactorySet factorySet, Instance<B> instance);
 
-    protected abstract PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression);
-
-    protected PropertyExpression<H, B> mergeTo(SingleValuePropertyExpression<H, B> singleValuePropertyExpression) {
-        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", hostClass.getName(), property));
+    protected PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression) {
+        return propertyExpression;
     }
 
-    protected PropertyExpression<H, B> mergeTo(SubObjectPropertyExpression<H, B> conditionValueSet) {
-        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", hostClass.getName(), property));
+    protected PropertyExpression<H, B> mergeBy(SubObjectPropertyExpression<H, B> conditionValueSet) {
+        return this;
     }
 
-    protected PropertyExpression<H, B> mergeTo(CollectionPropertyExpression<H, ?, B> collectionConditionValue) {
-        throw new IllegalArgumentException(String.format("Cannot merge different structure %s.%s", hostClass.getName(), property));
+    protected PropertyExpression<H, B> mergeBy(CollectionPropertyExpression<H, ?, B> collectionConditionValue) {
+        return this;
     }
 
     protected boolean isIntently() {

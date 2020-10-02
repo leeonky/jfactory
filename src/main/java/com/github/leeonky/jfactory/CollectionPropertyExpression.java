@@ -35,16 +35,18 @@ class CollectionPropertyExpression<H, E, B> extends PropertyExpression<H, B> {
 
     @Override
     public PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression) {
-        return propertyExpression.mergeTo(this);
+        return propertyExpression.mergeBy(this);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected PropertyExpression<H, B> mergeTo(CollectionPropertyExpression<H, ?, B> collectionConditionValue) {
-        collectionConditionValue.conditionValueIndexMap.forEach((k, v) ->
-                conditionValueIndexMap.put(k, conditionValueIndexMap.containsKey(k) ?
-                        conditionValueIndexMap.get(k).merge((PropertyExpression<E, B>) v)
-                        : (PropertyExpression<E, B>) v));
+    protected PropertyExpression<H, B> mergeBy(CollectionPropertyExpression<H, ?, B> collectionConditionValue) {
+        collectionConditionValue.conditionValueIndexMap.forEach((index, expression) ->
+                conditionValueIndexMap.put(index, mergeOrAssign(index, (PropertyExpression<E, B>) expression)));
         return this;
+    }
+
+    private PropertyExpression<E, B> mergeOrAssign(Integer k, PropertyExpression<E, B> v) {
+        return conditionValueIndexMap.containsKey(k) ? v.merge(conditionValueIndexMap.get(k)) : v;
     }
 }
