@@ -372,7 +372,7 @@ class _05_ComplexPropertyArgs {
         }
 
         @Test
-        void support_create_object_only_with_spec_and_mix_in_and_ignore_value() {
+        void support_create_object_ignore_value() {
             factorySet.register(ABean.class);
 
             assertThat(factorySet.type(Beans.class)
@@ -386,6 +386,13 @@ class _05_ComplexPropertyArgs {
                     .property("bean(ABean)!", "")
                     .create().getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
+            ;
+
+            factorySet.factory(Bean.class).spec(instance -> instance.spec().property("content").value("content"));
+            assertThat(factorySet.type(Beans.class)
+                    .property("bean!", "")
+                    .create().getBean())
+                    .hasFieldOrPropertyWithValue("content", "content")
             ;
         }
     }
