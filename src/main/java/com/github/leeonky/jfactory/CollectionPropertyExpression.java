@@ -26,10 +26,10 @@ class CollectionPropertyExpression<H, E, B> extends PropertyExpression<H, B> {
     }
 
     @Override
-    public Producer<?> buildProducer(FactorySet factorySet, Instance<B> instance) {
-        CollectionProducer<?, ?> producer = new CollectionProducer<>(factorySet.getObjectFactorySet(), beanClass,
-                hostClass.getPropertyWriter(property).getType(), instance);
-        conditionValueIndexMap.forEach((k, v) -> producer.addChild(k.toString(), v.buildProducer(factorySet, instance)));
+    @SuppressWarnings("unchecked")
+    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance) {
+        CollectionProducer<?, E> producer = (CollectionProducer<?, E>) host.getChild(property);
+        conditionValueIndexMap.forEach((k, v) -> producer.addChild(k.toString(), v.buildProducer(factorySet, producer, instance)));
         return producer;
     }
 

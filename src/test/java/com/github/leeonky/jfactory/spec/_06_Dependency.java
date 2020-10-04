@@ -44,6 +44,12 @@ public class _06_Dependency {
         private Beans beans;
     }
 
+    @Getter
+    @Setter
+    public static class BeansArray {
+        private Beans[] beansArray;
+    }
+
     @Nested
     class FlattenDependency {
 
@@ -263,5 +269,99 @@ public class _06_Dependency {
                 assertThat(bean3).hasFieldOrPropertyWithValue("stringValue", "bean3");
             }
         }
+    }
+
+    @Nested
+    class SubCollectionElementDependency {
+
+        @Test
+        void dependency_of_collection_element_property_with_default_value() {
+            factorySet.factory(BeanArray.class).spec(instance -> instance.spec()
+                    .property("beans[0]").asDefault()
+                    .property("beans[1]").asDefault()
+                    .property("beans[0].stringValue").dependsOn("beans[1].stringValue", obj -> obj));
+
+            BeanArray beanArray = factorySet.create(BeanArray.class);
+            assertThat(beanArray.getBeans()[0].getStringValue())
+                    .isEqualTo(beanArray.getBeans()[1].getStringValue());
+        }
+
+        @Test
+        void dependency_of_collection_element_property_with_specified_value() {
+            factorySet.factory(BeanArray.class).spec(instance -> instance.spec()
+                    .property("beans[0]").asDefault()
+                    .property("beans[1]").asDefault()
+                    .property("beans[0].stringValue").dependsOn("beans[1].stringValue", obj -> obj));
+
+            BeanArray beanArray = factorySet.type(BeanArray.class).property("beans[1].stringValue", "hello").create();
+
+            assertThat(beanArray.getBeans()[0].getStringValue())
+                    .isEqualTo(beanArray.getBeans()[1].getStringValue())
+                    .isEqualTo("hello");
+        }
+
+//        @Nested
+//        class Override {
+//
+//            @Test
+//            void ignore_dependency_when_input_property_override_dependency() {
+//                factorySet.factory(BeansArray.class).define((argument, spec) -> {
+//                    spec.property("beansArray[0]").type(Beans.class);
+//                    spec.property("beansArray[1]").type(Beans.class);
+//                    spec.property("beansArray[0].bean1").dependsOn("beansArray[1].bean2", obj -> obj);
+//                });
+//
+//                Bean bean = new Bean();
+//                BeansArray beansArray = factorySet.type(BeansArray.class).property("beansArray[0].bean1", bean).create();
+//
+//                assertThat(beansArray.getBeansArray()).hasSize(2);
+//                assertThat(beansArray.getBeansArray()[0])
+//                        .hasFieldOrPropertyWithValue("bean1", bean)
+//                        .hasFieldOrPropertyWithValue("bean2", null);
+//                assertThat(beansArray.getBeansArray()[1])
+//                        .hasFieldOrPropertyWithValue("bean1", null)
+//                        .hasFieldOrPropertyWithValue("bean2", null);
+//            }
+//
+//            @Test
+//            void ignore_dependency_when_input_property_override_host_object() {
+//                factorySet.factory(BeansArray.class).define((argument, spec) -> {
+//                    spec.property("beansArray[0]").type(Beans.class);
+//                    spec.property("beansArray[1]").type(Beans.class);
+//                    spec.property("beansArray[0].bean1").dependsOn("beansArray[1].bean2", obj -> obj);
+//                });
+//
+//                BeansArray beansArray = factorySet.type(BeansArray.class).property("beansArray[0]", null).create();
+//
+//                assertThat(beansArray.getBeansArray()).hasSize(2);
+//                assertThat(beansArray.getBeansArray()[0]).isNull();
+//                assertThat(beansArray.getBeansArray()[1])
+//                        .hasFieldOrPropertyWithValue("bean1", null)
+//                        .hasFieldOrPropertyWithValue("bean2", null);
+//            }
+//
+//            @Test
+//            void parent_property_dependency_can_override_sub_property_spec() {
+//                factorySet.factory(Beans.class).define((argument, spec) -> {
+//                    spec.property("bean1").type(Bean.class);
+//                    spec.property("bean2").type(Bean.class);
+//                });
+//                factorySet.factory(BeansArray.class).define((argument, spec) -> {
+//                    spec.property("beansArray[0]").type(Beans.class);
+//                    spec.property("beansArray[1]").type(Beans.class);
+//                    spec.property("beansArray[0].bean1.intValue").dependsOn("beansArray[1].bean2.intValue", obj -> {
+//                        fail("should not be called");
+//                        return 0;
+//                    });
+//                });
+//
+//                Beans beans = new Beans();
+//                BeansArray beansArray = factorySet.type(BeansArray.class).property("beansArray[0]", beans).create();
+//
+//                assertThat(beansArray.getBeansArray()).hasSize(2);
+//                assertThat(beansArray.getBeansArray()[0]).isEqualTo(beans);
+//                assertThat(beansArray.getBeansArray()[1]).isNotEqualTo(beans);
+//            }
+//        }
     }
 }

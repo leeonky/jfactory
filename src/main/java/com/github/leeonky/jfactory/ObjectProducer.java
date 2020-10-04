@@ -30,7 +30,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private void buildProducerFromInputProperties(FactorySet factorySet, DefaultBuilder<T> builder) {
-        builder.toExpressions().forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, instance.sub(p))));
+        builder.toExpressions().forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, this, instance.sub(p))));
     }
 
     private void buildProducersFromSpec(DefaultBuilder<T> builder) {

@@ -33,7 +33,7 @@ abstract class PropertyExpression<H, B> {
 
     protected abstract <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue);
 
-    public abstract Producer<?> buildProducer(FactorySet factorySet, Instance<B> instance);
+    public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance);
 
     protected PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression) {
         return propertyExpression;
