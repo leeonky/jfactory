@@ -1,8 +1,8 @@
 #!/bin/bash
-PROJECT="github.com/leeonky/$(basename $(pwd))"
-VERSION=$(git symbolic-ref --short HEAD)
-
 set -Euo pipefail
+
+PROJECT="github.com/leeonky/$(basename $(pwd))"
+VERSION=master
 
 cd build
 
