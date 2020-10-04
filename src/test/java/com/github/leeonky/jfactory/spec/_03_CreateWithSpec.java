@@ -71,6 +71,21 @@ public class _03_CreateWithSpec {
         }
 
         @Test
+        void support_method_chain_in_spec_definition() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("stringValue").value("hello"))
+                    .spec("a bean", instance -> instance.spec()
+                            .property("content").value("a bean"))
+                    .constructor(instance -> new BeanSub());
+
+            assertThat(factorySet.type(Bean.class).mixIn("a bean").create())
+                    .isInstanceOf(BeanSub.class)
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("content", "a bean")
+            ;
+        }
+
+        @Test
         void raise_error_when_mixin_not_exist() {
             assertThrows(IllegalArgumentException.class, () -> factorySet.type(Bean.class).mixIn("not exist").create());
         }
