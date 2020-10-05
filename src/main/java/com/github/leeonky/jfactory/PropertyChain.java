@@ -3,7 +3,7 @@ package com.github.leeonky.jfactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 class PropertyChain {
     public final List<Object> property;
@@ -55,9 +55,8 @@ class PropertyChain {
     }
 
     public Optional<Producer<?>> getProducer(Producer<?> producer) {
-        //TODO producer maybe null
         if (property.isEmpty())
-            return of(producer);
+            return ofNullable(producer);
         return removeHead().getProducer(producer.getChild(property.get(0).toString()));
     }
 

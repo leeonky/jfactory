@@ -41,10 +41,8 @@ abstract class Producer<T> {
         //TODO producer maybe null
         String p = property.getTail();
 
-        // TODO property in sub is readonly: no producer
-        Producer<?> producer = getChild(property.removeTail()).get();
-
-        producer.changeChild(p, producerGenerator.apply(producer, p));
+        getChild(property.removeTail()).ifPresent(producer ->
+                producer.changeChild(p, producerGenerator.apply(producer, p)));
     }
 
     @SuppressWarnings("unchecked")
