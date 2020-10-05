@@ -62,6 +62,8 @@ class PropertyChainTest {
             assertHashEqual("a.b[0].c");
             assertHashEqual("b[0].c");
             assertHashEqual("b[0]");
+
+            assertThat(new PropertyChain("p1").hashCode()).isNotEqualTo(new PropertyChain("p2").hashCode());
         }
 
         @Test
@@ -72,6 +74,8 @@ class PropertyChainTest {
             assertContentEqual("a.b[0].c");
             assertContentEqual("b[0].c");
             assertContentEqual("b[0]");
+
+            assertThat(new PropertyChain("p1")).isNotEqualTo(new PropertyChain("p2"));
         }
 
         private void assertContentEqual(String value) {

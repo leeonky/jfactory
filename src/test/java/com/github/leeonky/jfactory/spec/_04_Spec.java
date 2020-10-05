@@ -63,8 +63,8 @@ class _04_Spec {
 
         @Test
         void support_specify_value_in_spec() {
-            factorySet.factory(Bean.class).spec(instance ->
-                    instance.spec().property("content").value("hello"));
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("content").value("hello"));
 
             assertThat(factorySet.create(Bean.class))
                     .hasFieldOrPropertyWithValue("content", "hello")
