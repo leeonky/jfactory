@@ -361,4 +361,27 @@ public class _06_Dependency {
             }
         }
     }
+
+    @Nested
+    class NestedDependency {
+
+        @Test
+        void dependency_in_two_object_spec_definitions() {
+            factorySet.factory(BeansWrapper.class).spec(instance -> instance.spec()
+                    .property("beans").asDefault()
+                    .property("bean").dependsOn("beans.bean1", obj -> obj));
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean1").dependsOn("bean2", obj -> obj));
+
+            Bean bean = new Bean();
+            BeansWrapper beansWrapper = factorySet.type(BeansWrapper.class)
+                    .property("beans.bean2", bean).create();
+
+            assertThat(beansWrapper)
+                    .hasFieldOrPropertyWithValue("bean", bean);
+            assertThat(beansWrapper.getBeans())
+                    .hasFieldOrPropertyWithValue("bean1", bean)
+                    .hasFieldOrPropertyWithValue("bean2", bean);
+        }
+    }
 }

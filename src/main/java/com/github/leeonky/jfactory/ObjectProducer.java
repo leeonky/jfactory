@@ -77,7 +77,13 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     public ObjectProducer<T> processSpec() {
-        dependencies.values().forEach(dependency -> dependency.process(this, instance));
+        processDependencies();
         return this;
+    }
+
+    @Override
+    protected void processDependencies() {
+        children.values().forEach(Producer::processDependencies);
+        dependencies.values().forEach(dependency -> dependency.process(this, instance));
     }
 }

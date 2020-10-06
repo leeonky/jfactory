@@ -50,4 +50,7 @@ abstract class Producer<T> {
         Producer<T> original = (Producer<T>) getChild(property);
         addChild(property, original == null ? producer : original.changeTo(producer));
     }
+
+    protected void processDependencies() {
+    }
 }
