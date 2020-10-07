@@ -47,6 +47,9 @@ public class _03_CreateWithSpec {
         }
     }
 
+    class InvalidGenericArgSpec<T> extends Spec<T> {
+    }
+
     @Nested
     class SpecInLambda {
 
@@ -134,6 +137,11 @@ public class _03_CreateWithSpec {
         @Test
         void should_raise_error_when_definition_or_mix_in_not_exist() {
             assertThrows(IllegalArgumentException.class, () -> factorySet.create("ABean"));
+        }
+
+        @Test
+        void should_raise_error_when_invalid_generic_args() {
+            assertThrows(IllegalStateException.class, () -> factorySet.create(new InvalidGenericArgSpec<>()));
         }
     }
 }
