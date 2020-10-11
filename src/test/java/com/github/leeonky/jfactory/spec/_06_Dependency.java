@@ -384,4 +384,54 @@ public class _06_Dependency {
                     .hasFieldOrPropertyWithValue("bean2", bean);
         }
     }
+
+    @Nested
+    class TargetPropertyObjectIsNotBeanFactoryProducer {
+
+        @Test
+        void should_ignore_dependency_when_parent_object_not_set_factory() {
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean1.stringValue").dependsOn("bean2", obj -> ((Bean) obj).getIntValue() + ""));
+
+            Bean bean = new Bean();
+            Beans beans = factorySet.type(Beans.class)
+                    .property("bean2", bean)
+                    .create();
+
+            assertThat(beans)
+                    .hasFieldOrPropertyWithValue("bean1", null)
+                    .hasFieldOrPropertyWithValue("bean2", bean);
+        }
+
+        @Test
+        void should_ignore_dependency_in_collection() {
+            factorySet.factory(BeanArray.class).spec(instance -> instance.spec()
+                    .property("beans[1].stringValue").dependsOn("beans[0]", obj -> ((Bean) obj).getIntValue() + ""));
+
+            Bean bean = new Bean();
+            BeanArray beanArray = factorySet.type(BeanArray.class)
+                    .property("beans[0]", bean)
+                    .create();
+
+            assertThat(beanArray.getBeans()).containsOnly(bean, null);
+        }
+
+        @Test
+        void should_ignore_dependency_when_parent_object_specified_during_creation() {
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean1").asDefault());
+
+            factorySet.factory(BeansWrapper.class).spec(instance -> instance.spec()
+                    .property("beans").asDefault()
+                    .property("beans.bean1.stringValue").dependsOn("bean", obj -> ((Bean) obj).getStringValue()));
+
+            Bean bean = new Bean();
+            BeansWrapper beansWrapper = factorySet.type(BeansWrapper.class)
+                    .property("bean", new Bean().setStringValue("hello"))
+                    .property("beans.bean1", bean)
+                    .create();
+
+            assertThat(beansWrapper.getBeans().getBean1().getStringValue()).isNotEqualTo("hello");
+        }
+    }
 }

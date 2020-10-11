@@ -38,7 +38,6 @@ abstract class Producer<T> {
     }
 
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
-        //TODO producer maybe null
         String p = property.getTail();
 
         getChild(property.removeTail()).ifPresent(producer ->

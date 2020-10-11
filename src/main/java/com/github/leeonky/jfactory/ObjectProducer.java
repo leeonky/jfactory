@@ -73,7 +73,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     public void addDependency(PropertyChain property, Function<Object[], Object> function, List<PropertyChain> propertyChains) {
         Dependency<?> dependency = new Dependency<>(function, property, propertyChains);
-        dependencies.put(dependency.getProperty(), dependency);
+        dependencies.put(property, dependency);
     }
 
     public ObjectProducer<T> processSpec() {

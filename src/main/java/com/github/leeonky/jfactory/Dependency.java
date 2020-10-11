@@ -8,22 +8,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 class Dependency<T> {
-
     private final Function<Object[], T> function;
-
-    // TODO test for property chain
     private final PropertyChain property;
-    // TODO test for dependency chain
     private final List<PropertyChain> propertyChains;
 
     public Dependency(Function<Object[], T> function, PropertyChain property, List<PropertyChain> propertyChains) {
         this.function = function;
         this.property = property;
         this.propertyChains = propertyChains;
-    }
-
-    public PropertyChain getProperty() {
-        return property;
     }
 
     @SuppressWarnings("unchecked")
