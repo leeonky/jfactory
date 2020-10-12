@@ -386,7 +386,7 @@ public class _06_Dependency {
     }
 
     @Nested
-    class TargetPropertyObjectIsNotBeanFactoryProducer {
+    class TargetPropertyObjectIsNotObjectProducer {
 
         @Test
         void should_ignore_dependency_when_parent_object_not_set_factory() {

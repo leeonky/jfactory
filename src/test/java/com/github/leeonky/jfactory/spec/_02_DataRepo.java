@@ -8,17 +8,56 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class _02_DataRepo {
+class _02_DataRepo {
     private FactorySet factorySet = new FactorySet();
 
     @Test
-    void should_save_in_repo_after_creation() {
-        Builder<Bean> builder = factorySet.type(Bean.class).property("stringValue", "hello").property("intValue", "100");
+    void should_save_in_repo_after_creation_for_simple_condition() {
+        Builder<Bean> builder = factorySet.type(Bean.class).property("stringValue", "hello");
 
         Bean created = builder.create();
 
         assertThat(builder.query()).isEqualTo(created);
+    }
 
+    @Test
+    void should_return_null_if_query_condition_not_matched_for_simple_condition() {
+        factorySet.type(Bean.class).property("stringValue", "hello").create();
+
+        assertThat(factorySet.type(Bean.class).property("stringValue", "not hello").query()).isNull();
+    }
+
+    @Test
+    void should_return_null_when_no_data_in_repo_for_simple_condition() {
+        Builder<Bean> builder = factorySet.type(Bean.class).property("stringValue", "hello");
+
+        builder.create();
+        factorySet.getDataRepository().clear();
+
+        assertThat(builder.query()).isNull();
+    }
+
+    @Test
+    void should_save_in_repo_after_creation_for_complex_condition() {
+        Builder<Beans> builder = factorySet.type(Beans.class).property("bean.stringValue", "hello");
+
+        Beans created = builder.create();
+
+        assertThat(builder.query()).isEqualTo(created);
+    }
+
+    @Test
+    void should_return_null_if_query_condition_not_matched_for_complex_condition() {
+        factorySet.type(Beans.class).property("bean.stringValue", "hello").create();
+
+        assertThat(factorySet.type(Beans.class).property("bean.stringValue", "not hello").query()).isNull();
+    }
+
+    @Test
+    void should_return_null_when_no_data_in_repo_for_complex_condition() {
+        Builder<Beans> builder = factorySet.type(Beans.class).property("bean.stringValue", "hello");
+
+        builder.create();
         factorySet.getDataRepository().clear();
 
         assertThat(builder.query()).isNull();

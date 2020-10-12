@@ -35,6 +35,12 @@ class PropertyValueBuildersTest {
                 .create(null, new Instance<>(sequence, null))).isEqualTo(expected);
     }
 
+    @Test
+    void default_value_builder_create_default_value() {
+        assertThat(new PropertyValueBuilders.DefaultValueBuilder<>(BeanClass.create(int.class)).create(null, null))
+                .isInstanceOf(Integer.class);
+    }
+
     public static class InvalidGenericArgPropertyValueBuilder<V> implements PropertyValueBuilder<V> {
         @Override
         public <T> V create(BeanClass<T> type, Instance<T> instance) {
