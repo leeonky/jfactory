@@ -45,7 +45,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Producer<?> getChild(String property) {
+    public Producer<?> queryChild(String property) {
         int index = Integer.valueOf(property);
         fillCollectionWithDefaultValue(index);
         return children.get(index);

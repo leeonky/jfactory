@@ -50,7 +50,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    public Producer<?> getChild(String property) {
+    public Producer<?> queryChild(String property) {
         Producer<?> producer = children.get(property);
         if (producer == null) {
             BeanClass<?> propertyType = getType().getPropertyWriter(property).getType();

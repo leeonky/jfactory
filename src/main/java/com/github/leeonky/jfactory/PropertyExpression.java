@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 abstract class PropertyExpression<H, B> {
+    // TODO property to PropertyChain
     protected final String property;
     protected final BeanClass<H> hostClass;
     protected final BeanClass<B> beanClass;

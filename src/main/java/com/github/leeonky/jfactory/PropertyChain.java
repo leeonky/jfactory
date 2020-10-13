@@ -54,6 +54,7 @@ class PropertyChain {
         }).collect(Collectors.joining(".")).replace(".[", "[");
     }
 
+    //TODO move back to producer
     public Optional<Producer<?>> getProducer(Producer<?> producer) {
         if (property.isEmpty())
             return ofNullable(producer);

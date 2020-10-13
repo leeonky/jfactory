@@ -21,14 +21,22 @@ abstract class Producer<T> {
     public void addChild(String property, Producer<?> producer) {
     }
 
-    public Producer<?> getChild(String property) {
+    protected Producer<?> queryChild(String property) {
         return null;
+    }
+
+    public Producer<?> getChild(String property) {
+        Producer<?> producer = queryChild(property);
+        if (producer == null)
+            producer = new ReadOnlyProducer<>(this, property);
+        return producer;
     }
 
     public BeanClass<T> getType() {
         return type;
     }
 
+    //TODO remove optional
     public Optional<Producer<?>> getChild(PropertyChain property) {
         return property.getProducer(this);
     }

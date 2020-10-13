@@ -434,4 +434,59 @@ public class _06_Dependency {
             assertThat(beansWrapper.getBeans().getBean1().getStringValue()).isNotEqualTo("hello");
         }
     }
+
+    @Nested
+    class DependencyIsNotProducer {
+
+        @Test
+        void read_property_value_from_object() {
+            Bean bean = new Bean();
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean1").dependsOn("bean2", obj -> obj));
+
+            assertThat(factorySet.type(Beans.class).property("bean2", bean).create())
+                    .hasFieldOrPropertyWithValue("bean1", bean)
+                    .hasFieldOrPropertyWithValue("bean2", bean)
+            ;
+        }
+
+        @Test
+        void read_property_value_from_sub_object() {
+            Bean bean = new Bean().setIntValue(100);
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean1").asDefault()
+                    .property("bean1.intValue").dependsOn("bean2.intValue", obj -> obj));
+
+            assertThat(factorySet.type(Beans.class).property("bean2", bean).create().getBean1())
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+                    .isNotEqualTo(bean);
+        }
+
+        //        @Test
+        void should_use_type_default_value_when_has_null_in_property_chain() {
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean1").asDefault()
+                    .property("bean1.intValue").dependsOn("bean2.intValue", obj -> obj));
+
+            assertThat(factorySet.create(Beans.class).getBean1())
+                    .hasFieldOrPropertyWithValue("intValue", 0)
+            ;
+        }
+
+        //        @Test
+        void read_property_value_from_collection() {
+            factorySet.factory(BeanArray.class).constructor(argument -> {
+                BeanArray beanArray = new BeanArray();
+                beanArray.beans = new Bean[]{null, new Bean().setIntValue(100)};
+                return beanArray;
+            }).spec(instance -> instance.spec()
+                    .property("beans[0]").asDefault()
+                    .property("beans[0].intValue").dependsOn("beans[1].intValue", obj -> obj));
+
+            BeanArray beanArray = factorySet.create(BeanArray.class);
+
+            assertThat(beanArray.getBeans()[0])
+                    .hasFieldOrPropertyWithValue("intValue", 100);
+        }
+    }
 }
