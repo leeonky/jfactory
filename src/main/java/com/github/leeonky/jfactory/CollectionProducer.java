@@ -4,7 +4,6 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class CollectionProducer<T, C> extends Producer<C> {
     private final ObjectFactorySet objectFactorySet;
@@ -23,7 +22,16 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     @SuppressWarnings("unchecked")
     protected C produce() {
-        return (C) getType().createCollection(children.stream().map(Producer::getValue).collect(Collectors.toList()));
+        List<Object> list = new ArrayList<>();
+        // Should not use java stream here, children.size may be changed in produce
+        for (int i = 0; i < children.size(); i++)
+            list.add(children.get(i).getValue());
+        return (C) getType().createCollection(list);
+    }
+
+    @Override
+    protected Producer<?> getChild(String property) {
+        return children.get(Integer.valueOf(property));
     }
 
     @Override
@@ -45,7 +53,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Producer<?> queryChild(String property) {
+    public Producer<?> queryOrCreateChild(String property) {
         int index = Integer.valueOf(property);
         fillCollectionWithDefaultValue(index);
         return children.get(index);

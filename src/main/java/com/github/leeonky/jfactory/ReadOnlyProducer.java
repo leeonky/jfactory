@@ -17,6 +17,9 @@ class ReadOnlyProducer<T, P> extends Producer<T> {
     @Override
     @SuppressWarnings("unchecked")
     protected T produce() {
-        return (T) propertyReader.getValue(parent.getValue());
+        P parentValue = parent.getValue();
+        if (parentValue == null)
+            return (T) propertyReader.getType().createDefault();
+        return (T) propertyReader.getValue(parentValue);
     }
 }

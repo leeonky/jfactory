@@ -55,10 +55,21 @@ class PropertyChain {
     }
 
     //TODO move back to producer
-    public Optional<Producer<?>> getProducer(Producer<?> producer) {
+    public Optional<Producer<?>> getProducerForCreate(Producer<?> producer) {
         if (property.isEmpty())
             return ofNullable(producer);
-        return removeHead().getProducer(producer.getChild(property.get(0).toString()));
+        return removeHead().getProducerForCreate(producer.getOrCreateChild(property.get(0).toString()));
+    }
+
+    //TODO move back to producer
+    public <T> Optional<Producer<?>> getProducer(Producer producer) {
+        if (property.isEmpty())
+            return ofNullable(producer);
+        String property = this.property.get(0).toString();
+        Producer child = producer.getChild(property);
+        if (child == null)
+            child = new ReadOnlyProducer(producer, property);
+        return removeHead().getProducer(child);
     }
 
     private PropertyChain removeHead() {

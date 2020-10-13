@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
+//TODO getChild for read/write
 abstract class Producer<T> {
     private final BeanClass<T> type;
 
@@ -15,21 +16,23 @@ abstract class Producer<T> {
     protected abstract T produce();
 
     public T getValue() {
+        // TODO cache produced value
         return produce();
     }
 
     public void addChild(String property, Producer<?> producer) {
     }
 
-    protected Producer<?> queryChild(String property) {
+    protected Producer<?> queryOrCreateChild(String property) {
         return null;
     }
 
-    public Producer<?> getChild(String property) {
-        Producer<?> producer = queryChild(property);
-        if (producer == null)
-            producer = new ReadOnlyProducer<>(this, property);
-        return producer;
+    protected Producer<?> getChild(String property) {
+        return null;
+    }
+
+    public Producer<?> getOrCreateChild(String property) {
+        return queryOrCreateChild(property);
     }
 
     public BeanClass<T> getType() {
@@ -37,6 +40,10 @@ abstract class Producer<T> {
     }
 
     //TODO remove optional
+    public Optional<Producer<?>> getOrCreateChild(PropertyChain property) {
+        return property.getProducerForCreate(this);
+    }
+
     public Optional<Producer<?>> getChild(PropertyChain property) {
         return property.getProducer(this);
     }
@@ -48,13 +55,13 @@ abstract class Producer<T> {
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
         String p = property.getTail();
 
-        getChild(property.removeTail()).ifPresent(producer ->
+        getOrCreateChild(property.removeTail()).ifPresent(producer ->
                 producer.changeChild(p, producerGenerator.apply(producer, p)));
     }
 
     @SuppressWarnings("unchecked")
     private <T> void changeChild(String property, Producer<T> producer) {
-        Producer<T> original = (Producer<T>) getChild(property);
+        Producer<T> original = (Producer<T>) getOrCreateChild(property);
         addChild(property, original == null ? producer : original.changeTo(producer));
     }
 

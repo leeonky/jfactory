@@ -13,6 +13,7 @@ public class Instance<T> {
     private final Spec<T> spec;
     private final AtomicReference<T> reference;
     private final List<Integer> indexes;
+    private boolean hasValue = false;
 
     Instance(int sequence, Spec<T> spec) {
         this(sequence, null, spec, new AtomicReference<>(), emptyList());
@@ -42,6 +43,7 @@ public class Instance<T> {
 
     void giveValue(T value) {
         reference.set(value);
+        hasValue = true;
     }
 
     public String getProperty() {
@@ -64,5 +66,9 @@ public class Instance<T> {
         Instance<T> instance = new Instance<>(sequence, property, spec, reference, indexes);
         instance.indexes.add(0);
         return instance;
+    }
+
+    boolean hasValue() {
+        return hasValue;
     }
 }

@@ -34,6 +34,7 @@ public class _06_Dependency {
     @Setter
     public static class BeanArray {
         private Bean[] beans;
+        private Bean[] anotherBeans;
         private Bean bean;
         private int intValue;
     }
@@ -451,7 +452,7 @@ public class _06_Dependency {
         }
 
         @Test
-        void read_property_value_from_sub_object() {
+        void read_property_value_from_specified_sub_object() {
             Bean bean = new Bean().setIntValue(100);
             factorySet.factory(Beans.class).spec(instance -> instance.spec()
                     .property("bean1").asDefault()
@@ -462,7 +463,21 @@ public class _06_Dependency {
                     .isNotEqualTo(bean);
         }
 
-        //        @Test
+        @Test
+        void read_property_value_from_created_sub_object() {
+            Bean bean = new Bean().setIntValue(100);
+            factorySet.factory(Beans.class)
+                    .constructor(instance -> new Beans().setBean2(new Bean().setIntValue(100)))
+                    .spec(instance -> instance.spec()
+                            .property("bean1").asDefault()
+                            .property("bean1.intValue").dependsOn("bean2.intValue", obj -> obj));
+
+            assertThat(factorySet.type(Beans.class).create().getBean1())
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+                    .isNotEqualTo(bean);
+        }
+
+        @Test
         void should_use_type_default_value_when_has_null_in_property_chain() {
             factorySet.factory(Beans.class).spec(instance -> instance.spec()
                     .property("bean1").asDefault()
@@ -473,15 +488,15 @@ public class _06_Dependency {
             ;
         }
 
-        //        @Test
+        @Test
         void read_property_value_from_collection() {
             factorySet.factory(BeanArray.class).constructor(argument -> {
                 BeanArray beanArray = new BeanArray();
-                beanArray.beans = new Bean[]{null, new Bean().setIntValue(100)};
+                beanArray.anotherBeans = new Bean[]{new Bean().setIntValue(100)};
                 return beanArray;
             }).spec(instance -> instance.spec()
                     .property("beans[0]").asDefault()
-                    .property("beans[0].intValue").dependsOn("beans[1].intValue", obj -> obj));
+                    .property("beans[0].intValue").dependsOn("anotherBeans[0].intValue", obj -> obj));
 
             BeanArray beanArray = factorySet.create(BeanArray.class);
 

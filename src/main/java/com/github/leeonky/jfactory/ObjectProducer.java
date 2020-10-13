@@ -50,7 +50,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    public Producer<?> queryChild(String property) {
+    public Producer<?> queryOrCreateChild(String property) {
         Producer<?> producer = children.get(property);
         if (producer == null) {
             BeanClass<?> propertyType = getType().getPropertyWriter(property).getType();
@@ -64,16 +64,22 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected T produce() {
-        T obj = objectFactory.create(instance);
-        instance.giveValue(obj);
-        children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.getValue()));
-        factorySet.getDataRepository().save(obj);
-        return obj;
+        if (!instance.hasValue()) {
+            T obj = objectFactory.create(instance);
+            instance.giveValue(obj);
+            children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.getValue()));
+            factorySet.getDataRepository().save(obj);
+        }
+        return instance.reference().get();
+    }
+
+    @Override
+    protected Producer<?> getChild(String property) {
+        return children.get(property);
     }
 
     public void addDependency(PropertyChain property, Function<Object[], Object> function, List<PropertyChain> propertyChains) {
-        Dependency<?> dependency = new Dependency<>(function, property, propertyChains);
-        dependencies.put(property, dependency);
+        dependencies.put(property, new Dependency<>(function, property, propertyChains));
     }
 
     public ObjectProducer<T> processSpec() {
