@@ -30,7 +30,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    protected Producer<?> getChild(String property) {
+    public Producer<?> getChild(String property) {
         return children.get(Integer.valueOf(property));
     }
 

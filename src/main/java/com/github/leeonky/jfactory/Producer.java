@@ -2,15 +2,18 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 
-//TODO getChild for read/write
+//TODO getChild for read/write refactor
 abstract class Producer<T> {
     private final BeanClass<T> type;
 
     Producer(BeanClass<T> type) {
         this.type = type;
+    }
+
+    public BeanClass<T> getType() {
+        return type;
     }
 
     protected abstract T produce();
@@ -20,6 +23,9 @@ abstract class Producer<T> {
         return produce();
     }
 
+    protected void processDependencies() {
+    }
+
     public void addChild(String property, Producer<?> producer) {
     }
 
@@ -27,7 +33,7 @@ abstract class Producer<T> {
         return null;
     }
 
-    protected Producer<?> getChild(String property) {
+    public Producer<?> getChild(String property) {
         return null;
     }
 
@@ -35,16 +41,7 @@ abstract class Producer<T> {
         return queryOrCreateChild(property);
     }
 
-    public BeanClass<T> getType() {
-        return type;
-    }
-
-    //TODO remove optional
-    public Optional<Producer<?>> getOrCreateChild(PropertyChain property) {
-        return property.getProducerForCreate(this);
-    }
-
-    public Optional<Producer<?>> getChild(PropertyChain property) {
+    public Producer<?> getChild(PropertyChain property) {
         return property.getProducer(this);
     }
 
@@ -55,7 +52,7 @@ abstract class Producer<T> {
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
         String p = property.getTail();
 
-        getOrCreateChild(property.removeTail()).ifPresent(producer ->
+        property.removeTail().getProducerForCreate(this).ifPresent(producer ->
                 producer.changeChild(p, producerGenerator.apply(producer, p)));
     }
 
@@ -63,8 +60,5 @@ abstract class Producer<T> {
     private <T> void changeChild(String property, Producer<T> producer) {
         Producer<T> original = (Producer<T>) getOrCreateChild(property);
         addChild(property, original == null ? producer : original.changeTo(producer));
-    }
-
-    protected void processDependencies() {
     }
 }

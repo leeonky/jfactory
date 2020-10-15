@@ -55,6 +55,7 @@ class PropertyChain {
     }
 
     //TODO move back to producer
+    //TODO try to remove optional
     public Optional<Producer<?>> getProducerForCreate(Producer<?> producer) {
         if (property.isEmpty())
             return ofNullable(producer);
@@ -62,9 +63,9 @@ class PropertyChain {
     }
 
     //TODO move back to producer
-    public <T> Optional<Producer<?>> getProducer(Producer producer) {
+    public Producer<?> getProducer(Producer producer) {
         if (property.isEmpty())
-            return ofNullable(producer);
+            return producer;
         String property = this.property.get(0).toString();
         Producer child = producer.getChild(property);
         if (child == null)

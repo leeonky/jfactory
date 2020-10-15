@@ -74,7 +74,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    protected Producer<?> getChild(String property) {
+    public Producer<?> getChild(String property) {
         return children.get(property);
     }
 

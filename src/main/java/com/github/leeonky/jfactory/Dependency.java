@@ -20,9 +20,9 @@ class Dependency<T> {
 
     @SuppressWarnings("unchecked")
     public <B> void process(ObjectProducer<B> objectProducer, Instance<B> instance) {
-        objectProducer.changeChild(property, (producer, property) -> new DependencyProducer<>(propertyChains.stream().map(dependency ->
-                // TODO dependency is read from instance: no producer
-                (Supplier<Object>) () -> objectProducer.getChild(dependency).get().getValue()).collect(Collectors.toList()),
+        objectProducer.changeChild(property, (producer, property) -> new DependencyProducer<>(
+                propertyChains.stream().map(dependency -> (Supplier<Object>)
+                        () -> objectProducer.getChild(dependency).getValue()).collect(Collectors.toList()),
                 function, (BeanClass<T>) producer.getType().getPropertyWriter(property).getType()));
     }
 }
