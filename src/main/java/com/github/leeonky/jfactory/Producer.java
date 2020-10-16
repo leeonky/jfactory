@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 //TODO getChild for read/write refactor
@@ -29,20 +30,17 @@ abstract class Producer<T> {
     public void addChild(String property, Producer<?> producer) {
     }
 
-    protected Producer<?> queryOrCreateChild(String property) {
-        return null;
+    public Optional<Producer<?>> getChild(String property) {
+        return Optional.empty();
     }
 
-    public Producer<?> getChild(String property) {
-        return null;
-    }
-
-    public Producer<?> getOrCreateChild(String property) {
-        return queryOrCreateChild(property);
+    public Producer<?> getChildOrDefault(String property) {
+        return getChild(property).orElse(null);
     }
 
     public Producer<?> getChild(PropertyChain property) {
-        return property.getProducer(this);
+        return property.childOf(this, producer -> producer, (producer, subProperty) ->
+                producer.getChild(subProperty).orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)));
     }
 
     protected Producer<T> changeTo(Producer<T> newProducer) {
@@ -50,15 +48,21 @@ abstract class Producer<T> {
     }
 
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
-        String p = property.getTail();
+//        property.forTail(this, (lastProperty, p) -> p.getProducerForCreate(this).ifPresent(producer ->
+//                producer.changeChild(lastProperty, producerGenerator.apply(producer, lastProperty)))
+//        );
 
-        property.removeTail().getProducerForCreate(this).ifPresent(producer ->
-                producer.changeChild(p, producerGenerator.apply(producer, p)));
+        property.forTail(this, (tail, producer) -> producer.changeChild(tail, producerGenerator.apply(producer, tail)));
+
+//        String lastProperty = property.getTail();
+//
+//        property.removeTail().getProducerForCreate(this).ifPresent(producer ->
+//                producer.changeChild(lastProperty, producerGenerator.apply(producer, lastProperty)));
     }
 
     @SuppressWarnings("unchecked")
     private <T> void changeChild(String property, Producer<T> producer) {
-        Producer<T> original = (Producer<T>) getOrCreateChild(property);
+        Producer<T> original = (Producer<T>) getChildOrDefault(property);
         addChild(property, original == null ? producer : original.changeTo(producer));
     }
 }

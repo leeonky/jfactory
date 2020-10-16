@@ -4,6 +4,7 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 class CollectionProducer<T, C> extends Producer<C> {
     private final ObjectFactorySet objectFactorySet;
@@ -30,8 +31,8 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Producer<?> getChild(String property) {
-        return children.get(Integer.valueOf(property));
+    public Optional<Producer<?>> getChild(String property) {
+        return Optional.ofNullable(children.get(Integer.valueOf(property)));
     }
 
     @Override
@@ -53,7 +54,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Producer<?> queryOrCreateChild(String property) {
+    public Producer<?> getChildOrDefault(String property) {
         int index = Integer.valueOf(property);
         fillCollectionWithDefaultValue(index);
         return children.get(index);

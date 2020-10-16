@@ -2,10 +2,7 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 class ObjectProducer<T> extends Producer<T> {
@@ -50,7 +47,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    public Producer<?> queryOrCreateChild(String property) {
+    public Producer<?> getChildOrDefault(String property) {
         Producer<?> producer = children.get(property);
         if (producer == null) {
             BeanClass<?> propertyType = getType().getPropertyWriter(property).getType();
@@ -74,8 +71,8 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    public Producer<?> getChild(String property) {
-        return children.get(property);
+    public Optional<Producer<?>> getChild(String property) {
+        return Optional.ofNullable(children.get(property));
     }
 
     public void addDependency(PropertyChain property, Function<Object[], Object> function, List<PropertyChain> propertyChains) {
