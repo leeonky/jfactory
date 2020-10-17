@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import static com.github.leeonky.jfactory.PropertyChain.createChain;
+
 public class Spec<T> {
     private List<BiConsumer<FactorySet, ObjectProducer<T>>> operations = new ArrayList<>();
 
@@ -17,7 +19,7 @@ public class Spec<T> {
     }
 
     public PropertySpec<T> property(String property) {
-        return new PropertySpec<>(this, new PropertyChain(property));
+        return new PropertySpec<>(this, createChain(property));
     }
 
     Spec<T> append(BiConsumer<FactorySet, ObjectProducer<T>> operation) {

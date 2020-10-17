@@ -2,10 +2,10 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-//TODO getChild for read/write refactor
 abstract class Producer<T> {
     private final BeanClass<T> type;
 
@@ -39,8 +39,8 @@ abstract class Producer<T> {
     }
 
     public Producer<?> getChild(PropertyChain property) {
-        return property.childOf(this, producer -> producer, (producer, subProperty) ->
-                producer.getChild(subProperty).orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)));
+        return property.applyAccess(this, (producer, subProperty) -> producer.getChild(subProperty)
+                .orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)), Objects::requireNonNull);
     }
 
     protected Producer<T> changeTo(Producer<T> newProducer) {
@@ -48,16 +48,9 @@ abstract class Producer<T> {
     }
 
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
-//        property.forTail(this, (lastProperty, p) -> p.getProducerForCreate(this).ifPresent(producer ->
-//                producer.changeChild(lastProperty, producerGenerator.apply(producer, lastProperty)))
-//        );
-
-        property.forTail(this, (tail, producer) -> producer.changeChild(tail, producerGenerator.apply(producer, tail)));
-
-//        String lastProperty = property.getTail();
-//
-//        property.removeTail().getProducerForCreate(this).ifPresent(producer ->
-//                producer.changeChild(lastProperty, producerGenerator.apply(producer, lastProperty)));
+        String lastProperty = property.tail();
+        property.removeTail().applyAccess(this, Producer::getChildOrDefault, Optional::ofNullable).ifPresent(producer ->
+                producer.changeChild(lastProperty, producerGenerator.apply(producer, lastProperty)));
     }
 
     @SuppressWarnings("unchecked")

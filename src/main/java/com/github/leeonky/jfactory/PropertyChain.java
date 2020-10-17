@@ -1,16 +1,17 @@
 package com.github.leeonky.jfactory;
 
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class PropertyChain {
     public final List<Object> property;
 
-    public PropertyChain(String property) {
+    private PropertyChain(String property) {
         this.property = Arrays.stream(property.split("[\\[\\].]"))
                 .filter(s -> !s.isEmpty())
                 .map(s -> {
@@ -22,8 +23,12 @@ class PropertyChain {
                 }).collect(Collectors.toList());
     }
 
-    public PropertyChain(List<Object> propertyChain) {
+    private PropertyChain(List<Object> propertyChain) {
         property = new ArrayList<>(propertyChain);
+    }
+
+    public static PropertyChain createChain(String property) {
+        return new PropertyChain(property);
     }
 
     public boolean isTopLevelPropertyCollection() {
@@ -56,32 +61,20 @@ class PropertyChain {
         }).collect(Collectors.joining(".")).replace(".[", "[");
     }
 
-    //TODO move back to producer
-    //TODO try to remove optional
-    public Optional<Producer<?>> getProducerForCreate(Producer<?> producer) {
-        return childOf(producer, Optional::ofNullable, Producer::getChildOrDefault);
+    public <T> T applyAccess(Producer<?> producer, BiFunction<Producer<?>, String, Producer<?>> accessor,
+                             Function<Producer<?>, T> returnWrapper) {
+        if (property.isEmpty())
+            return returnWrapper.apply(producer);
+        String head = property.get(0).toString();
+        return new PropertyChain(property.subList(1, property.size()))
+                .applyAccess(accessor.apply(producer, head), accessor, returnWrapper);
     }
 
-    public <T> T childOf(Producer<?> producer, Function<Producer<?>, T> last, BiFunction<Producer<?>, String, Producer<?>> accessor) {
-        return childOf(new LinkedList<>(property), producer, last, accessor);
+    public String tail() {
+        return property.get(property.size() - 1).toString();
     }
 
-    private <T> T childOf(LinkedList<Object> properties, Producer<?> producer, Function<Producer<?>, T> last, BiFunction<Producer<?>, String, Producer<?>> accessor) {
-        Predicate<List<Object>> predicate = List::isEmpty;
-        return childOf(properties, producer, predicate, last, accessor);
-    }
-
-    private <T> T childOf(LinkedList<Object> properties, Producer<?> producer, Predicate<List<Object>> condition,
-                          Function<Producer<?>, T> last, BiFunction<Producer<?>, String, Producer<?>> accessor) {
-        if (condition.test(properties))
-            return last.apply(producer);
-        Object first = properties.removeFirst();
-        return childOf(properties, accessor.apply(producer, first.toString()), last, accessor);
-    }
-
-    public void forTail(Producer<?> producer, BiConsumer<String, Producer<?>> operation) {
-        String tail = property.get(property.size() - 1).toString();
-        new PropertyChain(property.subList(0, property.size() - 1)).getProducerForCreate(producer)
-                .ifPresent(producer1 -> operation.accept(tail, producer1));
+    public PropertyChain removeTail() {
+        return new PropertyChain(property.subList(0, property.size() - 1));
     }
 }

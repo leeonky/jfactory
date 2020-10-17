@@ -63,7 +63,7 @@ public class PropertySpec<T> {
 
     public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> function) {
         return spec.append((factorySet, objectProducer) ->
-                objectProducer.addDependency(property, function, dependencies.stream().map(PropertyChain::new).collect(Collectors.toList())));
+                objectProducer.addDependency(property, function, dependencies.stream().map(PropertyChain::createChain).collect(Collectors.toList())));
     }
 
     private Spec<T> appendProducer(Fuc<FactorySet, Producer<?>, String, Producer<?>> producerGenerator) {
