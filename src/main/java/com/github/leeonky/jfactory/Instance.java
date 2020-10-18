@@ -2,7 +2,6 @@ package com.github.leeonky.jfactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import static java.util.Collections.emptyList;
@@ -11,20 +10,20 @@ public class Instance<T> {
     private final int sequence;
     private final String property;
     private final Spec<T> spec;
-    private final AtomicReference<T> reference;
     private final List<Integer> indexes;
-    private boolean hasValue = false;
+    private final ValueCache<T> valueCache;
 
     Instance(int sequence, Spec<T> spec) {
-        this(sequence, null, spec, new AtomicReference<>(), emptyList());
+        this(sequence, null, spec, emptyList(), new ValueCache<>());
     }
 
-    private Instance(int sequence, String property, Spec<T> spec, AtomicReference<T> reference, List<Integer> indexes) {
+    private Instance(int sequence, String property, Spec<T> spec,
+                     List<Integer> indexes, ValueCache<T> valueCache) {
         this.sequence = sequence;
         this.property = property;
         this.spec = spec;
-        this.reference = reference;
         this.indexes = new ArrayList<>(indexes);
+        this.valueCache = valueCache;
     }
 
     public int getSequence() {
@@ -32,18 +31,13 @@ public class Instance<T> {
     }
 
     Instance<T> sub(String property) {
-        return new Instance<>(sequence, property, spec, reference, indexes);
+        return new Instance<>(sequence, property, spec, indexes, valueCache);
     }
 
     Instance<T> element(int index) {
-        Instance<T> instance = new Instance<>(sequence, property, spec, reference, indexes);
+        Instance<T> instance = new Instance<>(sequence, property, spec, indexes, valueCache);
         instance.indexes.set(instance.indexes.size() - 1, index);
         return instance;
-    }
-
-    void giveValue(T value) {
-        reference.set(value);
-        hasValue = true;
     }
 
     public String getProperty() {
@@ -59,16 +53,16 @@ public class Instance<T> {
     }
 
     public Supplier<T> reference() {
-        return reference::get;
+        return valueCache::getValue;
     }
 
     public Instance<T> inCollection() {
-        Instance<T> instance = new Instance<>(sequence, property, spec, reference, indexes);
+        Instance<T> instance = new Instance<>(sequence, property, spec, indexes, valueCache);
         instance.indexes.add(0);
         return instance;
     }
 
-    boolean hasValue() {
-        return hasValue;
+    ValueCache<T> getValueCache() {
+        return valueCache;
     }
 }

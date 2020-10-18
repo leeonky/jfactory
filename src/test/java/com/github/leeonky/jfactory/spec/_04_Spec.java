@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,7 +48,7 @@ class _04_Spec {
     @Getter
     @Setter
     public static class Table {
-        private List<Row> rows;
+        private ArrayList<Row> rows;
     }
 
     @Getter
@@ -175,6 +175,15 @@ class _04_Spec {
 
             assertThat(table.getRows().get(0))
                     .hasFieldOrPropertyWithValue("value", 100);
+        }
+
+        @Test
+        void should_raise_error_when_collection_property_is_null() {
+            factorySet.factory(Table.class).spec(instance -> instance.spec()
+                    .property("rows").asDefault());
+
+            assertThrows(IllegalArgumentException.class, () ->
+                    factorySet.type(Table.class).property("rows[0]", null).create());
         }
     }
 

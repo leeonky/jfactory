@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 
 abstract class Producer<T> {
     private final BeanClass<T> type;
+    private final ValueCache<T> valueCache = new ValueCache<>();
 
     Producer(BeanClass<T> type) {
         this.type = type;
@@ -20,8 +21,7 @@ abstract class Producer<T> {
     protected abstract T produce();
 
     public T getValue() {
-        // TODO cache produced value
-        return produce();
+        return valueCache.cache(this::produce);
     }
 
     protected void processDependencies() {

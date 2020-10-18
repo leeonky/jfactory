@@ -28,10 +28,12 @@ class CollectionPropertyExpression<H, E, B> extends PropertyExpression<H, B> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance) {
-        CollectionProducer<?, E> producer = (CollectionProducer<?, E>) host.getChildOrDefault(property);
-        //TODO producer maybe null
-        conditionValueIndexMap.forEach((k, v) -> producer.addChild(k.toString(), v.buildProducer(factorySet, producer, instance)));
-        return producer;
+        Producer<E> existProducer = (Producer<E>) host.getChildOrDefault(property);
+        if (!(existProducer instanceof CollectionProducer))
+            throw new IllegalArgumentException();
+        conditionValueIndexMap.forEach((k, v) -> existProducer.addChild(k.toString(),
+                v.buildProducer(factorySet, existProducer, instance)));
+        return existProducer;
     }
 
     @Override

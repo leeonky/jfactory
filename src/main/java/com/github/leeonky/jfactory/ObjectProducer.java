@@ -51,23 +51,19 @@ class ObjectProducer<T> extends Producer<T> {
         Producer<?> producer = children.get(property);
         if (producer == null) {
             BeanClass<?> propertyType = getType().getPropertyWriter(property).getType();
-            if (propertyType.isCollection()) {
+            if (propertyType.isCollection())
                 addChild(property, producer = new CollectionProducer<>(
                         factorySet.getObjectFactorySet(), getType(), propertyType, instance.sub(property)));
-            }
         }
         return producer;
     }
 
     @Override
     protected T produce() {
-        if (!instance.hasValue()) {
-            T obj = objectFactory.create(instance);
-            instance.giveValue(obj);
+        return instance.getValueCache().cache(() -> objectFactory.create(instance), obj -> {
             children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.getValue()));
             factorySet.getDataRepository().save(obj);
-        }
-        return instance.reference().get();
+        });
     }
 
     @Override

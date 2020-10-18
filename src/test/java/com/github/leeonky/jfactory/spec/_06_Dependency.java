@@ -465,16 +465,15 @@ public class _06_Dependency {
 
         @Test
         void read_property_value_from_created_sub_object() {
-            Bean bean = new Bean().setIntValue(100);
             factorySet.factory(Beans.class)
                     .constructor(instance -> new Beans().setBean2(new Bean().setIntValue(100)))
                     .spec(instance -> instance.spec()
                             .property("bean1").asDefault()
                             .property("bean1.intValue").dependsOn("bean2.intValue", obj -> obj));
 
-            assertThat(factorySet.type(Beans.class).create().getBean1())
-                    .hasFieldOrPropertyWithValue("intValue", 100)
-                    .isNotEqualTo(bean);
+            Beans beans = factorySet.create(Beans.class);
+            assertThat(beans.getBean1())
+                    .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
         @Test
