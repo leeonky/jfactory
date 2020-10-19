@@ -7,11 +7,15 @@ class ReadOnlyProducer<T, P> extends Producer<T> {
     private final PropertyReader<P> propertyReader;
     private final Producer<P> parent;
 
-    @SuppressWarnings("unchecked")
     public ReadOnlyProducer(Producer<P> parent, String property) {
-        super((BeanClass<T>) (parent.getType().getPropertyReader(property)).getType());
+        this(parent, parent.getType().getPropertyReader(property));
+    }
+
+    @SuppressWarnings("unchecked")
+    private ReadOnlyProducer(Producer<P> parent, PropertyReader<P> propertyReader) {
+        super((BeanClass<T>) propertyReader.getType());
         this.parent = parent;
-        propertyReader = parent.getType().getPropertyReader(property);
+        this.propertyReader = propertyReader;
     }
 
     @Override
