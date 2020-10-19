@@ -63,4 +63,18 @@ class DefaultBuilder<T> implements Builder<T> {
     public Map<String, PropertyExpression<T, T>> toExpressions() {
         return PropertyExpression.createPropertyExpressions(objectFactory.getType(), properties);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(DefaultBuilder.class, properties, mixIns);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DefaultBuilder) {
+            DefaultBuilder<?> another = (DefaultBuilder<?>) obj;
+            return properties.equals(another.properties) && mixIns.equals(another.mixIns);
+        }
+        return super.equals(obj);
+    }
 }

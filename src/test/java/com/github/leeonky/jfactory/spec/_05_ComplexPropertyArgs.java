@@ -400,8 +400,7 @@ class _05_ComplexPropertyArgs {
     @Nested
     class UniqCreation {
 
-        // @Test
-        // TODO not implement
+        @Test
         void uniq_build_in_nested_duplicated_object_creation() {
             BeansPair beansPair = factorySet.type(BeansPair.class)
                     .property("beans1.bean.stringValue", "hello")
