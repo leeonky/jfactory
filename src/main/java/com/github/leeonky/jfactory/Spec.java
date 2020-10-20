@@ -5,6 +5,8 @@ import com.github.leeonky.util.BeanClass;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
 
@@ -40,5 +42,11 @@ public class Spec<T> {
 
     String getName() {
         return getClass().getSimpleName();
+    }
+
+    public Spec<T> link(String property, String... others) {
+        List<PropertyChain> collect = Stream.concat(Stream.of(property), Stream.of(others)).map(PropertyChain::createChain).collect(Collectors.toList());
+        append((factorySet, objectProducer) -> objectProducer.link(collect));
+        return this;
     }
 }

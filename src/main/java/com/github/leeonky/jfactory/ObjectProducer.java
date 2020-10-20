@@ -11,7 +11,8 @@ class ObjectProducer<T> extends Producer<T> {
     private final DefaultBuilder<T> builder;
     private final Instance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
-    private Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
+    private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
+    private final List<Link> links = new ArrayList<>();
 
     public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder) {
         super(objectFactory.getType());
@@ -79,13 +80,18 @@ class ObjectProducer<T> extends Producer<T> {
 
     public ObjectProducer<T> processSpec() {
         processDependencies();
+        processLinks();
         return this;
+    }
+
+    private void processLinks() {
+        links.forEach(link -> link.process(this));
     }
 
     @Override
     protected void processDependencies() {
         children.values().forEach(Producer::processDependencies);
-        dependencies.values().forEach(dependency -> dependency.process(this, instance));
+        dependencies.values().forEach(dependency -> dependency.process(this));
     }
 
     @Override
@@ -100,5 +106,9 @@ class ObjectProducer<T> extends Producer<T> {
             return objectFactory.equals(another.objectFactory) && builder.equals(another.builder);
         }
         return super.equals(obj);
+    }
+
+    public void link(List<PropertyChain> properties) {
+        links.add(new Link(properties));
     }
 }

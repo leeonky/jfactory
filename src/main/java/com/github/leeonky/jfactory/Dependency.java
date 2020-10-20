@@ -19,10 +19,10 @@ class Dependency<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public <B> void process(ObjectProducer<B> objectProducer, Instance<B> instance) {
-        objectProducer.changeChild(property, (producer, property) -> new DependencyProducer<>(
+    public void process(Producer<?> producer) {
+        producer.changeChild(property, (origin, property) -> new DependencyProducer<>(
                 propertyChains.stream().map(dependency -> (Supplier<Object>)
-                        () -> objectProducer.getChild(dependency).getValue()).collect(Collectors.toList()),
-                function, (BeanClass<T>) producer.getType().getPropertyWriter(property).getType()));
+                        () -> producer.getChild(dependency).getValue()).collect(Collectors.toList()),
+                function, (BeanClass<T>) origin.getType().getPropertyWriter(property).getType()));
     }
 }
