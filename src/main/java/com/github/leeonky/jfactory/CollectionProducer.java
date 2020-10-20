@@ -4,7 +4,10 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 class CollectionProducer<T, C> extends Producer<C> {
     private final ObjectFactorySet objectFactorySet;
@@ -58,5 +61,11 @@ class CollectionProducer<T, C> extends Producer<C> {
         int index = Integer.valueOf(property);
         fillCollectionWithDefaultValue(index);
         return children.get(index);
+    }
+
+    @Override
+    public Map<PropertyChain, Producer<?>> getChildren() {
+        return IntStream.range(0, children.size()).boxed()
+                .collect(Collectors.toMap(i -> PropertyChain.createChain(i.toString()), children::get));
     }
 }

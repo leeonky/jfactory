@@ -4,6 +4,7 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> objectFactory;
@@ -80,8 +81,17 @@ class ObjectProducer<T> extends Producer<T> {
 
     public ObjectProducer<T> processSpec() {
         processDependencies();
+        //TODO
+//        uniqSameSubBuild();
         processLinks();
         return this;
+    }
+
+    private void uniqSameSubBuild() {
+        getAllChildren().entrySet().stream()
+                .filter(e -> e.getValue() instanceof ObjectProducer)
+                .collect(Collectors.groupingBy(Map.Entry::getValue))
+                .forEach((_ignore, properties) -> link(properties.stream().map(Map.Entry::getKey).collect(Collectors.toList())));
     }
 
     private void processLinks() {
@@ -96,7 +106,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ObjectProducer.class, objectFactory, builder.hashCode());
+        return Objects.hash(ObjectProducer.class, objectFactory, builder.hashCode(), dependencies, links);
     }
 
     @Override
@@ -109,6 +119,13 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     public void link(List<PropertyChain> properties) {
-        links.add(new Link(properties));
+        if (properties.size() > 1)
+            links.add(new Link(properties));
+    }
+
+    @Override
+    public Map<PropertyChain, Producer<?>> getChildren() {
+        return children.entrySet().stream()
+                .collect(Collectors.toMap(e -> PropertyChain.createChain(e.getKey()), Map.Entry::getValue));
     }
 }

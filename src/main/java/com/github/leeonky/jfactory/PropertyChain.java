@@ -77,4 +77,10 @@ class PropertyChain {
     public PropertyChain removeTail() {
         return new PropertyChain(property.subList(0, property.size() - 1));
     }
+
+    public PropertyChain concat(PropertyChain subChain) {
+        ArrayList<Object> chain = new ArrayList<>(property);
+        chain.addAll(subChain.property);
+        return new PropertyChain(chain);
+    }
 }

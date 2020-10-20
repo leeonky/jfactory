@@ -2,6 +2,8 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -10,7 +12,7 @@ abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
 
-    Producer(BeanClass<T> type) {
+    protected Producer(BeanClass<T> type) {
         this.type = type;
     }
 
@@ -57,5 +59,20 @@ abstract class Producer<T> {
     private <T> void changeChild(String property, Producer<T> producer) {
         Producer<T> original = (Producer<T>) getChildOrDefault(property);
         addChild(property, original == null ? producer : original.changeTo(producer));
+    }
+
+    public Map<PropertyChain, Producer<?>> getChildren() {
+        return new HashMap<>();
+    }
+
+    public Map<PropertyChain, Producer<?>> getAllChildren() {
+        Map<PropertyChain, Producer<?>> allChildren = new HashMap<>();
+        getChildren().forEach((propertyChain, producer) -> {
+            allChildren.put(propertyChain, producer);
+            producer.getAllChildren().forEach((subChain, subProducer) -> {
+                allChildren.put(propertyChain.concat(subChain), subProducer);
+            });
+        });
+        return allChildren;
     }
 }
