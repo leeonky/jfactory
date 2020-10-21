@@ -108,14 +108,19 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ObjectProducer.class, objectFactory, builder.hashCode());
+        return Objects.hash(ObjectProducer.class, objectFactory, builder.hashCode(), uniqHashWhenChange());
+    }
+
+    private Object uniqHashWhenChange() {
+        return isNotChange() ? true : new Object();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ObjectProducer) {
             ObjectProducer another = (ObjectProducer) obj;
-            return objectFactory.equals(another.objectFactory) && builder.equals(another.builder);
+            return objectFactory.equals(another.objectFactory) && builder.equals(another.builder)
+                    && isNotChange() && another.isNotChange();
         }
         return super.equals(obj);
     }

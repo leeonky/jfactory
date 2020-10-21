@@ -9,7 +9,7 @@ abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
     private Set<Producer<?>> cachedAllChildren;
-    private boolean notChange = false;
+    private boolean notChange = true;
 
     protected Producer(BeanClass<T> type) {
         this.type = type;
