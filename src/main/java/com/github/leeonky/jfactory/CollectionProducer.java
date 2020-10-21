@@ -68,4 +68,6 @@ class CollectionProducer<T, C> extends Producer<C> {
         return IntStream.range(0, children.size()).boxed()
                 .collect(Collectors.toMap(i -> PropertyChain.createChain(i.toString()), children::get));
     }
+
+    //TODO should nested process sub link and dependency
 }

@@ -2,15 +2,14 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 
 abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
+    private Set<Producer<?>> cachedAllChildren;
+    private boolean notChange = false;
 
     protected Producer(BeanClass<T> type) {
         this.type = type;
@@ -74,5 +73,17 @@ abstract class Producer<T> {
             });
         });
         return allChildren;
+    }
+
+    public void beforeCheckChange() {
+        cachedAllChildren = new HashSet<>(getAllChildren().values());
+    }
+
+    public void checkChange() {
+        notChange = Objects.equals(cachedAllChildren, new HashSet<>(getAllChildren().values()));
+    }
+
+    public boolean isNotChange() {
+        return notChange;
     }
 }

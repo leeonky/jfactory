@@ -22,6 +22,7 @@ class Dependency<T> {
     public void process(Producer<?> producer) {
         producer.changeChild(property, (origin, property) -> new DependencyProducer<>(
                 propertyChains.stream().map(dependency -> (Supplier<Object>)
+                        // TODO need to check producer.getChild(dependency) is replaced by linker
                         () -> producer.getChild(dependency).getValue()).collect(Collectors.toList()),
                 function, (BeanClass<T>) origin.getType().getPropertyWriter(property).getType()));
     }

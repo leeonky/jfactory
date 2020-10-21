@@ -81,9 +81,9 @@ class ObjectProducer<T> extends Producer<T> {
 
     public ObjectProducer<T> processSpec() {
         processDependencies();
+        processLinks();
         //TODO
 //        uniqSameSubBuild();
-        processLinks();
         return this;
     }
 
@@ -102,11 +102,13 @@ class ObjectProducer<T> extends Producer<T> {
     protected void processDependencies() {
         children.values().forEach(Producer::processDependencies);
         dependencies.values().forEach(dependency -> dependency.process(this));
+        children.values().forEach(Producer::checkChange);
+        beforeCheckChange();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ObjectProducer.class, objectFactory, builder.hashCode(), dependencies, links);
+        return Objects.hash(ObjectProducer.class, objectFactory, builder.hashCode());
     }
 
     @Override
