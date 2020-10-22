@@ -15,6 +15,6 @@ class Link {
     public void process(Producer<?> producer) {
         List<Producer<?>> linkedProducers = properties.stream().map(producer::getChild).collect(Collectors.toList());
         properties.forEach(linkProperty -> producer.changeChild(linkProperty,
-                (origin, property) -> new LinkProducer(linkedProducers, origin.getType())));
+                (host, property) -> new LinkProducer(linkedProducers, host.getType().getPropertyWriter(property).getType())));
     }
 }

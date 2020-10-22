@@ -20,10 +20,10 @@ class Dependency<T> {
 
     @SuppressWarnings("unchecked")
     public void process(Producer<?> producer) {
-        producer.changeChild(property, (origin, property) -> new DependencyProducer<>(
+        producer.changeChild(property, (host, property) -> new DependencyProducer<>(
                 propertyChains.stream().map(dependency -> (Supplier<Object>)
                         // TODO need to check producer.getChild(dependency) is replaced by linker
                         () -> producer.getChild(dependency).getValue()).collect(Collectors.toList()),
-                function, (BeanClass<T>) origin.getType().getPropertyWriter(property).getType()));
+                function, (BeanClass<T>) host.getType().getPropertyWriter(property).getType()));
     }
 }
