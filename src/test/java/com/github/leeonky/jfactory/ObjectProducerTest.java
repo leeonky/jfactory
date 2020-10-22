@@ -195,7 +195,7 @@ class ObjectProducerTest {
             @Test
             void should_not_has_outside_spec() {
                 factorySet.factory(Beans.class).spec(instance -> instance.spec().property("bean1").asDefault());
-                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(null);
+                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(null, false);
 
                 producer.processDependencies();
 
@@ -208,7 +208,7 @@ class ObjectProducerTest {
                         .property("bean1").asDefault()
                         .property("bean2").asDefault()
                         .property("bean1.stringValue").dependsOn("bean2.stringValue", Function.identity()));
-                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(null);
+                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(null, false);
 
                 producer.processDependencyAndLink();
 

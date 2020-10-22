@@ -17,16 +17,11 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        return createProducer(null).processDependencyAndLink().getValue();
+        return createProducer(null, false).processDependencyAndLink().getValue();
     }
 
     @Override
-    public ObjectProducer<T> createProducer(String property) {
-        return new ObjectProducer<>(factorySet, objectFactory, this, false);
-    }
-
-    @Override
-    public Producer<?> createProducer(String property, boolean intently) {
+    public ObjectProducer<T> createProducer(String property, boolean intently) {
         return new ObjectProducer<>(factorySet, objectFactory, this, intently);
     }
 

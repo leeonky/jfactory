@@ -195,7 +195,7 @@ class _05_ComplexPropertyArgs {
         }
 
         @Test
-        void should_not_merge_when_not_specify_properties() {
+        void should_not_merge_intently_default_creation() {
             factorySet.factory(BeansPair.class).spec(instance -> instance.spec()
                     .property("beans1").asDefault(true)
                     .property("beans2").asDefault(true));
@@ -399,6 +399,17 @@ class _05_ComplexPropertyArgs {
                     .create().getBean())
                     .hasFieldOrPropertyWithValue("content", "content")
             ;
+        }
+
+        @Test
+        void should_not_uniq_creation() {
+            factorySet.type(BeanCollection.class)
+                    .property("list[0]!.stringValue", "hello")
+                    .property("list[1]!.stringValue", "hello")
+                    .create();
+
+            assertThat(factorySet.type(Bean.class)
+                    .queryAll()).hasSize(2);
         }
     }
 
