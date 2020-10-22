@@ -19,11 +19,6 @@ public interface Builder<T> {
 
     Collection<T> queryAll();
 
-    @Deprecated
-    default Producer<T> createProducer(String property) {
-        return createProducer(property, false);
-    }
-
     Builder<T> mixIn(String... mixIns);
 
     Producer<T> createProducer(String property, boolean intently);

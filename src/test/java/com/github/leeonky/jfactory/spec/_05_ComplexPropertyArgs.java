@@ -402,13 +402,24 @@ class _05_ComplexPropertyArgs {
         }
 
         @Test
-        void should_not_uniq_creation() {
+        void should_not_uniq_creation_in_sub_creation() {
             factorySet.type(BeanCollection.class)
                     .property("list[0]!.stringValue", "hello")
                     .property("list[1]!.stringValue", "hello")
                     .create();
 
             assertThat(factorySet.type(Bean.class)
+                    .queryAll()).hasSize(2);
+        }
+
+        @Test
+        void should_not_uniq_creation_in_sub_creation2() {
+            factorySet.type(BeansPair.class)
+                    .property("beans1.bean!", null)
+                    .property("beans2.bean!", null)
+                    .create();
+
+            assertThat(factorySet.type(Beans.class)
                     .queryAll()).hasSize(2);
         }
     }

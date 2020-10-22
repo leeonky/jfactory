@@ -27,14 +27,11 @@ class SingleValuePropertyExpression<H, B> extends PropertyExpression<H, B> {
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance) {
         BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
         if (isIntently())
-            return toBuilder(factorySet, propertyType.getType()).createProducer(property);
+            return toBuilder(factorySet, propertyType.getType()).createProducer(property, true);
         return new FixedValueProducer(propertyType, value);
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, Class<?> propertyType) {
-        return (definition != null ?
-                factorySet.spec(definition)
-                : factorySet.type(propertyType))
-                .mixIn(mixIns);
+        return (definition != null ? factorySet.spec(definition) : factorySet.type(propertyType)).mixIn(mixIns);
     }
 }
