@@ -22,4 +22,6 @@ public interface Builder<T> {
     Producer<T> createProducer(String property);
 
     Builder<T> mixIn(String... mixIns);
+
+    Producer<?> createProducer(String property, boolean intently);
 }

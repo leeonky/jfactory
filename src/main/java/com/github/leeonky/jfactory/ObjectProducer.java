@@ -10,16 +10,18 @@ class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
     private final DefaultBuilder<T> builder;
+    private final boolean intently;
     private final Instance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
     private final List<Link> links = new ArrayList<>();
 
-    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder) {
+    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder, boolean intently) {
         super(objectFactory.getType());
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
         this.builder = builder;
+        this.intently = intently;
         instance = objectFactory.createInstance(factorySet.getTypeSequence());
         establishProducers(factorySet, builder);
     }
@@ -83,16 +85,14 @@ class ObjectProducer<T> extends Producer<T> {
         processDependencies();
         getAllChildren().values().forEach(Producer::checkChange);
         processLinks();
-        //TODO
-        uniqSameSubBuild();
+        uniqSameSubObjectProducer();
         return this;
     }
 
-    private void uniqSameSubBuild() {
-        Map<? extends Producer<?>, List<Map.Entry<PropertyChain, Producer<?>>>> collect = getAllChildren().entrySet().stream()
+    private void uniqSameSubObjectProducer() {
+        getAllChildren().entrySet().stream()
                 .filter(e -> e.getValue() instanceof ObjectProducer)
-                .collect(Collectors.groupingBy(Map.Entry::getValue));
-        collect
+                .collect(Collectors.groupingBy(Map.Entry::getValue))
                 .forEach((_ignore, properties) -> link(properties.stream().map(Map.Entry::getKey).collect(Collectors.toList())));
         processLinks();
     }
@@ -111,7 +111,11 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ObjectProducer.class, objectFactory, builder.hashCode(), uniqHashWhenChange());
+        return Objects.hash(ObjectProducer.class, objectFactory, builder.hashCode(), uniqHashWhenChange(), uniqHashWhenIntently());
+    }
+
+    private Object uniqHashWhenIntently() {
+        return intently ? new Object() : false;
     }
 
     private Object uniqHashWhenChange() {
@@ -123,7 +127,7 @@ class ObjectProducer<T> extends Producer<T> {
         if (obj instanceof ObjectProducer) {
             ObjectProducer another = (ObjectProducer) obj;
             return objectFactory.equals(another.objectFactory) && builder.equals(another.builder)
-                    && isNotChange() && another.isNotChange();
+                    && isNotChange() && another.isNotChange() && !intently && !another.intently;
         }
         return super.equals(obj);
     }

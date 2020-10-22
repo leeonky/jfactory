@@ -194,13 +194,11 @@ class _05_ComplexPropertyArgs {
             ;
         }
 
-        //        @Test
-        //TODO skip
+        @Test
         void should_not_merge_when_not_specify_properties() {
-            factorySet.factory(BeansPair.class).spec(instance -> {
-                instance.spec().property("beans1").asDefault();
-                instance.spec().property("beans2").asDefault();
-            });
+            factorySet.factory(BeansPair.class).spec(instance -> instance.spec()
+                    .property("beans1").asDefault(true)
+                    .property("beans2").asDefault(true));
 
             BeansPair beansPair = factorySet.create(BeansPair.class);
 

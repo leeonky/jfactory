@@ -22,7 +22,12 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public ObjectProducer<T> createProducer(String property) {
-        return new ObjectProducer<>(factorySet, objectFactory, this);
+        return new ObjectProducer<>(factorySet, objectFactory, this, false);
+    }
+
+    @Override
+    public Producer<?> createProducer(String property, boolean intently) {
+        return new ObjectProducer<>(factorySet, objectFactory, this, intently);
     }
 
     @Override

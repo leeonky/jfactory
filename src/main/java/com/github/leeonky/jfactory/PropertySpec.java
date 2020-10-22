@@ -49,7 +49,7 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> asDefault() {
-        return asDefault(b -> b);
+        return asDefault(Function.identity());
     }
 
     public Spec<T> asDefault(Function<Builder<?>, Builder<?>> builder) {
@@ -71,6 +71,15 @@ public class PropertySpec<T> {
             return spec.append((factorySet, objectProducer) -> objectProducer.changeChild(property, ((producer, property) ->
                     producerGenerator.apply(factorySet, producer, property))));
         throw new IllegalArgumentException(String.format("Not support property chain '%s' in current operation", property.toString()));
+    }
+
+    public Spec<T> asDefault(boolean intently) {
+        return asDefault(intently, b -> b);
+    }
+
+    private Spec<T> asDefault(boolean intently, Function<Builder<?>, Builder<?>> builder) {
+        return appendProducer((factorySet, producer, property) ->
+                builder.apply(factorySet.type(producer.getType().getPropertyWriter(property).getTypeClass())).createProducer(property, intently));
     }
 
     @FunctionalInterface

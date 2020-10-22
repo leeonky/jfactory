@@ -16,14 +16,24 @@ class ObjectProducerTest {
 
     private FactorySet factorySet = new FactorySet();
 
-    private ObjectProducer buildProducer(Function<Builder<Bean>, Builder<Bean>> modifyBuilder) {
+    private ObjectProducer buildProducer(Function<Builder<Bean>, Builder<Bean>> modifyBuilder, boolean intently) {
         ObjectFactory<Bean> objectFactory = factorySet.getObjectFactorySet().queryObjectFactory(Bean.class);
         return new ObjectProducer<>(factorySet, objectFactory,
-                (DefaultBuilder<Bean>) modifyBuilder.apply(new DefaultBuilder<>(objectFactory, factorySet)));
+                (DefaultBuilder<Bean>) modifyBuilder.apply(new DefaultBuilder<>(objectFactory, factorySet)), intently);
     }
 
     private ObjectProducer sameProducer() {
-        return buildProducer(builder -> builder.property("intValue", 1).mixIn("a bean"));
+        return buildProducer(builder -> builder.property("intValue", 1).mixIn("a bean"), false);
+    }
+
+    private ObjectProducer sameIntentlyProducer() {
+        return buildProducer(builder -> builder.property("intValue", 1).mixIn("a bean"), true);
+    }
+
+    private ObjectProducer checkChangeSameProducer() {
+        ObjectProducer another = sameProducer();
+        another.checkChange();
+        return another;
     }
 
     @Getter
@@ -74,25 +84,32 @@ class ObjectProducerTest {
 
         @Test
         void should_not_equal_when_has_outside_producer() {
-            ObjectProducer another = sameProducer();
-            another.checkChange();
-            ObjectProducer producer = sameProducer();
-            producer.checkChange();
+            assertThat(sameProducer().hashCode())
+                    .isNotEqualTo(checkChangeSameProducer().hashCode());
 
-            assertThat(producer.hashCode())
-                    .isNotEqualTo(another.hashCode());
+            assertThat(checkChangeSameProducer().hashCode())
+                    .isNotEqualTo(sameProducer().hashCode());
+        }
+
+        @Test
+        void should_not_equal_when_intently_create() {
+            assertThat(sameProducer().hashCode())
+                    .isNotEqualTo(sameIntentlyProducer().hashCode());
+
+            assertThat(sameIntentlyProducer().hashCode())
+                    .isNotEqualTo(sameProducer().hashCode());
         }
 
         @Test
         void should_not_equal_when_different_mixin() {
             assertThat(sameProducer().hashCode())
-                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 1).mixIn("another bean")).hashCode());
+                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 1).mixIn("another bean"), false).hashCode());
         }
 
         @Test
         void should_not_equal_when_different_property() {
             assertThat(sameProducer().hashCode())
-                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 2000).mixIn("a bean")).hashCode());
+                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 2000).mixIn("a bean"), false).hashCode());
         }
 
         @Test
@@ -101,7 +118,7 @@ class ObjectProducerTest {
             assertThat(sameProducer().hashCode())
                     .isNotEqualTo(new ObjectProducer<>(factorySet, objectFactory,
                             (DefaultBuilder<Bean2>) new DefaultBuilder<>(objectFactory, factorySet)
-                                    .property("intValue", 1).mixIn("a bean")).hashCode());
+                                    .property("intValue", 1).mixIn("a bean"), false).hashCode());
         }
     }
 
@@ -131,25 +148,32 @@ class ObjectProducerTest {
 
         @Test
         void should_not_equal_when_has_outside_producer() {
-            ObjectProducer another = sameProducer();
-            another.checkChange();
-            ObjectProducer objectProducer = sameProducer();
-            objectProducer.checkChange();
+            assertThat(sameProducer())
+                    .isNotEqualTo(checkChangeSameProducer());
 
-            assertThat(objectProducer)
-                    .isNotEqualTo(another);
+            assertThat(checkChangeSameProducer())
+                    .isNotEqualTo(sameProducer());
+        }
+
+        @Test
+        void should_not_equal_when_intently_create() {
+            assertThat(sameIntentlyProducer())
+                    .isNotEqualTo(sameProducer());
+
+            assertThat(sameProducer())
+                    .isNotEqualTo(sameIntentlyProducer());
         }
 
         @Test
         void should_not_equal_when_different_mixin() {
             assertThat(sameProducer())
-                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 1).mixIn("another bean")));
+                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 1).mixIn("another bean"), false));
         }
 
         @Test
         void should_not_equal_when_different_property() {
             assertThat(sameProducer())
-                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 2000).mixIn("a bean")));
+                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 2000).mixIn("a bean"), false));
         }
 
         @Test
@@ -158,7 +182,7 @@ class ObjectProducerTest {
             assertThat(sameProducer())
                     .isNotEqualTo(new ObjectProducer<>(factorySet, objectFactory,
                             (DefaultBuilder<Bean2>) new DefaultBuilder<>(objectFactory, factorySet)
-                                    .property("intValue", 1).mixIn("a bean")));
+                                    .property("intValue", 1).mixIn("a bean"), false));
         }
     }
 
