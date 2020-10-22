@@ -79,30 +79,33 @@ class ObjectProducer<T> extends Producer<T> {
         dependencies.put(property, new Dependency<>(function, property, propertyChains));
     }
 
-    public ObjectProducer<T> processSpec() {
+    public ObjectProducer<T> processDependencyAndLink() {
         processDependencies();
+        getAllChildren().values().forEach(Producer::checkChange);
         processLinks();
         //TODO
-//        uniqSameSubBuild();
+        uniqSameSubBuild();
         return this;
     }
 
     private void uniqSameSubBuild() {
-        getAllChildren().entrySet().stream()
+        Map<? extends Producer<?>, List<Map.Entry<PropertyChain, Producer<?>>>> collect = getAllChildren().entrySet().stream()
                 .filter(e -> e.getValue() instanceof ObjectProducer)
-                .collect(Collectors.groupingBy(Map.Entry::getValue))
+                .collect(Collectors.groupingBy(Map.Entry::getValue));
+        collect
                 .forEach((_ignore, properties) -> link(properties.stream().map(Map.Entry::getKey).collect(Collectors.toList())));
+        processLinks();
     }
 
     private void processLinks() {
         links.forEach(link -> link.process(this));
+        links.clear();
     }
 
     @Override
     protected void processDependencies() {
         children.values().forEach(Producer::processDependencies);
         dependencies.values().forEach(dependency -> dependency.process(this));
-        children.values().forEach(Producer::checkChange);
         beforeCheckChange();
     }
 

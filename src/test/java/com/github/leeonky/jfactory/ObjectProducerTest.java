@@ -183,14 +183,16 @@ class ObjectProducerTest {
                 factorySet.factory(Beans.class).spec(instance -> instance.spec()
                         .property("bean1").asDefault()
                         .property("bean2").asDefault()
-                        .property("bean1.stringValue").dependsOn("bean2.stringValue", Function.identity())
-                );
+                        .property("bean1.stringValue").dependsOn("bean2.stringValue", Function.identity()));
                 ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(null);
 
-                producer.processDependencies();
+                producer.processDependencyAndLink();
 
                 assertFalse(producer.getChild("bean1").get().isNotChange());
             }
         }
+
+        //TODO for link
+        //TODO for dependency and link
     }
 }

@@ -69,5 +69,10 @@ class CollectionProducer<T, C> extends Producer<C> {
                 .collect(Collectors.toMap(i -> PropertyChain.createChain(i.toString()), children::get));
     }
 
+    @Override
+    protected void processDependencies() {
+        children.forEach(Producer::processDependencies);
+    }
+
     //TODO should nested process sub link and dependency
 }

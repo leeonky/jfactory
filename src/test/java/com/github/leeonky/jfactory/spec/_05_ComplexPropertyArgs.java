@@ -407,8 +407,7 @@ class _05_ComplexPropertyArgs {
     @Nested
     class UniqCreation {
 
-        //        @Test
-        //TODO skip
+        @Test
         void uniq_build_in_nested_duplicated_object_creation() {
             BeansPair beansPair = factorySet.type(BeansPair.class)
                     .property("beans1.bean.stringValue", "hello")
@@ -419,8 +418,7 @@ class _05_ComplexPropertyArgs {
             assertThat(beansPair.beans1).isEqualTo(beansPair.beans2);
         }
 
-        //        @Test
-        //TODO skip
+        @Test
         void uniq_build_in_collection_element_duplicated_object_creation() {
             BeanArray beanArray = factorySet.type(BeanArray.class)
                     .property("beanArray[0].stringValue", "hello")

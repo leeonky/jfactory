@@ -17,7 +17,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        return createProducer(null).processSpec().getValue();
+        return createProducer(null).processDependencyAndLink().getValue();
     }
 
     @Override
