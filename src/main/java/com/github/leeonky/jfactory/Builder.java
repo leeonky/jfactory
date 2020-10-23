@@ -8,9 +8,9 @@ public interface Builder<T> {
     T create();
 
     default Builder<T> property(String property, Object value) {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(property, value);
-        return properties(properties);
+        return properties(new HashMap<String, Object>() {{
+            put(property, value);
+        }});
     }
 
     Builder<T> properties(Map<String, ?> properties);
