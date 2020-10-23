@@ -33,17 +33,16 @@ class _07_Link {
             assertThat(bean.str1).isEqualTo(bean.str2);
         }
 
-//        @Test
-//        void should_use_input_property_in_link() {
-//            factorySet.factory(Bean.class).define((argument, spec) -> {
-//                spec.link("str1", "str2");
-//            });
-//
-//            Bean bean = factorySet.type(Bean.class).property("str2", "string").create();
-//
-//            assertThat(bean.str1).isEqualTo("string");
-//            assertThat(bean.str2).isEqualTo("string");
-//        }
+        @Test
+        void should_use_input_property_in_link() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .link("str1", "str2"));
+
+            Bean bean = factorySet.type(Bean.class).property("str2", "string").create();
+
+            assertThat(bean.str1).isEqualTo("string");
+            assertThat(bean.str2).isEqualTo("string");
+        }
 //
 //        private void assertLink(String property, String value, String... properties) {
 //            Bean bean = factorySet.type(Bean.class).property(property, value).create();

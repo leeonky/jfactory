@@ -71,6 +71,7 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     @Override
     protected void processDependencies() {
+        //TODO add one UT for this
         children.forEach(Producer::processDependencies);
     }
 
