@@ -20,6 +20,15 @@ class _07_Link {
         public String s1, s2, s3, s4;
     }
 
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class BeanWrapper {
+        public Bean bean;
+        public String str;
+        public Bean another;
+    }
+
     @Nested
     class FlattenLink {
 
@@ -43,62 +52,30 @@ class _07_Link {
             assertThat(bean.str1).isEqualTo("string");
             assertThat(bean.str2).isEqualTo("string");
         }
-//
-//        private void assertLink(String property, String value, String... properties) {
-//            Bean bean = factorySet.type(Bean.class).property(property, value).create();
-//            for (String p : properties)
-//                assertThat(bean).hasFieldOrPropertyWithValue(p, value);
-//        }
-//
-//        @Test
-//        void support_link_link_producer() {
-//            factorySet.factory(Bean.class).define((argument, spec) -> {
-//                spec.link("str1", "str2");
-//                spec.link("str2", "str3");
-//            });
-//
-//            assertLink("str1", "string", "str1", "str2", "str3");
-//            assertLink("str2", "string", "str1", "str2", "str3");
-//            assertLink("str3", "string", "str1", "str2", "str3");
-//        }
-//
-//        @Test
-//        void support_producer_link_link() {
-//            factorySet.factory(Bean.class).define((argument, spec) -> {
-//                spec.link("str1", "str2");
-//                spec.link("str3", "str2");
-//            });
-//
-//            assertLink("str1", "string", "str1", "str2", "str3");
-//            assertLink("str2", "string", "str1", "str2", "str3");
-//            assertLink("str3", "string", "str1", "str2", "str3");
-//        }
-//
-//        @Test
-//        void support_link_link_link() {
-//            factorySet.factory(Bean.class).define((argument, spec) -> {
-//                spec.link("str1", "str2");
-//                spec.link("str3", "str4");
-//                spec.link("str2", "str3");
-//            });
-//
-//            Bean bean = factorySet.create(Bean.class);
-//
-//            assertThat(bean.str1).isEqualTo(bean.str2);
-//            assertThat(bean.str2).isEqualTo(bean.str3);
-//            assertThat(bean.str3).isEqualTo(bean.str4);
-//        }
-//
-//        @Test
-//        void support_link_with_bean_object() {
-//            factorySet.factory(BeanWrapper.class).define((argument, spec) -> {
-//                spec.link("bean", "another");
-//            });
-//
-//            Bean bean = new Bean();
-//            assertThat(factorySet.type(BeanWrapper.class).property("another", bean).create())
-//                    .hasFieldOrPropertyWithValue("bean", bean);
-//        }
+
+        @Test
+        void support_merge_link() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .link("str1", "str2")
+                    .link("str3", "str4")
+                    .link("str2", "str3"));
+
+            Bean bean = factorySet.create(Bean.class);
+
+            assertThat(bean.str1).isEqualTo(bean.str2);
+            assertThat(bean.str2).isEqualTo(bean.str3);
+            assertThat(bean.str3).isEqualTo(bean.str4);
+        }
+
+        @Test
+        void support_link_with_bean_object() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .link("bean", "another"));
+
+            Bean bean = new Bean();
+            assertThat(factorySet.type(BeanWrapper.class).property("another", bean).create())
+                    .hasFieldOrPropertyWithValue("bean", bean);
+        }
     }
 
 }

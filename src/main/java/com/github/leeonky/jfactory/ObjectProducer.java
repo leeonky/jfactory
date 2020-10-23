@@ -133,8 +133,14 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     public void link(List<PropertyChain> properties) {
-        if (properties.size() > 1)
-            links.add(new Link(properties));
+        if (properties.size() > 1) {
+            links.stream().filter(link -> link.contains(properties))
+                    .findFirst().orElseGet(() -> {
+                Link link = new Link();
+                links.add(link);
+                return link;
+            }).merge(properties);
+        }
     }
 
     @Override

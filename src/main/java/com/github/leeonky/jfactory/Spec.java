@@ -45,8 +45,9 @@ public class Spec<T> {
     }
 
     public Spec<T> link(String property, String... others) {
-        List<PropertyChain> collect = Stream.concat(Stream.of(property), Stream.of(others)).map(PropertyChain::createChain).collect(Collectors.toList());
-        append((factorySet, objectProducer) -> objectProducer.link(collect));
+        List<PropertyChain> linkProperties = Stream.concat(Stream.of(property), Stream.of(others))
+                .map(PropertyChain::createChain).collect(Collectors.toList());
+        append((factorySet, objectProducer) -> objectProducer.link(linkProperties));
         return this;
     }
 }

@@ -1,20 +1,25 @@
 package com.github.leeonky.jfactory;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 class Link {
-    private final List<PropertyChain> properties = new ArrayList<>();
-
-    public Link(List<PropertyChain> properties) {
-        this.properties.addAll(properties);
-    }
+    private final Set<PropertyChain> properties = new LinkedHashSet<>();
 
     @SuppressWarnings("unchecked")
     public void process(Producer<?> producer) {
         List<Producer<?>> linkedProducers = properties.stream().map(producer::getChild).collect(Collectors.toList());
         properties.forEach(linkProperty -> producer.changeChild(linkProperty,
                 (host, property) -> new LinkProducer(linkedProducers, host.getType().getPropertyWriter(property).getType())));
+    }
+
+    public boolean contains(List<PropertyChain> properties) {
+        return properties.stream().anyMatch(this.properties::contains);
+    }
+
+    public void merge(List<PropertyChain> properties) {
+        this.properties.addAll(properties);
     }
 }
