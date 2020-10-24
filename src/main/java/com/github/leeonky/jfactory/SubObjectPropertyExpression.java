@@ -32,11 +32,10 @@ class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
         BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
         if (isIntently())
             return toBuilder(factorySet, propertyType).createProducer(property, true);
-        Collection<?> collection = toBuilder(factorySet, hostClass.getPropertyReader(property).getType()).queryAll();
-        if (collection.isEmpty())
+        Collection<?> queried = toBuilder(factorySet, hostClass.getPropertyReader(property).getType()).queryAll();
+        if (queried.isEmpty())
             return toBuilder(factorySet, propertyType).createProducer(property, false);
-        else
-            return new FixedValueProducer(propertyType, collection.iterator().next());
+        return new FixedValueProducer(propertyType, queried.iterator().next());
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {

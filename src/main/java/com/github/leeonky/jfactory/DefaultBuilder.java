@@ -2,7 +2,10 @@ package com.github.leeonky.jfactory;
 
 import java.util.*;
 
+import static com.github.leeonky.jfactory.PropertyExpression.createPropertyExpressions;
+import static com.github.leeonky.util.BeanClass.cast;
 import static java.util.Arrays.asList;
+import static java.util.Objects.hash;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
@@ -61,20 +64,18 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     public Map<String, PropertyExpression<T, T>> toExpressions() {
-        return PropertyExpression.createPropertyExpressions(objectFactory.getType(), properties);
+        return createPropertyExpressions(objectFactory.getType(), properties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(DefaultBuilder.class, properties, mixIns);
+        return hash(DefaultBuilder.class, properties, mixIns);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof DefaultBuilder) {
-            DefaultBuilder<?> another = (DefaultBuilder<?>) obj;
-            return properties.equals(another.properties) && mixIns.equals(another.mixIns);
-        }
-        return super.equals(obj);
+    public boolean equals(Object another) {
+        return cast(another, DefaultBuilder.class)
+                .map(builder -> properties.equals(builder.properties) && mixIns.equals(builder.mixIns))
+                .orElseGet(() -> super.equals(another));
     }
 }

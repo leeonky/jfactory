@@ -7,33 +7,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.BeanClass.cast;
+
 class CollectionPropertyExpression<H, E, B> extends PropertyExpression<H, B> {
     private final Map<Integer, PropertyExpression<E, B>> conditionValueIndexMap = new LinkedHashMap<>();
 
-    public CollectionPropertyExpression(int index, PropertyExpression<E, B> propertyExpression, String property,
-                                        BeanClass<H> hostClass, BeanClass<B> beanClass) {
+    public CollectionPropertyExpression(BeanClass<H> hostClass, BeanClass<B> beanClass, String property,
+                                        int index, PropertyExpression<E, B> propertyExpression) {
         super(property, hostClass, beanClass);
         conditionValueIndexMap.put(index, propertyExpression);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue) {
         List<Object> elements = BeanClass.arrayCollectionToStream(propertyValue).collect(Collectors.toList());
         return conditionValueIndexMap.entrySet().stream()
-                .allMatch(e -> elements.get(e.getKey()) != null && !e.getValue().isIntently()
-                        && e.getValue().isMatch((BeanClass) propertyType.getElementType(), elements.get(e.getKey())));
+                .allMatch(e -> isMatch(propertyType.getElementType(), e.getValue(), elements.get(e.getKey())));
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean isMatch(BeanClass elementType, PropertyExpression<E, B> expression, Object value) {
+        return value != null && !expression.isIntently() && expression.isMatch(elementType, value);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance) {
-        Producer<E> existProducer = (Producer<E>) host.getChildOrDefault(property);
-        if (!(existProducer instanceof CollectionProducer))
-            throw new IllegalArgumentException();
-        conditionValueIndexMap.forEach((k, v) -> existProducer.addChild(k.toString(),
-                v.buildProducer(factorySet, existProducer, instance)));
-        return existProducer;
+        CollectionProducer<?, E> collectionProducer = cast(host.getChildOrDefault(property), CollectionProducer.class)
+                .orElseThrow(IllegalArgumentException::new);
+        conditionValueIndexMap.forEach((k, v) -> collectionProducer.addChild(k.toString(),
+                v.buildProducer(factorySet, collectionProducer, instance)));
+        return collectionProducer;
     }
 
     @Override
@@ -49,7 +53,8 @@ class CollectionPropertyExpression<H, E, B> extends PropertyExpression<H, B> {
         return this;
     }
 
-    private PropertyExpression<E, B> mergeOrAssign(Integer k, PropertyExpression<E, B> v) {
-        return conditionValueIndexMap.containsKey(k) ? v.merge(conditionValueIndexMap.get(k)) : v;
+    private PropertyExpression<E, B> mergeOrAssign(Integer index, PropertyExpression<E, B> propertyExpression) {
+        return conditionValueIndexMap.containsKey(index) ?
+                propertyExpression.merge(conditionValueIndexMap.get(index)) : propertyExpression;
     }
 }

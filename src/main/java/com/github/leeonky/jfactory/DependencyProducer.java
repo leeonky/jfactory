@@ -8,16 +8,16 @@ import java.util.function.Supplier;
 
 class DependencyProducer<T> extends Producer<T> {
     private final List<Supplier<Object>> dependencies;
-    private final Function<Object[], T> function;
+    private final Function<Object[], T> rule;
 
-    public DependencyProducer(List<Supplier<Object>> dependencies, Function<Object[], T> function, BeanClass<T> type) {
+    public DependencyProducer(List<Supplier<Object>> dependencies, Function<Object[], T> rule, BeanClass<T> type) {
         super(type);
         this.dependencies = dependencies;
-        this.function = function;
+        this.rule = rule;
     }
 
     @Override
     protected T produce() {
-        return function.apply(dependencies.stream().map(Supplier::get).toArray());
+        return rule.apply(dependencies.stream().map(Supplier::get).toArray());
     }
 }

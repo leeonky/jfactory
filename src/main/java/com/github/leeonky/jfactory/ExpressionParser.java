@@ -47,10 +47,10 @@ class ExpressionParser<T> {
         String condition = matcher.group(GROUP_CONDITION);
 
         if (index != null) {
-            return new CollectionPropertyExpression<>(Integer.valueOf(index),
+            return new CollectionPropertyExpression<>(beanClass, beanClass, property, Integer.valueOf(index),
                     create(value, mixIn, group, condition, index, beanClass.getPropertyWriter(property).getType(), beanClass)
-                            .setIntently(intently),
-                    property, beanClass, beanClass);
+                            .setIntently(intently)
+            );
         }
         return create(value, mixIn, group, condition, property, beanClass, beanClass).setIntently(intently);
     }
