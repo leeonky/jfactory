@@ -6,15 +6,13 @@ import java.util.Objects;
 
 class SingleValuePropertyExpression<H, B> extends PropertyExpression<H, B> {
     private final Object value;
-    private final String[] mixIns;
-    private final String definition;
+    private final MixInsSpec mixInsSpec;
 
-    public SingleValuePropertyExpression(Object value, String[] mixIns, String definition, String property,
-                                         BeanClass<H> hostClass, BeanClass<B> beanClass) {
+    public SingleValuePropertyExpression(Object value, String property,
+                                         BeanClass<H> hostClass, BeanClass<B> beanClass, MixInsSpec mixInsSpec) {
         super(property, hostClass, beanClass);
         this.value = value;
-        this.mixIns = mixIns;
-        this.definition = definition;
+        this.mixInsSpec = mixInsSpec;
     }
 
     @Override
@@ -27,11 +25,7 @@ class SingleValuePropertyExpression<H, B> extends PropertyExpression<H, B> {
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance) {
         BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
         if (isIntently())
-            return toBuilder(factorySet, propertyType.getType()).createProducer(property, true);
+            return mixInsSpec.toBuilder(factorySet, propertyType).createProducer(property, true);
         return new FixedValueProducer(propertyType, value);
-    }
-
-    private Builder<?> toBuilder(FactorySet factorySet, Class<?> propertyType) {
-        return (definition != null ? factorySet.spec(definition) : factorySet.type(propertyType)).mixIn(mixIns);
     }
 }

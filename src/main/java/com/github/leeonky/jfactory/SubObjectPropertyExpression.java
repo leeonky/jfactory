@@ -2,20 +2,18 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.*;
-
-import static java.util.Arrays.asList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
     private final Map<String, Object> conditionValues = new LinkedHashMap<>();
-    private String[] mixIns;
-    private String definition;
+    private final MixInsSpec mixInsSpec;
 
-    public SubObjectPropertyExpression(String condition, Object value, String[] mixIns, String definition,
-                                       String property, BeanClass<H> hostClass, BeanClass<B> beanClass) {
+    public SubObjectPropertyExpression(String condition, Object value,
+                                       MixInsSpec mixInsSpec, String property, BeanClass<H> hostClass, BeanClass<B> beanClass) {
         super(property, hostClass, beanClass);
-        this.mixIns = mixIns;
-        this.definition = definition;
+        this.mixInsSpec = mixInsSpec;
         conditionValues.put(condition, value);
     }
 
@@ -39,8 +37,7 @@ class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-        return (definition != null ? factorySet.spec(definition) : factorySet.type(propertyType.getType()))
-                .mixIn(mixIns).properties(conditionValues);
+        return mixInsSpec.toBuilder(factorySet, propertyType).properties(conditionValues);
     }
 
     @Override
@@ -49,31 +46,13 @@ class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
     }
 
     @Override
-    protected PropertyExpression<H, B> mergeBy(SubObjectPropertyExpression<H, B> conditionValueSet) {
-        conditionValueSet.conditionValues.putAll(conditionValues);
+    protected PropertyExpression<H, B> mergeBy(SubObjectPropertyExpression<H, B> another) {
+        another.conditionValues.putAll(conditionValues);
         conditionValues.clear();
-        conditionValues.putAll(conditionValueSet.conditionValues);
-        mergeMixIn(conditionValueSet);
-        mergeDefinition(conditionValueSet);
-        setIntently(isIntently() || conditionValueSet.isIntently());
+        conditionValues.putAll(another.conditionValues);
+        mixInsSpec.mergeSubObject(another.mixInsSpec, hostClass, property);
+        setIntently(isIntently() || another.isIntently());
         return this;
     }
 
-    private void mergeMixIn(SubObjectPropertyExpression another) {
-        if (mixIns.length != 0 && another.mixIns.length != 0
-                && !new HashSet<>(asList(mixIns)).equals(new HashSet<>(asList(another.mixIns))))
-            throw new IllegalArgumentException(String.format("Cannot merge different mix-in %s and %s for %s.%s",
-                    Arrays.toString(mixIns), Arrays.toString(another.mixIns), hostClass.getName(), property));
-        if (mixIns.length == 0)
-            mixIns = another.mixIns;
-    }
-
-    private void mergeDefinition(SubObjectPropertyExpression<H, B> another) {
-        if (definition != null && another.definition != null
-                && !Objects.equals(definition, another.definition))
-            throw new IllegalArgumentException(String.format("Cannot merge different definition `%s` and `%s` for %s.%s",
-                    definition, another.definition, hostClass.getName(), property));
-        if (definition == null)
-            definition = another.definition;
-    }
 }
