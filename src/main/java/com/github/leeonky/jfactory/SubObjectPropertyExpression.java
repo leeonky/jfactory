@@ -10,17 +10,18 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     private final Map<String, Object> conditionValues = new LinkedHashMap<>();
     private final MixInsSpec mixInsSpec;
 
-    public SubObjectPropertyExpression(String condition, Object value,
-                                       MixInsSpec mixInsSpec, String property, BeanClass<H> hostClass) {
-        super(property, hostClass);
+    public SubObjectPropertyExpression(String condition, Object value, MixInsSpec mixInsSpec, Property<H> property) {
+        super(property);
         this.mixInsSpec = mixInsSpec;
         conditionValues.put(condition, value);
     }
 
     @Override
-    protected <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue) {
+    @SuppressWarnings("unchecked")
+    protected boolean isPropertyMatch(Object propertyValue) {
         return conditionValues.entrySet().stream()
-                .map(conditionValue -> ExpressionParser.parse(propertyType, conditionValue.getKey(), conditionValue.getValue()))
+                .map(conditionValue -> ExpressionParser.parse((BeanClass<Object>) property.getReader().getType(),
+                        conditionValue.getKey(), conditionValue.getValue()))
                 .allMatch(queryExpression -> queryExpression.isMatch(propertyValue));
     }
 

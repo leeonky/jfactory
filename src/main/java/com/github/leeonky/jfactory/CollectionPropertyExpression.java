@@ -1,43 +1,39 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.BeanClass.arrayCollectionToStream;
 import static com.github.leeonky.util.BeanClass.cast;
 
 class CollectionPropertyExpression<H, E> extends PropertyExpression<H> {
     private final Map<Integer, PropertyExpression<E>> conditionValueIndexMap = new LinkedHashMap<>();
 
-    public CollectionPropertyExpression(BeanClass<H> hostClass, String property,
-                                        int index, PropertyExpression<E> propertyExpression) {
-        super(property, hostClass);
+    public CollectionPropertyExpression(int index, PropertyExpression<E> propertyExpression, Property<H> property) {
+        super(property);
         conditionValueIndexMap.put(index, propertyExpression);
     }
 
     @Override
-    protected <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue) {
-        List<Object> elements = BeanClass.arrayCollectionToStream(propertyValue).collect(Collectors.toList());
-        return conditionValueIndexMap.entrySet().stream()
-                .allMatch(e -> isMatch(propertyType.getElementType(), e.getValue(), elements.get(e.getKey())));
+    protected boolean isPropertyMatch(Object propertyValue) {
+        List<Object> elements = arrayCollectionToStream(propertyValue).collect(Collectors.toList());
+        return conditionValueIndexMap.entrySet().stream().allMatch(e -> isMatch(e.getValue(), elements.get(e.getKey())));
     }
 
-    @SuppressWarnings("unchecked")
-    private boolean isMatch(BeanClass elementType, PropertyExpression<E> expression, Object value) {
-        return value != null && !expression.isIntently() && expression.isMatch(elementType, value);
+    private boolean isMatch(PropertyExpression<E> expression, Object value) {
+        return value != null && !expression.isIntently()
+                && expression.isPropertyMatch(value);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
-        CollectionProducer<?, E> collectionProducer = cast(host.getChildOrDefault(property.getProperty()), CollectionProducer.class)
+        CollectionProducer<?, E> producer = cast(host.getChildOrDefault(property.getProperty()), CollectionProducer.class)
                 .orElseThrow(IllegalArgumentException::new);
-        conditionValueIndexMap.forEach((k, v) -> collectionProducer.addChild(k.toString(),
-                v.buildProducer(factorySet, collectionProducer)));
-        return collectionProducer;
+        conditionValueIndexMap.forEach((k, v) -> producer.addChild(k.toString(), v.buildProducer(factorySet, producer)));
+        return producer;
     }
 
     @Override

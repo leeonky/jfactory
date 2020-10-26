@@ -10,8 +10,8 @@ abstract class PropertyExpression<H> {
     protected final Property<H> property;
     private boolean intently = false;
 
-    public PropertyExpression(String property, BeanClass<H> hostClass) {
-        this.property = new Property<>(hostClass, property);
+    public PropertyExpression(Property<H> property) {
+        this.property = property;
     }
 
     public static <T> Map<String, PropertyExpression<T>> createPropertyExpressions(BeanClass<T> beanClass,
@@ -27,13 +27,11 @@ abstract class PropertyExpression<H> {
         return property.getProperty();
     }
 
-    @SuppressWarnings("unchecked")
     public boolean isMatch(H object) {
-        return object != null && !isIntently()
-                && isMatch((BeanClass) property.getReader().getType(), property.getValue(object));
+        return object != null && !isIntently() && isPropertyMatch(property.getValue(object));
     }
 
-    protected abstract <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue);
+    protected abstract boolean isPropertyMatch(Object propertyValue);
 
     public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<H> host);
 

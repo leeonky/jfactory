@@ -45,16 +45,14 @@ class ExpressionParser<T> {
                 matcher.group(GROUP_SPEC));
 
         if (index != null)
-            return new CollectionPropertyExpression<>(beanClass, property, Integer.valueOf(index),
-                    create(value, condition, index, beanClass.getPropertyWriter(property).getType(), mixInsSpec)
-                            .setIntently(intently));
-        return create(value, condition, property, beanClass, mixInsSpec).setIntently(intently);
+            return new CollectionPropertyExpression<>(Integer.valueOf(index),
+                    create(value, condition, mixInsSpec, new Property<>(beanClass.getPropertyWriter(property).getType(), index))
+                            .setIntently(intently), new Property<>(beanClass, property));
+        return create(value, condition, mixInsSpec, new Property<>(beanClass, property)).setIntently(intently);
     }
 
-    private <H> PropertyExpression<H> create(Object value, String condition, String property, BeanClass<H> hostClass,
-                                             MixInsSpec mixInsSpec) {
-        return condition != null ?
-                new SubObjectPropertyExpression<>(condition, value, mixInsSpec, property, hostClass)
-                : new SingleValuePropertyExpression<>(value, property, hostClass, mixInsSpec);
+    private <H> PropertyExpression<H> create(Object value, String condition, MixInsSpec mixInsSpec, Property<H> property) {
+        return condition != null ? new SubObjectPropertyExpression<>(condition, value, mixInsSpec, property)
+                : new SingleValuePropertyExpression<>(value, mixInsSpec, property);
     }
 }

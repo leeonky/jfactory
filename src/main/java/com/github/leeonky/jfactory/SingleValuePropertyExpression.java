@@ -8,15 +8,15 @@ class SingleValuePropertyExpression<H> extends PropertyExpression<H> {
     private final Object value;
     private final MixInsSpec mixInsSpec;
 
-    public SingleValuePropertyExpression(Object value, String property, BeanClass<H> hostClass, MixInsSpec mixInsSpec) {
-        super(property, hostClass);
+    public SingleValuePropertyExpression(Object value, MixInsSpec mixInsSpec, Property<H> property) {
+        super(property);
         this.value = value;
         this.mixInsSpec = mixInsSpec;
     }
 
     //TODO try to remove parameter propertyType
     @Override
-    protected <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue) {
+    protected boolean isPropertyMatch(Object propertyValue) {
         return Objects.equals(propertyValue, property.getReader().tryConvert(value));
     }
 

@@ -5,7 +5,6 @@ import com.github.leeonky.util.PropertyReader;
 import com.github.leeonky.util.PropertyWriter;
 
 public class Property<Bean> {
-
     private final String property;
     private final BeanClass<Bean> beanType;
 
