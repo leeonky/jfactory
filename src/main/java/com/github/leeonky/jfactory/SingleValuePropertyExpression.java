@@ -4,13 +4,12 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.Objects;
 
-class SingleValuePropertyExpression<H, B> extends PropertyExpression<H, B> {
+class SingleValuePropertyExpression<H> extends PropertyExpression<H> {
     private final Object value;
     private final MixInsSpec mixInsSpec;
 
-    public SingleValuePropertyExpression(Object value, String property,
-                                         BeanClass<H> hostClass, BeanClass<B> beanClass, MixInsSpec mixInsSpec) {
-        super(property, hostClass, beanClass);
+    public SingleValuePropertyExpression(Object value, String property, BeanClass<H> hostClass, MixInsSpec mixInsSpec) {
+        super(property, hostClass);
         this.value = value;
         this.mixInsSpec = mixInsSpec;
     }
@@ -22,7 +21,7 @@ class SingleValuePropertyExpression<H, B> extends PropertyExpression<H, B> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance) {
+    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
         BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
         if (isIntently())
             return mixInsSpec.toBuilder(factorySet, propertyType).createProducer(property, true);

@@ -6,13 +6,13 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
+class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     private final Map<String, Object> conditionValues = new LinkedHashMap<>();
     private final MixInsSpec mixInsSpec;
 
     public SubObjectPropertyExpression(String condition, Object value,
-                                       MixInsSpec mixInsSpec, String property, BeanClass<H> hostClass, BeanClass<B> beanClass) {
-        super(property, hostClass, beanClass);
+                                       MixInsSpec mixInsSpec, String property, BeanClass<H> hostClass) {
+        super(property, hostClass);
         this.mixInsSpec = mixInsSpec;
         conditionValues.put(condition, value);
     }
@@ -26,7 +26,7 @@ class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance) {
+    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
         BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
         if (isIntently())
             return toBuilder(factorySet, propertyType).createProducer(property, true);
@@ -41,12 +41,12 @@ class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
     }
 
     @Override
-    public PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression) {
+    public PropertyExpression<H> merge(PropertyExpression<H> propertyExpression) {
         return propertyExpression.mergeBy(this);
     }
 
     @Override
-    protected PropertyExpression<H, B> mergeBy(SubObjectPropertyExpression<H, B> another) {
+    protected PropertyExpression<H> mergeBy(SubObjectPropertyExpression<H> another) {
         another.conditionValues.putAll(conditionValues);
         conditionValues.clear();
         conditionValues.putAll(another.conditionValues);
@@ -54,5 +54,4 @@ class SubObjectPropertyExpression<H, B> extends PropertyExpression<H, B> {
         setIntently(isIntently() || another.isIntently());
         return this;
     }
-
 }

@@ -33,7 +33,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private void buildProducerFromInputProperties(FactorySet factorySet, DefaultBuilder<T> builder) {
-        builder.toExpressions().forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, this, instance.sub(p))));
+        builder.toExpressions().forEach((p, exp) -> addChild(p, exp.buildProducer(factorySet, this)));
     }
 
     private void buildProducersFromSpec(DefaultBuilder<T> builder) {
@@ -133,14 +133,12 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     public void link(List<PropertyChain> properties) {
-        if (properties.size() > 1) {
-            links.stream().filter(link -> link.contains(properties))
-                    .findFirst().orElseGet(() -> {
+        if (properties.size() > 1)
+            links.stream().filter(link -> link.contains(properties)).findFirst().orElseGet(() -> {
                 Link link = new Link();
                 links.add(link);
                 return link;
             }).merge(properties);
-        }
     }
 
     @Override

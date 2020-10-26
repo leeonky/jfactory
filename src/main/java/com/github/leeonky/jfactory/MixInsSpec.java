@@ -8,9 +8,9 @@ import java.util.Objects;
 
 import static java.util.Arrays.asList;
 
-public class MixInsSpec {
-    public String[] mixIns;
-    public String spec;
+class MixInsSpec {
+    private String[] mixIns;
+    private String spec;
 
     public MixInsSpec(String[] mixIns, String spec) {
         this.mixIns = mixIns;

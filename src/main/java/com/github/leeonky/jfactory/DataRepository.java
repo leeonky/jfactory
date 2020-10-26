@@ -14,7 +14,7 @@ public interface DataRepository {
     <T> Collection<T> queryAll(Class<T> type);
 
     default <T> Collection<T> query(BeanClass<T> type, Map<String, Object> criteria) {
-        Collection<PropertyExpression<T, T>> expressions = createPropertyExpressions(type, criteria).values();
+        Collection<PropertyExpression<T>> expressions = createPropertyExpressions(type, criteria).values();
         return queryAll(type.getType()).stream()
                 .filter(o -> expressions.stream().allMatch(e -> e.isMatch(o))).collect(Collectors.toList());
     }

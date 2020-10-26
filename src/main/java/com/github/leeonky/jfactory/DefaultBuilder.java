@@ -63,7 +63,7 @@ class DefaultBuilder<T> implements Builder<T> {
         objectFactory.collectSpec(mixIns, instance);
     }
 
-    public Map<String, PropertyExpression<T, T>> toExpressions() {
+    public Map<String, PropertyExpression<T>> toExpressions() {
         return createPropertyExpressions(objectFactory.getType(), properties);
     }
 

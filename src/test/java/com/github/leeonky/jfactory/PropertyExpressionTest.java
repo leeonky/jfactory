@@ -12,8 +12,8 @@ class PropertyExpressionTest {
 
         @Test
         void single_merge_single_should_return_the_new_one() {
-            SingleValuePropertyExpression<Object, Object> expression1 = new SingleValuePropertyExpression<>(null, null, null, null, null);
-            SingleValuePropertyExpression<Object, Object> expression2 = new SingleValuePropertyExpression<>(null, null, null, null, null);
+            SingleValuePropertyExpression<Object> expression1 = new SingleValuePropertyExpression<>(null, null, null, null);
+            SingleValuePropertyExpression<Object> expression2 = new SingleValuePropertyExpression<>(null, null, null, null);
 
             assertThat(expression1.merge(expression2)).isEqualTo(expression2);
         }

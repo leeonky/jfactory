@@ -5,19 +5,18 @@ import com.github.leeonky.util.BeanClass;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-abstract class PropertyExpression<H, B> {
+abstract class PropertyExpression<H> {
     protected final String property;
     protected final BeanClass<H> hostClass;
-    protected final BeanClass<B> beanClass;
     private boolean intently = false;
 
-    public PropertyExpression(String property, BeanClass<H> hostClass, BeanClass<B> beanClass) {
+    public PropertyExpression(String property, BeanClass<H> hostClass) {
         this.property = property;
         this.hostClass = hostClass;
-        this.beanClass = beanClass;
     }
 
-    public static <T> Map<String, PropertyExpression<T, T>> createPropertyExpressions(BeanClass<T> beanClass, Map<String, Object> criteria) {
+    public static <T> Map<String, PropertyExpression<T>> createPropertyExpressions(BeanClass<T> beanClass,
+                                                                                   Map<String, Object> criteria) {
         return criteria.entrySet().stream()
                 .map(e -> ExpressionParser.parse(beanClass, e.getKey(), e.getValue()))
                 .collect(Collectors.groupingBy(expression -> expression.property)).values().stream()
@@ -27,23 +26,23 @@ abstract class PropertyExpression<H, B> {
 
     @SuppressWarnings("unchecked")
     public boolean isMatch(H object) {
-        return object != null && !isIntently() && isMatch((BeanClass) hostClass.getPropertyReader(property).getType(),
-                hostClass.getPropertyValue(object, property));
+        return object != null && !isIntently()
+                && isMatch((BeanClass) hostClass.getPropertyReader(property).getType(), hostClass.getPropertyValue(object, property));
     }
 
     protected abstract <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue);
 
-    public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<H> host, Instance<B> instance);
+    public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<H> host);
 
-    protected PropertyExpression<H, B> merge(PropertyExpression<H, B> propertyExpression) {
+    protected PropertyExpression<H> merge(PropertyExpression<H> propertyExpression) {
         return propertyExpression;
     }
 
-    protected PropertyExpression<H, B> mergeBy(SubObjectPropertyExpression<H, B> conditionValueSet) {
+    protected PropertyExpression<H> mergeBy(SubObjectPropertyExpression<H> conditionValueSet) {
         return this;
     }
 
-    protected PropertyExpression<H, B> mergeBy(CollectionPropertyExpression<H, ?, B> collectionConditionValue) {
+    protected PropertyExpression<H> mergeBy(CollectionPropertyExpression<H, ?> collectionConditionValue) {
         return this;
     }
 
@@ -51,7 +50,7 @@ abstract class PropertyExpression<H, B> {
         return intently;
     }
 
-    protected PropertyExpression<H, B> setIntently(boolean intently) {
+    protected PropertyExpression<H> setIntently(boolean intently) {
         this.intently = intently;
         return this;
     }
