@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.github.leeonky.jfactory.ExpressionParser.parse;
+
 class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     private final Map<String, Object> conditionValues = new LinkedHashMap<>();
     private final MixInsSpec mixInsSpec;
@@ -17,24 +19,20 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected boolean isPropertyMatch(Object propertyValue) {
         return conditionValues.entrySet().stream()
-                .map(conditionValue -> ExpressionParser.parse((BeanClass<Object>) property.getReader().getType(),
-                        conditionValue.getKey(), conditionValue.getValue()))
+                .map(conditionValue -> parse(property.getReaderType(), conditionValue.getKey(), conditionValue.getValue()))
                 .allMatch(queryExpression -> queryExpression.isMatch(propertyValue));
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
-        BeanClass<?> propertyType = property.getWriter().getType();
         if (isIntently())
-            return toBuilder(factorySet, propertyType).createProducer(property.getProperty(), true);
-        Collection<?> queried = toBuilder(factorySet, property.getReader().getType()).queryAll();
+            return toBuilder(factorySet, property.getWriterType()).createProducer(property.getName(), true);
+        Collection<?> queried = toBuilder(factorySet, property.getReaderType()).queryAll();
         if (queried.isEmpty())
-            return toBuilder(factorySet, propertyType).createProducer(property.getProperty(), false);
-        return new FixedValueProducer(propertyType, queried.iterator().next());
+            return toBuilder(factorySet, property.getWriterType()).createProducer(property.getName(), false);
+        return new FixedValueProducer<>(property.getWriterType(), queried.iterator().next());
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
@@ -51,7 +49,7 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
         another.conditionValues.putAll(conditionValues);
         conditionValues.clear();
         conditionValues.putAll(another.conditionValues);
-        mixInsSpec.mergeSubObject(another.mixInsSpec, property.getBeanType(), property.getProperty());
+        mixInsSpec.mergeSubObject(another.mixInsSpec, property.getBeanType(), property.getName());
         setIntently(isIntently() || another.isIntently());
         return this;
     }

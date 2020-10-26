@@ -24,7 +24,7 @@ abstract class PropertyExpression<H> {
     }
 
     protected String getProperty() {
-        return property.getProperty();
+        return property.getName();
     }
 
     public boolean isMatch(H object) {

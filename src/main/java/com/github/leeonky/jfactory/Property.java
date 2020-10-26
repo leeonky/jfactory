@@ -14,22 +14,32 @@ public class Property<Bean> {
     }
 
     public PropertyReader<Bean> getReader() {
-        return getBeanType().getPropertyReader(getProperty());
+        return beanType.getPropertyReader(property);
     }
 
     public Object getValue(Bean object) {
-        return getBeanType().getPropertyValue(object, getProperty());
+        return beanType.getPropertyValue(object, property);
     }
 
-    public String getProperty() {
+    public String getName() {
         return property;
     }
 
     public PropertyWriter<Bean> getWriter() {
-        return getBeanType().getPropertyWriter(property);
+        return beanType.getPropertyWriter(property);
     }
 
     public BeanClass<Bean> getBeanType() {
         return beanType;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <P> BeanClass<P> getReaderType() {
+        return (BeanClass<P>) getReader().getType();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <P> BeanClass<P> getWriterType() {
+        return (BeanClass<P>) getWriter().getType();
     }
 }

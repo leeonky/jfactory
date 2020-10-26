@@ -1,7 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
-
 import java.util.Objects;
 
 class SingleValuePropertyExpression<H> extends PropertyExpression<H> {
@@ -14,18 +12,16 @@ class SingleValuePropertyExpression<H> extends PropertyExpression<H> {
         this.mixInsSpec = mixInsSpec;
     }
 
-    //TODO try to remove parameter propertyType
     @Override
     protected boolean isPropertyMatch(Object propertyValue) {
         return Objects.equals(propertyValue, property.getReader().tryConvert(value));
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
-        BeanClass<?> propertyType = property.getWriter().getType();
         if (isIntently())
-            return mixInsSpec.toBuilder(factorySet, propertyType).createProducer(property.getProperty(), true);
-        return new FixedValueProducer(propertyType, value);
+            return mixInsSpec.toBuilder(factorySet, property.getWriterType()).createProducer(property.getName(), true);
+        return new FixedValueProducer<>(property.getWriterType(), value);
     }
+
 }

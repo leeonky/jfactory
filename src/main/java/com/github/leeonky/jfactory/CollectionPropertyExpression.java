@@ -23,14 +23,13 @@ class CollectionPropertyExpression<H, E> extends PropertyExpression<H> {
     }
 
     private boolean isMatch(PropertyExpression<E> expression, Object value) {
-        return value != null && !expression.isIntently()
-                && expression.isPropertyMatch(value);
+        return value != null && !expression.isIntently() && expression.isPropertyMatch(value);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
-        CollectionProducer<?, E> producer = cast(host.getChildOrDefault(property.getProperty()), CollectionProducer.class)
+        CollectionProducer<?, E> producer = cast(host.getChildOrDefault(property.getName()), CollectionProducer.class)
                 .orElseThrow(IllegalArgumentException::new);
         conditionValueIndexMap.forEach((k, v) -> producer.addChild(k.toString(), v.buildProducer(factorySet, producer)));
         return producer;
