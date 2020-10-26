@@ -14,17 +14,18 @@ class SingleValuePropertyExpression<H> extends PropertyExpression<H> {
         this.mixInsSpec = mixInsSpec;
     }
 
+    //TODO try to remove parameter propertyType
     @Override
     protected <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue) {
-        return Objects.equals(propertyValue, hostClass.getConverter().tryConvert(propertyType.getType(), value));
+        return Objects.equals(propertyValue, property.getReader().tryConvert(value));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
-        BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
+        BeanClass<?> propertyType = property.getWriter().getType();
         if (isIntently())
-            return mixInsSpec.toBuilder(factorySet, propertyType).createProducer(property, true);
+            return mixInsSpec.toBuilder(factorySet, propertyType).createProducer(property.getProperty(), true);
         return new FixedValueProducer(propertyType, value);
     }
 }

@@ -33,7 +33,7 @@ class CollectionPropertyExpression<H, E> extends PropertyExpression<H> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
-        CollectionProducer<?, E> collectionProducer = cast(host.getChildOrDefault(property), CollectionProducer.class)
+        CollectionProducer<?, E> collectionProducer = cast(host.getChildOrDefault(property.getProperty()), CollectionProducer.class)
                 .orElseThrow(IllegalArgumentException::new);
         conditionValueIndexMap.forEach((k, v) -> collectionProducer.addChild(k.toString(),
                 v.buildProducer(factorySet, collectionProducer)));

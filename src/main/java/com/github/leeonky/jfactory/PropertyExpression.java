@@ -3,31 +3,34 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 abstract class PropertyExpression<H> {
-    protected final String property;
-    protected final BeanClass<H> hostClass;
+    protected final Property<H> property;
     private boolean intently = false;
 
     public PropertyExpression(String property, BeanClass<H> hostClass) {
-        this.property = property;
-        this.hostClass = hostClass;
+        this.property = new Property<>(hostClass, property);
     }
 
     public static <T> Map<String, PropertyExpression<T>> createPropertyExpressions(BeanClass<T> beanClass,
                                                                                    Map<String, Object> criteria) {
         return criteria.entrySet().stream()
                 .map(e -> ExpressionParser.parse(beanClass, e.getKey(), e.getValue()))
-                .collect(Collectors.groupingBy(expression -> expression.property)).values().stream()
+                .collect(Collectors.groupingBy(PropertyExpression::getProperty)).values().stream()
                 .map(expressions -> expressions.stream().reduce(PropertyExpression::merge).get())
-                .collect(Collectors.toMap(q -> q.property, q -> q));
+                .collect(Collectors.toMap(PropertyExpression::getProperty, Function.identity()));
+    }
+
+    protected String getProperty() {
+        return property.getProperty();
     }
 
     @SuppressWarnings("unchecked")
     public boolean isMatch(H object) {
         return object != null && !isIntently()
-                && isMatch((BeanClass) hostClass.getPropertyReader(property).getType(), hostClass.getPropertyValue(object, property));
+                && isMatch((BeanClass) property.getReader().getType(), property.getValue(object));
     }
 
     protected abstract <P> boolean isMatch(BeanClass<P> propertyType, P propertyValue);

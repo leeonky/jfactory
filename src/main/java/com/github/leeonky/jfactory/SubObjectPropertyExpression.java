@@ -27,12 +27,12 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
-        BeanClass<?> propertyType = hostClass.getPropertyWriter(property).getType();
+        BeanClass<?> propertyType = property.getWriter().getType();
         if (isIntently())
-            return toBuilder(factorySet, propertyType).createProducer(property, true);
-        Collection<?> queried = toBuilder(factorySet, hostClass.getPropertyReader(property).getType()).queryAll();
+            return toBuilder(factorySet, propertyType).createProducer(property.getProperty(), true);
+        Collection<?> queried = toBuilder(factorySet, property.getReader().getType()).queryAll();
         if (queried.isEmpty())
-            return toBuilder(factorySet, propertyType).createProducer(property, false);
+            return toBuilder(factorySet, propertyType).createProducer(property.getProperty(), false);
         return new FixedValueProducer(propertyType, queried.iterator().next());
     }
 
@@ -50,7 +50,7 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
         another.conditionValues.putAll(conditionValues);
         conditionValues.clear();
         conditionValues.putAll(another.conditionValues);
-        mixInsSpec.mergeSubObject(another.mixInsSpec, hostClass, property);
+        mixInsSpec.mergeSubObject(another.mixInsSpec, property.getBeanType(), property.getProperty());
         setIntently(isIntently() || another.isIntently());
         return this;
     }
