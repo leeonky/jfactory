@@ -21,38 +21,45 @@ class ExpressionParser<T> {
     private static final int GROUP_CONDITION = 11;
     private final BeanClass<T> beanClass;
     private final Matcher matcher;
+    private final Object value;
+    private final String property;
+    private final String index;
+    private final boolean intently;
 
-    private ExpressionParser(BeanClass<T> beanClass, String expression) {
-        this.beanClass = beanClass;
+    private ExpressionParser(BeanClass<T> beanClass, String expression, Object value) {
         matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_COLLECTION_INDEX +
                 PATTERN_MIX_IN_SPEC + PATTERN_INTENTLY + PATTERN_CONDITION).matcher(expression);
         if (!matcher.matches())
             throw new IllegalArgumentException(String.format("Invalid property `%s` for %s creation.",
                     expression, beanClass.getName()));
+
+        this.beanClass = beanClass;
+        this.value = value;
+        property = matcher.group(GROUP_PROPERTY);
+        index = matcher.group(GROUP_COLLECTION_INDEX);
+        intently = matcher.group(GROUP_INTENTLY) != null;
     }
 
     public static <T> PropertyExpression<T> parse(BeanClass<T> beanClass, String expression, Object value) {
-        return new ExpressionParser<>(beanClass, expression).create(value);
+        return new ExpressionParser<>(beanClass, expression, value).create();
     }
 
-    private PropertyExpression<T> create(Object value) {
-        String property = matcher.group(GROUP_PROPERTY);
-        String index = matcher.group(GROUP_COLLECTION_INDEX);
-        boolean intently = matcher.group(GROUP_INTENTLY) != null;
-        String condition = matcher.group(GROUP_CONDITION);
-        MixInsSpec mixInsSpec = new MixInsSpec(
-                matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
-                matcher.group(GROUP_SPEC));
-
+    private PropertyExpression<T> create() {
+        MixInsSpec mixInsSpec = getMixInsSpec();
+        SupKeyValue supKeyValue = getSupKeyValue();
         if (index != null)
             return new CollectionPropertyExpression<>(Integer.valueOf(index),
-                    create(value, condition, mixInsSpec, new Property<>(beanClass.getPropertyWriter(property).getType(), index))
-                            .setIntently(intently), new Property<>(beanClass, property));
-        return create(value, condition, mixInsSpec, new Property<>(beanClass, property)).setIntently(intently);
+                    supKeyValue.createSubExpression(new Property<>(beanClass.getPropertyWriter(property).getType(), index),
+                            mixInsSpec, value).setIntently(intently), new Property<>(beanClass, property));
+        return supKeyValue.createSubExpression(new Property<>(beanClass, property), mixInsSpec, value).setIntently(intently);
     }
 
-    private <H> PropertyExpression<H> create(Object value, String condition, MixInsSpec mixInsSpec, Property<H> property) {
-        return condition != null ? new SubObjectPropertyExpression<>(condition, value, mixInsSpec, property)
-                : new SingleValuePropertyExpression<>(value, mixInsSpec, property);
+    private SupKeyValue getSupKeyValue() {
+        return new SupKeyValue(matcher.group(GROUP_CONDITION), value);
+    }
+
+    private MixInsSpec getMixInsSpec() {
+        return new MixInsSpec(matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
+                matcher.group(GROUP_SPEC));
     }
 }

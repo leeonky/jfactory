@@ -17,6 +17,7 @@ class MixInsSpec {
         this.spec = spec;
     }
 
+    //TODO try to remove hostClass property
     private void mergeMixIn(MixInsSpec another, BeanClass<?> hostClass, String property) {
         if (mixIns.length != 0 && another.mixIns.length != 0
                 && !new HashSet<>(asList(mixIns)).equals(new HashSet<>(asList(another.mixIns))))

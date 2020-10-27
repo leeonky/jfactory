@@ -11,9 +11,9 @@ import static com.github.leeonky.util.BeanClass.cast;
 class CollectionPropertyExpression<H, E> extends PropertyExpression<H> {
     private final Map<Integer, PropertyExpression<E>> conditionValueIndexMap = new LinkedHashMap<>();
 
-    public CollectionPropertyExpression(int index, PropertyExpression<E> propertyExpression, Property<H> property) {
+    public CollectionPropertyExpression(int index, PropertyExpression<E> elementExpression, Property<H> property) {
         super(property);
-        conditionValueIndexMap.put(index, propertyExpression);
+        conditionValueIndexMap.put(index, elementExpression);
     }
 
     @Override

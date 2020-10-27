@@ -3,25 +3,20 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import static com.github.leeonky.jfactory.ExpressionParser.parse;
 
 class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
-    private final Map<String, Object> conditionValues = new LinkedHashMap<>();
+    private final SupKeyValue supKeyValue;
     private final MixInsSpec mixInsSpec;
 
-    public SubObjectPropertyExpression(String condition, Object value, MixInsSpec mixInsSpec, Property<H> property) {
+    public SubObjectPropertyExpression(SupKeyValue supKeyValue, MixInsSpec mixInsSpec, Property<H> property) {
         super(property);
+        this.supKeyValue = supKeyValue;
         this.mixInsSpec = mixInsSpec;
-        conditionValues.put(condition, value);
     }
 
     @Override
     protected boolean isPropertyMatch(Object propertyValue) {
-        return conditionValues.entrySet().stream()
-                .map(conditionValue -> parse(property.getReaderType(), conditionValue.getKey(), conditionValue.getValue()))
+        return supKeyValue.parseExpressions(property.getReaderType())
                 .allMatch(queryExpression -> queryExpression.isMatch(propertyValue));
     }
 
@@ -36,7 +31,7 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-        return mixInsSpec.toBuilder(factorySet, propertyType).properties(conditionValues);
+        return supKeyValue.apply(mixInsSpec.toBuilder(factorySet, propertyType));
     }
 
     @Override
@@ -46,11 +41,10 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
 
     @Override
     protected PropertyExpression<H> mergeBy(SubObjectPropertyExpression<H> another) {
-        another.conditionValues.putAll(conditionValues);
-        conditionValues.clear();
-        conditionValues.putAll(another.conditionValues);
+        supKeyValue.merge(another.supKeyValue);
         mixInsSpec.mergeSubObject(another.mixInsSpec, property.getBeanType(), property.getName());
         setIntently(isIntently() || another.isIntently());
         return this;
     }
+
 }
