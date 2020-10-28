@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.Property;
+
 import java.util.Objects;
 
 class SingleValuePropertyExpression<H> extends PropertyExpression<H> {

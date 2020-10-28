@@ -5,6 +5,8 @@ import com.github.leeonky.util.BeanClass;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+//TODO move expression classes to new package
 class ExpressionParser<T> {
     private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
     private static final String PATTERN_COLLECTION_INDEX = "(\\[(\\d+)])?";
@@ -22,9 +24,6 @@ class ExpressionParser<T> {
     private final BeanClass<T> beanClass;
     private final Matcher matcher;
     private final Object value;
-    private final String property;
-    private final String index;
-    private final boolean intently;
 
     private ExpressionParser(BeanClass<T> beanClass, String expression, Object value) {
         matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_COLLECTION_INDEX +
@@ -35,9 +34,6 @@ class ExpressionParser<T> {
 
         this.beanClass = beanClass;
         this.value = value;
-        property = matcher.group(GROUP_PROPERTY);
-        index = matcher.group(GROUP_COLLECTION_INDEX);
-        intently = matcher.group(GROUP_INTENTLY) != null;
     }
 
     public static <T> PropertyExpression<T> parse(BeanClass<T> beanClass, String expression, Object value) {
@@ -45,13 +41,18 @@ class ExpressionParser<T> {
     }
 
     private PropertyExpression<T> create() {
+        String property = matcher.group(GROUP_PROPERTY);
+        String index = matcher.group(GROUP_COLLECTION_INDEX);
+        boolean intently = matcher.group(GROUP_INTENTLY) != null;
+
         MixInsSpec mixInsSpec = getMixInsSpec();
         SupKeyValue supKeyValue = getSupKeyValue();
         if (index != null)
             return new CollectionPropertyExpression<>(Integer.valueOf(index),
-                    supKeyValue.createSubExpression(new Property<>(beanClass.getPropertyWriter(property).getType(), index),
-                            mixInsSpec, value).setIntently(intently), new Property<>(beanClass, property));
-        return supKeyValue.createSubExpression(new Property<>(beanClass, property), mixInsSpec, value).setIntently(intently);
+                    supKeyValue.createSubExpression(beanClass.getPropertyWriter(property).getType().getProperty(index),
+                            mixInsSpec, value).setIntently(intently), beanClass.getProperty(property));
+
+        return supKeyValue.createSubExpression(beanClass.getProperty(property), mixInsSpec, value).setIntently(intently);
     }
 
     private SupKeyValue getSupKeyValue() {
