@@ -11,10 +11,10 @@ import static com.github.leeonky.jfactory.ExpressionParser.parse;
 
 class SupKeyValue {
     private final Map<String, Object> keyValues = new LinkedHashMap<>();
-    private final boolean simgleValue;
+    private final boolean singleValue;
 
     public SupKeyValue(String key, Object value) {
-        simgleValue = key != null;
+        singleValue = key != null;
         keyValues.put(key, value);
     }
 
@@ -33,7 +33,7 @@ class SupKeyValue {
     }
 
     public <H> PropertyExpression<H> createSubExpression(Property<H> property, MixInsSpec mixInsSpec, Object value) {
-        return simgleValue ? new SubObjectPropertyExpression<>(this, mixInsSpec, property)
+        return singleValue ? new SubObjectPropertyExpression<>(this, mixInsSpec, property)
                 : new SingleValuePropertyExpression<>(value, mixInsSpec, property);
     }
 }

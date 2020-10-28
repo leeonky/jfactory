@@ -1,6 +1,9 @@
 package com.github.leeonky.jfactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static com.github.leeonky.jfactory.PropertyExpression.createPropertyExpressions;
 import static com.github.leeonky.util.BeanClass.cast;
@@ -10,12 +13,13 @@ import static java.util.Objects.hash;
 class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
-    private final Map<String, Object> properties = new LinkedHashMap<>();
     private final Set<String> mixIns = new LinkedHashSet<>();
+    private final TypeProperties<T> typeProperties;
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
         this.factorySet = factorySet;
         this.objectFactory = objectFactory;
+        typeProperties = new TypeProperties<>(objectFactory.getType());
     }
 
     @Override
@@ -37,7 +41,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     private DefaultBuilder<T> copy() {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, factorySet);
-        builder.properties.putAll(properties);
+        builder.typeProperties.merge(typeProperties);
         builder.mixIns.addAll(mixIns);
         return builder;
     }
@@ -45,7 +49,7 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> newBuilder = copy();
-        newBuilder.properties.putAll(properties);
+        newBuilder.typeProperties.putAll(properties);
         return newBuilder;
     }
 
@@ -56,7 +60,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Collection<T> queryAll() {
-        return factorySet.getDataRepository().query(objectFactory.getType(), properties);
+        return factorySet.getDataRepository().query(typeProperties.type, typeProperties.properties);
     }
 
     public void collectSpec(Instance<T> instance) {
@@ -64,18 +68,18 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     public Map<String, PropertyExpression<T>> toExpressions() {
-        return createPropertyExpressions(objectFactory.getType(), properties);
+        return createPropertyExpressions(typeProperties.type, typeProperties.properties);
     }
 
     @Override
     public int hashCode() {
-        return hash(DefaultBuilder.class, properties, mixIns);
+        return hash(DefaultBuilder.class, typeProperties, mixIns);
     }
 
     @Override
     public boolean equals(Object another) {
         return cast(another, DefaultBuilder.class)
-                .map(builder -> properties.equals(builder.properties) && mixIns.equals(builder.mixIns))
+                .map(builder -> typeProperties.equals(builder.typeProperties) && mixIns.equals(builder.mixIns))
                 .orElseGet(() -> super.equals(another));
     }
 }
