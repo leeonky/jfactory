@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 class ObjectFactorySet {
-    private final PropertyValueBuilders propertyValueBuilders = new PropertyValueBuilders();
+    private final DefaultValueBuilders defaultValueBuilders = new DefaultValueBuilders();
     private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
     private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new HashMap<>();
@@ -33,7 +33,7 @@ class ObjectFactorySet {
         });
     }
 
-    public <T> Optional<PropertyValueBuilder<T>> queryPropertyValueFactory(BeanClass<T> propertyType) {
-        return propertyValueBuilders.queryPropertyValueFactory(propertyType.getType());
+    public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueFactory(BeanClass<T> propertyType) {
+        return defaultValueBuilders.queryDefaultValueFactory(propertyType.getType());
     }
 }

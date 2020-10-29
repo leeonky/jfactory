@@ -2,10 +2,10 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.cast;
@@ -41,11 +41,16 @@ class TypeProperties<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public Map<String, PropertyExpression<T>> createPropertyExpressions() {
+    public Collection<T> select(Collection<T> data) {
+        Collection<PropertyExpression<T>> expressions = toExpressions();
+        return data.stream().filter(o -> expressions.stream().allMatch(e -> e.isMatch(o))).collect(Collectors.toList());
+    }
+
+    public Collection<PropertyExpression<T>> toExpressions() {
         return properties.entrySet().stream()
                 .map(e -> ExpressionParser.parse(type, e.getKey(), e.getValue()))
                 .collect(Collectors.groupingBy(PropertyExpression::getProperty)).values().stream()
                 .map(expressions -> expressions.stream().reduce(PropertyExpression::merge).get())
-                .collect(Collectors.toMap(PropertyExpression::getProperty, Function.identity()));
+                .collect(Collectors.toList());
     }
 }

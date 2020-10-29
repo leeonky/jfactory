@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class PropertyValueBuildersTest {
+class DefaultValueBuildersTest {
 
     @Test
     void create_string() {
@@ -22,26 +22,26 @@ class PropertyValueBuildersTest {
 
     @Test
     void should_raise_error_when_invalid_generic_args() {
-        assertThrows(IllegalStateException.class, () -> new InvalidGenericArgPropertyValueBuilder<>().getType());
+        assertThrows(IllegalStateException.class, () -> new InvalidGenericArgDefaultValueBuilder<>().getType());
     }
 
     private void assertValue(Class<?> type, int sequence, String property, Object expected) {
-        assertThat(new PropertyValueBuilders().queryPropertyValueFactory(type).get()
+        assertThat(new DefaultValueBuilders().queryDefaultValueFactory(type).get()
                 .create(null, new Instance<>(sequence, null).sub(property))).isEqualTo(expected);
     }
 
     private void assertValue(Class<?> type, int sequence, Object expected) {
-        assertThat(new PropertyValueBuilders().queryPropertyValueFactory(type).get()
+        assertThat(new DefaultValueBuilders().queryDefaultValueFactory(type).get()
                 .create(null, new Instance<>(sequence, null))).isEqualTo(expected);
     }
 
     @Test
     void default_value_builder_create_default_value() {
-        assertThat(new PropertyValueBuilders.DefaultValueBuilder<>(BeanClass.create(int.class)).create(null, null))
+        assertThat(new DefaultValueBuilders.DefaultTypeBuilder<>(BeanClass.create(int.class)).create(null, null))
                 .isInstanceOf(Integer.class);
     }
 
-    public static class InvalidGenericArgPropertyValueBuilder<V> implements PropertyValueBuilder<V> {
+    public static class InvalidGenericArgDefaultValueBuilder<V> implements DefaultValueBuilder<V> {
         @Override
         public <T> V create(BeanClass<T> type, Instance<T> instance) {
             return null;

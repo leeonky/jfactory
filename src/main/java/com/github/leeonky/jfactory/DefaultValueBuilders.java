@@ -9,19 +9,19 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
-class PropertyValueBuilders {
-    private final Map<Class<?>, PropertyValueBuilder<?>> propertyValueBuilders = new HashMap<Class<?>, PropertyValueBuilder<?>>() {{
-        put(String.class, new StringPropertyValueBuilder());
-        put(Integer.class, new IntegerPropertyValueBuilder());
+class DefaultValueBuilders {
+    private final Map<Class<?>, DefaultValueBuilder<?>> defaultValueBuilders = new HashMap<Class<?>, DefaultValueBuilder<?>>() {{
+        put(String.class, new DefaultStringBuilder());
+        put(Integer.class, new DefaultIntegerBuilder());
         put(int.class, get(Integer.class));
     }};
 
     @SuppressWarnings("unchecked")
-    public <T> Optional<PropertyValueBuilder<T>> queryPropertyValueFactory(Class<T> type) {
-        return ofNullable((PropertyValueBuilder<T>) propertyValueBuilders.get(type));
+    public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueFactory(Class<T> type) {
+        return ofNullable((DefaultValueBuilder<T>) defaultValueBuilders.get(type));
     }
 
-    public static class StringPropertyValueBuilder implements PropertyValueBuilder<String> {
+    public static class DefaultStringBuilder implements DefaultValueBuilder<String> {
 
         @Override
         public <T> String create(BeanClass<T> type, Instance<T> instance) {
@@ -30,7 +30,7 @@ class PropertyValueBuilders {
         }
     }
 
-    public static class IntegerPropertyValueBuilder implements PropertyValueBuilder<Integer> {
+    public static class DefaultIntegerBuilder implements DefaultValueBuilder<Integer> {
 
         @Override
         public <T> Integer create(BeanClass<T> type, Instance<T> instance) {
@@ -38,10 +38,10 @@ class PropertyValueBuilders {
         }
     }
 
-    public static class DefaultValueBuilder<T> implements PropertyValueBuilder<T> {
+    public static class DefaultTypeBuilder<T> implements DefaultValueBuilder<T> {
         private final BeanClass<T> type;
 
-        public DefaultValueBuilder(BeanClass<T> type) {
+        public DefaultTypeBuilder(BeanClass<T> type) {
             this.type = type;
         }
 

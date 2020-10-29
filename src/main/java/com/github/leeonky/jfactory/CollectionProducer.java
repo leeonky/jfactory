@@ -39,14 +39,14 @@ class CollectionProducer<T, C> extends Producer<C> {
         producerList.set(Integer.valueOf(property), producer, this::createPlaceholder);
     }
 
-    private PropertyValueProducer<T, ?> createPlaceholder(Integer index) {
-        return new PropertyValueProducer<>(beanType,
-                getPropertyValueBuilder(getType().getElementType()), instance.element(index));
+    private DefaultValueProducer<T, ?> createPlaceholder(Integer index) {
+        return new DefaultValueProducer<>(beanType,
+                getDefaultValueBuilder(getType().getElementType()), instance.element(index));
     }
 
-    private <E> PropertyValueBuilder<E> getPropertyValueBuilder(BeanClass<E> elementType) {
-        return objectFactorySet.queryPropertyValueFactory(elementType)
-                .orElseGet(() -> new PropertyValueBuilders.DefaultValueBuilder<>(elementType));
+    private <E> DefaultValueBuilder<E> getDefaultValueBuilder(BeanClass<E> elementType) {
+        return objectFactorySet.queryDefaultValueFactory(elementType)
+                .orElseGet(() -> new DefaultValueBuilders.DefaultTypeBuilder<>(elementType));
     }
 
     @Override
