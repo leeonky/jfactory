@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.github.leeonky.jfactory.PropertyExpression.createPropertyExpressions;
 import static com.github.leeonky.util.BeanClass.cast;
 import static java.util.Arrays.asList;
 import static java.util.Objects.hash;
@@ -60,7 +60,9 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Collection<T> queryAll() {
-        return factorySet.getDataRepository().query(typeProperties.type, typeProperties.properties);
+        Collection<PropertyExpression<T>> expressions = typeProperties.createPropertyExpressions().values();
+        return factorySet.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
+                .filter(o -> expressions.stream().allMatch(e -> e.isMatch(o))).collect(Collectors.toList());
     }
 
     public void collectSpec(Instance<T> instance) {
@@ -68,7 +70,7 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     public Map<String, PropertyExpression<T>> toExpressions() {
-        return createPropertyExpressions(typeProperties.type, typeProperties.properties);
+        return typeProperties.createPropertyExpressions();
     }
 
     @Override

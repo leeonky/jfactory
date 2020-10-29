@@ -22,7 +22,7 @@ class ObjectProducer<T> extends Producer<T> {
         this.factorySet = factorySet;
         this.builder = builder;
         this.intently = intently;
-        instance = objectFactory.createInstance(factorySet.getTypeSequence());
+        instance = objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()));
         establishProducers(factorySet, builder);
     }
 

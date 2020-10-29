@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.Arrays;
 
 public class FactorySet {
@@ -58,5 +60,9 @@ public class FactorySet {
 
     public <T> T create(String... mixInsAndSpec) {
         return this.<T>spec(mixInsAndSpec).create();
+    }
+
+    public int newSequence(BeanClass<?> type) {
+        return getTypeSequence().generate(type.getType());
     }
 }

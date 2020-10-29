@@ -1,11 +1,6 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Property;
-
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 abstract class PropertyExpression<H> {
     protected final Property<H> property;
@@ -13,15 +8,6 @@ abstract class PropertyExpression<H> {
 
     public PropertyExpression(Property<H> property) {
         this.property = property;
-    }
-
-    public static <T> Map<String, PropertyExpression<T>> createPropertyExpressions(BeanClass<T> beanClass,
-                                                                                   Map<String, Object> criteria) {
-        return criteria.entrySet().stream()
-                .map(e -> ExpressionParser.parse(beanClass, e.getKey(), e.getValue()))
-                .collect(Collectors.groupingBy(PropertyExpression::getProperty)).values().stream()
-                .map(expressions -> expressions.stream().reduce(PropertyExpression::merge).get())
-                .collect(Collectors.toMap(PropertyExpression::getProperty, Function.identity()));
     }
 
     protected String getProperty() {

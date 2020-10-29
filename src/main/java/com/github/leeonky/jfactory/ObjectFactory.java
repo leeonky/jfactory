@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 class ObjectFactory<T> implements Factory<T> {
     private final BeanClass<T> type;
-    private Function<Instance<T>, T> constructor = this::construct;
+    private Function<Instance<T>, T> constructor = instance -> getType().newInstance();
     private Consumer<Instance<T>> spec = (instance) -> {
     };
     private Map<String, Consumer<Instance<T>>> mixIns = new HashMap<>();
@@ -20,7 +20,7 @@ class ObjectFactory<T> implements Factory<T> {
         this.type = type;
     }
 
-    public Spec<T> createSpec() {
+    protected Spec<T> createSpec() {
         return new Spec<>();
     }
 
@@ -42,10 +42,6 @@ class ObjectFactory<T> implements Factory<T> {
         return this;
     }
 
-    private T construct(Instance<T> _ignore) {
-        return type.newInstance();
-    }
-
     public final T create(Instance<T> instance) {
         return constructor.apply(instance);
     }
@@ -61,7 +57,7 @@ class ObjectFactory<T> implements Factory<T> {
         })).forEach(spec -> spec.accept(instance));
     }
 
-    public Instance<T> createInstance(TypeSequence typeSequence) {
-        return new Instance<>(typeSequence.generate(getType().getType()), createSpec());
+    public Instance<T> createInstance(int sequence) {
+        return new Instance<>(sequence, createSpec());
     }
 }
