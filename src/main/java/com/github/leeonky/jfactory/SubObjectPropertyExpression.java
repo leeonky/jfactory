@@ -5,19 +5,21 @@ import com.github.leeonky.util.Property;
 
 import java.util.Collection;
 
+import static java.lang.String.format;
+
 class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
-    private final SupKeyValue supKeyValue;
+    private final KeyValueCollection keyValueCollection;
     private final MixInsSpec mixInsSpec;
 
-    public SubObjectPropertyExpression(SupKeyValue supKeyValue, MixInsSpec mixInsSpec, Property<H> property) {
+    public SubObjectPropertyExpression(KeyValueCollection keyValueCollection, MixInsSpec mixInsSpec, Property<H> property) {
         super(property);
-        this.supKeyValue = supKeyValue;
+        this.keyValueCollection = keyValueCollection;
         this.mixInsSpec = mixInsSpec;
     }
 
     @Override
     protected boolean isPropertyMatch(Object propertyValue) {
-        return supKeyValue.parseExpressions(property.getReaderType())
+        return keyValueCollection.parseExpressions(property.getReaderType())
                 .allMatch(queryExpression -> queryExpression.isMatch(propertyValue));
     }
 
@@ -32,7 +34,7 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-        return supKeyValue.apply(mixInsSpec.toBuilder(factorySet, propertyType));
+        return keyValueCollection.apply(mixInsSpec.toBuilder(factorySet, propertyType));
     }
 
     @Override
@@ -42,10 +44,9 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
 
     @Override
     protected PropertyExpression<H> mergeBy(SubObjectPropertyExpression<H> another) {
-        supKeyValue.merge(another.supKeyValue);
-        mixInsSpec.mergeSubObject(another.mixInsSpec, property.getBeanType(), property.getName());
+        keyValueCollection.merge(another.keyValueCollection);
+        mixInsSpec.merge(another.mixInsSpec, format("%s.%s", property.getBeanType().getName(), property.getName()));
         setIntently(isIntently() || another.isIntently());
         return this;
     }
-
 }

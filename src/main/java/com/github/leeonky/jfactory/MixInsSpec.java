@@ -17,11 +17,10 @@ class MixInsSpec {
         this.spec = spec;
     }
 
-    //TODO try to remove hostClass property
-    private void mergeMixIn(MixInsSpec another, BeanClass<?> hostClass, String property) {
+    private void mergeMixIn(MixInsSpec another, String property) {
         if (isDifferentMixIns(another))
-            throw new IllegalArgumentException(String.format("Cannot merge different mix-in %s and %s for %s.%s",
-                    Arrays.toString(mixIns), Arrays.toString(another.mixIns), hostClass.getName(), property));
+            throw new IllegalArgumentException(String.format("Cannot merge different mix-in %s and %s for %s",
+                    Arrays.toString(mixIns), Arrays.toString(another.mixIns), property));
         if (mixIns.length == 0)
             mixIns = another.mixIns;
     }
@@ -31,10 +30,10 @@ class MixInsSpec {
                 && !new HashSet<>(asList(mixIns)).equals(new HashSet<>(asList(another.mixIns)));
     }
 
-    private void mergeSpec(MixInsSpec another, BeanClass<?> hostClass, String property) {
+    private void mergeSpec(MixInsSpec another, String property) {
         if (isDifferentSpec(another))
-            throw new IllegalArgumentException(String.format("Cannot merge different spec `%s` and `%s` for %s.%s",
-                    spec, another.spec, hostClass.getName(), property));
+            throw new IllegalArgumentException(String.format("Cannot merge different spec `%s` and `%s` for %s",
+                    spec, another.spec, property));
         if (spec == null)
             spec = another.spec;
     }
@@ -48,8 +47,8 @@ class MixInsSpec {
                 .mixIn(mixIns);
     }
 
-    public void mergeSubObject(MixInsSpec another, BeanClass<?> hostClass, String property) {
-        mergeMixIn(another, hostClass, property);
-        mergeSpec(another, hostClass, property);
+    public void merge(MixInsSpec another, String property) {
+        mergeMixIn(another, property);
+        mergeSpec(another, property);
     }
 }

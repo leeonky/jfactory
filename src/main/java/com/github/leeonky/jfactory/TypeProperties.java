@@ -3,7 +3,6 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -11,31 +10,34 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.util.BeanClass.cast;
 import static java.util.Objects.hash;
 
+//TODO to be instead by KeyValueCollection
+@Deprecated
 class TypeProperties<T> {
-    public final Map<String, Object> properties = new LinkedHashMap<>();
-    public final BeanClass<T> type;
+    private final KeyValueCollection keyValueCollection = new KeyValueCollection();
+
+    private final BeanClass<T> type;
 
     public TypeProperties(BeanClass<T> type) {
         this.type = type;
     }
 
     public void merge(TypeProperties<T> another) {
-        properties.putAll(another.properties);
+        keyValueCollection.merge(another.keyValueCollection);
     }
 
     public void putAll(Map<String, ?> properties) {
-        this.properties.putAll(properties);
+        properties.forEach(keyValueCollection::add);
     }
 
     @Override
     public int hashCode() {
-        return hash(TypeProperties.class, type, properties);
+        return hash(TypeProperties.class, type, keyValueCollection);
     }
 
     @Override
     public boolean equals(Object another) {
         return cast(another, TypeProperties.class)
-                .map(typeProperties -> Objects.equals(properties, typeProperties.properties)
+                .map(typeProperties -> Objects.equals(keyValueCollection, typeProperties.keyValueCollection)
                         && Objects.equals(type, typeProperties.type))
                 .orElseGet(() -> super.equals(another));
     }
@@ -46,8 +48,7 @@ class TypeProperties<T> {
     }
 
     public Collection<PropertyExpression<T>> toExpressions() {
-        return properties.entrySet().stream()
-                .map(e -> ExpressionParser.parse(type, e.getKey(), e.getValue()))
+        return keyValueCollection.parseExpressions(type)
                 .collect(Collectors.groupingBy(PropertyExpression::getProperty)).values().stream()
                 .map(expressions -> expressions.stream().reduce(PropertyExpression::merge).get())
                 .collect(Collectors.toList());
