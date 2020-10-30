@@ -27,17 +27,16 @@ class TypeProperties<T> {
         this.properties.putAll(properties);
     }
 
-    //TODO missing type
     @Override
     public int hashCode() {
-        return hash(TypeProperties.class, properties);
+        return hash(TypeProperties.class, type, properties);
     }
 
-    //TODO missing compare type
     @Override
     public boolean equals(Object another) {
         return cast(another, TypeProperties.class)
-                .map(typeProperties -> Objects.equals(properties, typeProperties.properties))
+                .map(typeProperties -> Objects.equals(properties, typeProperties.properties)
+                        && Objects.equals(type, typeProperties.type))
                 .orElseGet(() -> super.equals(another));
     }
 

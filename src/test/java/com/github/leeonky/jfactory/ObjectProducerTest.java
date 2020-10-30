@@ -17,26 +17,20 @@ class ObjectProducerTest {
 
     private FactorySet factorySet = new FactorySet();
 
-    private ObjectProducer buildProducer(Function<Builder<Bean>, Builder<Bean>> modifyBuilder, boolean intently) {
-        ObjectFactory<Bean> objectFactory = factorySet.getObjectFactorySet().queryObjectFactory(Bean.class);
-        DefaultBuilder<Bean> builder = (DefaultBuilder<Bean>) modifyBuilder.apply(new DefaultBuilder<>(objectFactory, factorySet));
-        Instance<Bean> instance = objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()));
-        ObjectProducer<Bean> objectProducer = new ObjectProducer<>(factorySet, objectFactory,
-                builder, intently, instance);
-        builder.establishChildProducers(objectProducer, instance);
-        return objectProducer;
+    private Producer buildProducer(Function<Builder<Bean>, Builder<Bean>> modifyBuilder, boolean intently) {
+        return modifyBuilder.apply(factorySet.type(Bean.class)).createProducer(intently);
     }
 
-    private ObjectProducer sameProducer() {
+    private Producer sameProducer() {
         return buildProducer(builder -> builder.property("intValue", 1).mixIn("a bean"), false);
     }
 
-    private ObjectProducer sameIntentlyProducer() {
+    private Producer sameIntentlyProducer() {
         return buildProducer(builder -> builder.property("intValue", 1).mixIn("a bean"), true);
     }
 
-    private ObjectProducer checkChangeSameProducer() {
-        ObjectProducer another = sameProducer();
+    private Producer checkChangeSameProducer() {
+        Producer another = sameProducer();
         another.checkChange();
         return another;
     }

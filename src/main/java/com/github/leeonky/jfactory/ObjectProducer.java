@@ -16,7 +16,8 @@ class ObjectProducer<T> extends Producer<T> {
     private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
     private final List<Link> links = new ArrayList<>();
 
-    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder, boolean intently, Instance<T> instance) {
+    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder,
+                          boolean intently, Instance<T> instance) {
         super(objectFactory.getType());
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
