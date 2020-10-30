@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static java.util.function.Function.identity;
 
 public class PropertySpec<T> {
     private final Spec<T> spec;
@@ -34,7 +35,7 @@ public class PropertySpec<T> {
 
     public <V> Spec<T> spec(boolean intently, Class<? extends Spec<V>> specClass) {
         return appendProducer((factorySet, producer, property) ->
-                factorySet.spec(specClass).createProducer(property, intently));
+                factorySet.spec(specClass).createProducer(intently));
     }
 
     public <V> Spec<T> spec(Spec<V> spec) {
@@ -43,7 +44,7 @@ public class PropertySpec<T> {
 
     public <V> Spec<T> spec(boolean intently, Spec<V> spec) {
         return appendProducer((factorySet, producer, property) ->
-                factorySet.spec(spec).createProducer(property, intently));
+                factorySet.spec(spec).createProducer(intently));
     }
 
     public Spec<T> spec(String... mixInsAndSpec) {
@@ -52,7 +53,7 @@ public class PropertySpec<T> {
 
     public Spec<T> spec(boolean intently, String... mixInsAndSpec) {
         return appendProducer((factorySet, producer, property) ->
-                factorySet.spec(mixInsAndSpec).createProducer(property, intently));
+                factorySet.spec(mixInsAndSpec).createProducer(intently));
     }
 
     public <V> Spec<T> spec(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
@@ -61,11 +62,11 @@ public class PropertySpec<T> {
 
     public <V> Spec<T> spec(boolean intently, Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
         return appendProducer((factorySet, producer, property) ->
-                builder.apply(factorySet.spec(specClass)).createProducer(property, intently));
+                builder.apply(factorySet.spec(specClass)).createProducer(intently));
     }
 
     public Spec<T> asDefault() {
-        return asDefault(false, Function.identity());
+        return asDefault(false, identity());
     }
 
     public Spec<T> asDefault(Function<Builder<?>, Builder<?>> builder) {
@@ -73,12 +74,12 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> asDefault(boolean intently) {
-        return asDefault(intently, Function.identity());
+        return asDefault(intently, identity());
     }
 
     private Spec<T> asDefault(boolean intently, Function<Builder<?>, Builder<?>> builder) {
         return appendProducer((factorySet, producer, property) ->
-                builder.apply(factorySet.type(producer.getType().getPropertyWriter(property).getTypeClass())).createProducer(property, intently));
+                builder.apply(factorySet.type(producer.getType().getPropertyWriter(property).getTypeClass())).createProducer(intently));
     }
 
     public Spec<T> dependsOn(String dependency, Function<Object, Object> function) {

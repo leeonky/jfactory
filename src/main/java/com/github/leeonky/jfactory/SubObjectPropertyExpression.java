@@ -24,10 +24,10 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     @Override
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
         if (isIntently())
-            return toBuilder(factorySet, property.getWriterType()).createProducer(property.getName(), true);
+            return toBuilder(factorySet, property.getWriterType()).createProducer(true);
         Collection<?> queried = toBuilder(factorySet, property.getReaderType()).queryAll();
         if (queried.isEmpty())
-            return toBuilder(factorySet, property.getWriterType()).createProducer(property.getName(), false);
+            return toBuilder(factorySet, property.getWriterType()).createProducer(false);
         return new FixedValueProducer<>(property.getWriterType(), queried.iterator().next());
     }
 

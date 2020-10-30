@@ -5,9 +5,12 @@ import com.github.leeonky.util.BeanClass;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 class CollectionProducer<T, C> extends Producer<C> {
     private final ObjectFactorySet objectFactorySet;
@@ -26,7 +29,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     @SuppressWarnings("unchecked")
     protected C produce() {
-        return (C) getType().createCollection(producerList.stream().map(Producer::produce).collect(Collectors.toList()));
+        return (C) getType().createCollection(producerList.stream().map(Producer::produce).collect(toList()));
     }
 
     @Override
@@ -40,12 +43,12 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     private DefaultValueProducer<T, ?> createPlaceholder(Integer index) {
-        return new DefaultValueProducer<>(beanType,
-                getDefaultValueBuilder(getType().getElementType()), instance.element(index));
+        return new DefaultValueProducer<>(beanType, getDefaultValueBuilder(getType().getElementType()),
+                instance.element(index));
     }
 
     private <E> DefaultValueBuilder<E> getDefaultValueBuilder(BeanClass<E> elementType) {
-        return objectFactorySet.queryDefaultValueFactory(elementType)
+        return objectFactorySet.queryDefaultValueBuilder(elementType)
                 .orElseGet(() -> new DefaultValueBuilders.DefaultTypeBuilder<>(elementType));
     }
 
@@ -57,8 +60,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     public Map<PropertyChain, Producer<?>> getChildren() {
         Iterator<Integer> integerIterator = Stream.iterate(0, i -> i + 1).iterator();
-        return producerList.stream().collect(Collectors.toMap(
-                p -> PropertyChain.createChain(integerIterator.next().toString()), Function.identity()));
+        return producerList.stream().collect(toMap(p -> createChain(integerIterator.next().toString()), identity()));
     }
 
     @Override

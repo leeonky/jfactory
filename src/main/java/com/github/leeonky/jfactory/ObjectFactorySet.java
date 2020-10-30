@@ -33,7 +33,7 @@ class ObjectFactorySet {
         });
     }
 
-    public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueFactory(BeanClass<T> propertyType) {
+    public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueBuilder(BeanClass<T> propertyType) {
         return defaultValueBuilders.queryDefaultValueFactory(propertyType.getType());
     }
 }

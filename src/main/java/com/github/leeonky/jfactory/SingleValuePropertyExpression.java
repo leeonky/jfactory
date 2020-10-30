@@ -22,7 +22,7 @@ class SingleValuePropertyExpression<H> extends PropertyExpression<H> {
     @Override
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
         if (isIntently())
-            return mixInsSpec.toBuilder(factorySet, property.getWriterType()).createProducer(property.getName(), true);
+            return mixInsSpec.toBuilder(factorySet, property.getWriterType()).createProducer(true);
         return new FixedValueProducer<>(property.getWriterType(), value);
     }
 

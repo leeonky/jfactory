@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
+import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,8 +19,12 @@ class ObjectProducerTest {
 
     private ObjectProducer buildProducer(Function<Builder<Bean>, Builder<Bean>> modifyBuilder, boolean intently) {
         ObjectFactory<Bean> objectFactory = factorySet.getObjectFactorySet().queryObjectFactory(Bean.class);
-        return new ObjectProducer<>(factorySet, objectFactory,
-                (DefaultBuilder<Bean>) modifyBuilder.apply(new DefaultBuilder<>(objectFactory, factorySet)), intently);
+        DefaultBuilder<Bean> builder = (DefaultBuilder<Bean>) modifyBuilder.apply(new DefaultBuilder<>(objectFactory, factorySet));
+        Instance<Bean> instance = objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()));
+        ObjectProducer<Bean> objectProducer = new ObjectProducer<>(factorySet, objectFactory,
+                builder, intently, instance);
+        builder.establishChildProducers(objectProducer, instance);
+        return objectProducer;
     }
 
     private ObjectProducer sameProducer() {
@@ -118,7 +123,7 @@ class ObjectProducerTest {
             assertThat(sameProducer().hashCode())
                     .isNotEqualTo(new ObjectProducer<>(factorySet, objectFactory,
                             (DefaultBuilder<Bean2>) new DefaultBuilder<>(objectFactory, factorySet)
-                                    .property("intValue", 1).mixIn("a bean"), false).hashCode());
+                                    .property("intValue", 1).mixIn("a bean"), false, objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()))).hashCode());
         }
     }
 
@@ -182,7 +187,7 @@ class ObjectProducerTest {
             assertThat(sameProducer())
                     .isNotEqualTo(new ObjectProducer<>(factorySet, objectFactory,
                             (DefaultBuilder<Bean2>) new DefaultBuilder<>(objectFactory, factorySet)
-                                    .property("intValue", 1).mixIn("a bean"), false));
+                                    .property("intValue", 1).mixIn("a bean"), false, objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()))));
         }
     }
 
@@ -195,7 +200,7 @@ class ObjectProducerTest {
             @Test
             void should_not_has_outside_spec() {
                 factorySet.factory(Beans.class).spec(instance -> instance.spec().property("bean1").asDefault());
-                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(null, false);
+                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
 
                 producer.processDependencies();
 
@@ -207,8 +212,8 @@ class ObjectProducerTest {
                 factorySet.factory(Beans.class).spec(instance -> instance.spec()
                         .property("bean1").asDefault()
                         .property("bean2").asDefault()
-                        .property("bean1.stringValue").dependsOn("bean2.stringValue", Function.identity()));
-                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(null, false);
+                        .property("bean1.stringValue").dependsOn("bean2.stringValue", identity()));
+                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
 
                 producer.processDependencyAndLink();
 

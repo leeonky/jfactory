@@ -19,21 +19,28 @@ class MixInsSpec {
 
     //TODO try to remove hostClass property
     private void mergeMixIn(MixInsSpec another, BeanClass<?> hostClass, String property) {
-        if (mixIns.length != 0 && another.mixIns.length != 0
-                && !new HashSet<>(asList(mixIns)).equals(new HashSet<>(asList(another.mixIns))))
+        if (isDifferentMixIns(another))
             throw new IllegalArgumentException(String.format("Cannot merge different mix-in %s and %s for %s.%s",
                     Arrays.toString(mixIns), Arrays.toString(another.mixIns), hostClass.getName(), property));
         if (mixIns.length == 0)
             mixIns = another.mixIns;
     }
 
+    private boolean isDifferentMixIns(MixInsSpec another) {
+        return mixIns.length != 0 && another.mixIns.length != 0
+                && !new HashSet<>(asList(mixIns)).equals(new HashSet<>(asList(another.mixIns)));
+    }
+
     private void mergeSpec(MixInsSpec another, BeanClass<?> hostClass, String property) {
-        if (spec != null && another.spec != null
-                && !Objects.equals(spec, another.spec))
+        if (isDifferentSpec(another))
             throw new IllegalArgumentException(String.format("Cannot merge different spec `%s` and `%s` for %s.%s",
                     spec, another.spec, hostClass.getName(), property));
         if (spec == null)
             spec = another.spec;
+    }
+
+    private boolean isDifferentSpec(MixInsSpec another) {
+        return spec != null && another.spec != null && !Objects.equals(spec, another.spec);
     }
 
     public Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {

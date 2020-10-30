@@ -21,5 +21,5 @@ public interface Builder<T> {
 
     Builder<T> mixIn(String... mixIns);
 
-    Producer<T> createProducer(String property, boolean intently);
+    Producer<T> createProducer(boolean intently);
 }

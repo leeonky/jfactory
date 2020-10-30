@@ -60,7 +60,7 @@ class ExpressionParser<T> {
     }
 
     private MixInsSpec getMixInsSpec() {
-        return new MixInsSpec(matcher.group(GROUP_MIX_IN) != null ? matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0],
-                matcher.group(GROUP_SPEC));
+        return new MixInsSpec(matcher.group(GROUP_MIX_IN) != null ?
+                matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
     }
 }

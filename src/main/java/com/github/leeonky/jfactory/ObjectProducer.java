@@ -16,16 +16,13 @@ class ObjectProducer<T> extends Producer<T> {
     private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
     private final List<Link> links = new ArrayList<>();
 
-    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder, boolean intently) {
+    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder, boolean intently, Instance<T> instance) {
         super(objectFactory.getType());
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
         this.builder = builder;
         this.intently = intently;
-
-        //TODO try to move this in build.establishProducers and return intance
-        instance = objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()));
-        builder.establishProducers(this, instance);
+        this.instance = instance;
     }
 
     @Override
