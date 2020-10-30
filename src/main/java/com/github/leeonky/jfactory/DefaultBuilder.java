@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.cast;
 import static java.util.Arrays.asList;
@@ -13,12 +14,11 @@ class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
     private final Set<String> mixIns = new LinkedHashSet<>();
-    private final TypeProperties<T> typeProperties;
+    private final KeyValueCollection properties = new KeyValueCollection();
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
         this.factorySet = factorySet;
         this.objectFactory = objectFactory;
-        typeProperties = new TypeProperties<>(objectFactory.getType());
     }
 
     @Override
@@ -43,7 +43,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     private DefaultBuilder<T> copy() {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, factorySet);
-        builder.typeProperties.merge(typeProperties);
+        builder.properties.merge(properties);
         builder.mixIns.addAll(mixIns);
         return builder;
     }
@@ -51,29 +51,28 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> newBuilder = copy();
-        newBuilder.typeProperties.putAll(properties);
+        properties.forEach(newBuilder.properties::add);
         return newBuilder;
     }
 
     @Override
-    public T query() {
-        return queryAll().stream().findFirst().orElse(null);
-    }
-
-    @Override
     public Collection<T> queryAll() {
-        return typeProperties.select(factorySet.getDataRepository().queryAll(objectFactory.getType().getType()));
+        KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType());
+        return factorySet.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
+                .filter(matcher::matches).collect(Collectors.toList());
     }
 
+    //TODO missing type
     @Override
     public int hashCode() {
-        return hash(DefaultBuilder.class, typeProperties, mixIns);
+        return hash(DefaultBuilder.class, properties, mixIns);
     }
 
+    //TODO missing type
     @Override
     public boolean equals(Object another) {
         return cast(another, DefaultBuilder.class)
-                .map(builder -> typeProperties.equals(builder.typeProperties) && mixIns.equals(builder.mixIns))
+                .map(builder -> properties.equals(builder.properties) && mixIns.equals(builder.mixIns))
                 .orElseGet(() -> super.equals(another));
     }
 
@@ -89,7 +88,8 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private void forInputProperties(ObjectProducer<T> parent) {
-        typeProperties.toExpressions().forEach(exp -> parent.addChild(exp.getProperty(), exp.buildProducer(factorySet, parent)));
+        properties.toExpressions(objectFactory.getType())
+                .forEach(exp -> parent.addChild(exp.getProperty(), exp.buildProducer(factorySet, parent)));
     }
 
     private void forDefaultValue(ObjectProducer<T> parent, Instance<T> instance) {

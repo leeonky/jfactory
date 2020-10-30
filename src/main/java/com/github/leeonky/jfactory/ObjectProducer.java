@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.BeanClass.cast;
+
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
@@ -103,12 +105,10 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ObjectProducer) {
-            ObjectProducer another = (ObjectProducer) obj;
-            return objectFactory.equals(another.objectFactory) && builder.equals(another.builder)
-                    && isNotChange() && another.isNotChange() && !intently && !another.intently;
-        }
-        return super.equals(obj);
+        return cast(obj, ObjectProducer.class)
+                .map(another -> objectFactory.equals(another.objectFactory) && builder.equals(another.builder)
+                        && isNotChange() && another.isNotChange() && !intently && !another.intently)
+                .orElseGet(() -> super.equals(obj));
     }
 
     public void link(List<PropertyChain> properties) {

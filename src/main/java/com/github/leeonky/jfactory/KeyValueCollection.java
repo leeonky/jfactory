@@ -3,10 +3,11 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Property;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 class KeyValueCollection {
 
@@ -26,8 +27,11 @@ class KeyValueCollection {
         return builder;
     }
 
-    public <T> Stream<PropertyExpression<T>> parseExpressions(BeanClass<T> beanType) {
-        return keyValues.values().stream().map(keyValue -> keyValue.createExpression(beanType));
+    public <T> Collection<PropertyExpression<T>> toExpressions(BeanClass<T> type) {
+        return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type))
+                .collect(Collectors.groupingBy(PropertyExpression::getProperty)).values().stream()
+                .map(expressions -> expressions.stream().reduce(PropertyExpression::merge).get())
+                .collect(Collectors.toList());
     }
 
     public <H> PropertyExpression<H> createSubExpression(Property<H> property, MixInsSpec mixInsSpec, Object value) {
@@ -54,5 +58,21 @@ class KeyValueCollection {
         return BeanClass.cast(obj, KeyValueCollection.class)
                 .map(keyValueCollection -> Objects.equals(keyValues, keyValueCollection.keyValues))
                 .orElseGet(() -> super.equals(obj));
+    }
+
+    public <T> Matcher<T> matcher(BeanClass<T> type) {
+        return new Matcher<>(type);
+    }
+
+    class Matcher<T> {
+        private final Collection<PropertyExpression<T>> expressions;
+
+        public Matcher(BeanClass<T> type) {
+            expressions = toExpressions(type);
+        }
+
+        public boolean matches(T object) {
+            return expressions.stream().allMatch(e -> e.isMatch(object));
+        }
     }
 }

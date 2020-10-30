@@ -19,10 +19,10 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
 
     @Override
     protected boolean isPropertyMatch(Object propertyValue) {
-        return keyValueCollection.parseExpressions(property.getReaderType())
-                .allMatch(queryExpression -> queryExpression.isMatch(propertyValue));
+        return keyValueCollection.matcher(property.getReaderType()).matches(propertyValue);
     }
 
+    //TODO too complex
     @Override
     public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
         if (isIntently())

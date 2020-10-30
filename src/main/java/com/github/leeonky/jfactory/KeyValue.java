@@ -31,12 +31,7 @@ class KeyValue {
         this.value = value;
     }
 
-    //TODO
-    @Deprecated
-    public static <T> PropertyExpression<T> parse(BeanClass<T> beanClass, KeyValue keyValue) {
-        return keyValue.createExpression(beanClass);
-    }
-
+    // TODO large method
     public <T> PropertyExpression<T> createExpression(BeanClass<T> beanClass) {
         Matcher matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_COLLECTION_INDEX +
                 PATTERN_MIX_IN_SPEC + PATTERN_INTENTLY + PATTERN_CONDITION).matcher(key);

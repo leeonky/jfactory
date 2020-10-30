@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.util.*;
 import java.util.function.BiFunction;
 
+//TODO move to new package
 abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
