@@ -26,22 +26,22 @@ abstract class Producer<T> {
         return valueCache.cache(this::produce);
     }
 
-    protected void processDependencies() {
+    protected void doDependencies() {
     }
 
     public void addChild(String property, Producer<?> producer) {
     }
 
-    public Optional<Producer<?>> getChild(String property) {
+    public Optional<Producer<?>> child(String property) {
         return Optional.empty();
     }
 
-    public Producer<?> getChildOrDefault(String property) {
-        return getChild(property).orElse(null);
+    public Producer<?> childOrDefault(String property) {
+        return child(property).orElse(null);
     }
 
-    public Producer<?> getChild(PropertyChain property) {
-        return property.applyAccess(this, (producer, subProperty) -> producer.getChild(subProperty)
+    public Producer<?> child(PropertyChain property) {
+        return property.applyAccess(this, (producer, subProperty) -> producer.child(subProperty)
                 .orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)), Objects::requireNonNull);
     }
 
@@ -51,23 +51,23 @@ abstract class Producer<T> {
 
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
         String lastProperty = property.tail();
-        property.removeTail().applyAccess(this, Producer::getChildOrDefault, Optional::ofNullable).ifPresent(producer ->
+        property.removeTail().applyAccess(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(producer ->
                 producer.changeChild(lastProperty, producerGenerator.apply(producer, lastProperty)));
     }
 
     @SuppressWarnings("unchecked")
     private <T> void changeChild(String property, Producer<T> producer) {
-        Producer<T> original = (Producer<T>) getChildOrDefault(property);
+        Producer<T> original = (Producer<T>) childOrDefault(property);
         addChild(property, original == null ? producer : original.changeTo(producer));
     }
 
-    public Map<PropertyChain, Producer<?>> getChildren() {
+    public Map<PropertyChain, Producer<?>> children() {
         return new HashMap<>();
     }
 
     public Map<PropertyChain, Producer<?>> getAllChildren() {
         Map<PropertyChain, Producer<?>> allChildren = new HashMap<>();
-        getChildren().forEach((propertyChain, producer) -> {
+        children().forEach((propertyChain, producer) -> {
             allChildren.put(propertyChain, producer);
             producer.getAllChildren().forEach((subChain, subProducer) -> {
                 allChildren.put(propertyChain.concat(subChain), subProducer);

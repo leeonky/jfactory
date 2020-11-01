@@ -94,7 +94,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     private void forDefaultValue(ObjectProducer<T> parent, Instance<T> instance) {
         parent.getType().getPropertyWriters().forEach((name, propertyWriter) ->
-                factorySet.getObjectFactorySet().queryDefaultValueBuilder(propertyWriter.getType()).ifPresent(propertyValueFactory ->
+                factorySet.getFactoryPool().queryDefaultValueBuilder(propertyWriter.getType()).ifPresent(propertyValueFactory ->
                         parent.addChild(name, new DefaultValueProducer<>(parent.getType(), propertyValueFactory, instance.sub(name)))));
     }
 }

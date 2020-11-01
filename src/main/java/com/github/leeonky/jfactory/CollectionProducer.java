@@ -2,9 +2,8 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
@@ -13,61 +12,58 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 class CollectionProducer<T, C> extends Producer<C> {
-    private final ObjectFactorySet objectFactorySet;
-    private final Instance<T> instance;
-    private final BeanClass<T> beanType;
-    private final ProducerList producerList = new ProducerList();
+    private final List<Producer<?>> children = new ArrayList<>();
+    private final Function<Integer, Producer<?>> placeholderFactory;
 
-    public CollectionProducer(ObjectFactorySet objectFactorySet, BeanClass<T> beanType,
-                              BeanClass<C> collectionType, Instance<T> instance) {
+    public CollectionProducer(FactoryPool factoryPool, BeanClass<T> beanType, BeanClass<C> collectionType,
+                              Instance<T> instance) {
         super(collectionType);
-        this.objectFactorySet = objectFactorySet;
-        this.instance = instance.inCollection();
-        this.beanType = beanType;
+        placeholderFactory = index -> new DefaultValueProducer<>(beanType,
+                factoryPool.getDefaultValueBuilder(collectionType.getElementType()),
+                instance.inCollection().element(index));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected C produce() {
-        return (C) getType().createCollection(producerList.stream().map(Producer::produce).collect(toList()));
+        return (C) getType().createCollection(children.stream().map(Producer::produce).collect(toList()));
     }
 
     @Override
-    public Optional<Producer<?>> getChild(String property) {
-        return producerList.query(property);
+    public Optional<Producer<?>> child(String property) {
+        return Optional.ofNullable(children.get(Integer.valueOf(property)));
     }
 
     @Override
     public void addChild(String property, Producer<?> producer) {
-        producerList.set(Integer.valueOf(property), producer, this::createPlaceholder);
+        int intIndex = Integer.valueOf(property);
+        fillCollectionWithDefaultValue(intIndex);
+        children.set(intIndex, producer);
     }
 
-    private DefaultValueProducer<T, ?> createPlaceholder(Integer index) {
-        return new DefaultValueProducer<>(beanType, getDefaultValueBuilder(getType().getElementType()),
-                instance.element(index));
-    }
-
-    private <E> DefaultValueBuilder<E> getDefaultValueBuilder(BeanClass<E> elementType) {
-        return objectFactorySet.queryDefaultValueBuilder(elementType)
-                .orElseGet(() -> new DefaultValueBuilders.DefaultTypeBuilder<>(elementType));
+    private void fillCollectionWithDefaultValue(int index) {
+        for (int i = children.size(); i <= index; i++)
+            children.add(placeholderFactory.apply(i));
     }
 
     @Override
-    public Producer<?> getChildOrDefault(String property) {
-        return producerList.get(Integer.valueOf(property), this::createPlaceholder);
+    public Producer<?> childOrDefault(String property) {
+        int index = Integer.valueOf(property);
+        fillCollectionWithDefaultValue(index);
+        return children.get(index);
     }
 
     @Override
-    public Map<PropertyChain, Producer<?>> getChildren() {
-        Iterator<Integer> integerIterator = Stream.iterate(0, i -> i + 1).iterator();
-        return producerList.stream().collect(toMap(p -> createChain(integerIterator.next().toString()), identity()));
+    public Map<PropertyChain, Producer<?>> children() {
+        //TODO move Map<PropertyChain, Producer> a new type?
+        Iterator<Integer> index = Stream.iterate(0, i -> i + 1).iterator();
+        return children.stream().collect(toMap(p -> createChain(index.next().toString()), identity()));
     }
 
     @Override
-    protected void processDependencies() {
+    protected void doDependencies() {
         //TODO add one UT for this
-        producerList.stream().forEach(Producer::processDependencies);
+        children.forEach(Producer::doDependencies);
     }
-
     //TODO should nested process sub link
 }

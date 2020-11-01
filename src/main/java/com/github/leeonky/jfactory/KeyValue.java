@@ -32,7 +32,7 @@ class KeyValue {
     }
 
     // TODO large method
-    public <T> PropertyExpression<T> createExpression(BeanClass<T> beanClass) {
+    public <T> Expression<T> createExpression(BeanClass<T> beanClass) {
         Matcher matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_COLLECTION_INDEX +
                 PATTERN_MIX_IN_SPEC + PATTERN_INTENTLY + PATTERN_CONDITION).matcher(key);
         if (!matcher.matches())
@@ -47,9 +47,9 @@ class KeyValue {
                 matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
         KeyValueCollection keyValueCollection = new KeyValueCollection().add(matcher.group(GROUP_CONDITION), value);
         if (index != null)
-            return new CollectionPropertyExpression<>(Integer.valueOf(index),
+            return new CollectionExpression<>(beanClass.getProperty(property), Integer.valueOf(index),
                     keyValueCollection.createSubExpression(beanClass.getPropertyWriter(property).getType().getProperty(index),
-                            mixInsSpec, value).setIntently(intently), beanClass.getProperty(property));
+                            mixInsSpec, value).setIntently(intently));
 
         return keyValueCollection.createSubExpression(beanClass.getProperty(property), mixInsSpec, value).setIntently(intently);
     }

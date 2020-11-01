@@ -10,7 +10,7 @@ class Link {
 
     @SuppressWarnings("unchecked")
     public void process(Producer<?> producer) {
-        List<Producer<?>> linkedProducers = properties.stream().map(producer::getChild).collect(Collectors.toList());
+        List<Producer<?>> linkedProducers = properties.stream().map(producer::child).collect(Collectors.toList());
         properties.forEach(linkProperty -> producer.changeChild(linkProperty,
                 (host, property) -> new LinkProducer(linkedProducers, host.getType().getPropertyWriter(property).getType())));
     }

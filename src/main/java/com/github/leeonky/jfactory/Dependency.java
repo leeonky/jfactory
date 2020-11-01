@@ -26,7 +26,7 @@ class Dependency<T> {
 
     private List<Supplier<Object>> dependencySuppliers(Producer<?> producer) {
         return dependencyProperties.stream().map(dependency ->
-                // TODO need to check producer.getChild(dependency) is replaced by linker
-                (Supplier<Object>) () -> producer.getChild(dependency).getValue()).collect(Collectors.toList());
+                // TODO need to check producer.child(dependency) is replaced by linker
+                (Supplier<Object>) () -> producer.child(dependency).getValue()).collect(Collectors.toList());
     }
 }

@@ -7,11 +7,11 @@ import java.util.Collection;
 
 import static java.lang.String.format;
 
-class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
+class SubObjectExpression<H> extends Expression<H> {
     private final KeyValueCollection keyValueCollection;
     private final MixInsSpec mixInsSpec;
 
-    public SubObjectPropertyExpression(KeyValueCollection keyValueCollection, MixInsSpec mixInsSpec, Property<H> property) {
+    public SubObjectExpression(KeyValueCollection keyValueCollection, MixInsSpec mixInsSpec, Property<H> property) {
         super(property);
         this.keyValueCollection = keyValueCollection;
         this.mixInsSpec = mixInsSpec;
@@ -38,12 +38,12 @@ class SubObjectPropertyExpression<H> extends PropertyExpression<H> {
     }
 
     @Override
-    public PropertyExpression<H> merge(PropertyExpression<H> propertyExpression) {
-        return propertyExpression.mergeBy(this);
+    public Expression<H> merge(Expression<H> expression) {
+        return expression.mergeBy(this);
     }
 
     @Override
-    protected PropertyExpression<H> mergeBy(SubObjectPropertyExpression<H> another) {
+    protected Expression<H> mergeBy(SubObjectExpression<H> another) {
         keyValueCollection.merge(another.keyValueCollection);
         mixInsSpec.merge(another.mixInsSpec, format("%s.%s", property.getBeanType().getName(), property.getName()));
         setIntently(isIntently() || another.isIntently());

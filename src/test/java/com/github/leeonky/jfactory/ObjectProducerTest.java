@@ -113,7 +113,7 @@ class ObjectProducerTest {
 
         @Test
         void should_not_equal_for_different_bean() {
-            ObjectFactory<Bean2> objectFactory = factorySet.getObjectFactorySet().queryObjectFactory(Bean2.class);
+            ObjectFactory<Bean2> objectFactory = factorySet.getFactoryPool().queryObjectFactory(Bean2.class);
             assertThat(sameProducer().hashCode())
                     .isNotEqualTo(new ObjectProducer<>(factorySet, objectFactory,
                             (DefaultBuilder<Bean2>) new DefaultBuilder<>(objectFactory, factorySet)
@@ -177,7 +177,7 @@ class ObjectProducerTest {
 
         @Test
         void should_not_equal_for_different_bean() {
-            ObjectFactory<Bean2> objectFactory = factorySet.getObjectFactorySet().queryObjectFactory(Bean2.class);
+            ObjectFactory<Bean2> objectFactory = factorySet.getFactoryPool().queryObjectFactory(Bean2.class);
             assertThat(sameProducer())
                     .isNotEqualTo(new ObjectProducer<>(factorySet, objectFactory,
                             (DefaultBuilder<Bean2>) new DefaultBuilder<>(objectFactory, factorySet)
@@ -196,9 +196,9 @@ class ObjectProducerTest {
                 factorySet.factory(Beans.class).spec(instance -> instance.spec().property("bean1").asDefault());
                 ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
 
-                producer.processDependencies();
+                producer.doDependencies();
 
-                assertTrue(producer.getChild("bean1").get().isNotChange());
+                assertTrue(producer.child("bean1").get().isNotChange());
             }
 
             @Test
@@ -211,7 +211,7 @@ class ObjectProducerTest {
 
                 producer.processDependencyAndLink();
 
-                assertFalse(producer.getChild("bean1").get().isNotChange());
+                assertFalse(producer.child("bean1").get().isNotChange());
             }
         }
 

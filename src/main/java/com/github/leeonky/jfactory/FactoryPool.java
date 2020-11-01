@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class ObjectFactorySet {
+class FactoryPool {
     private final DefaultValueBuilders defaultValueBuilders = new DefaultValueBuilders();
     private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
@@ -33,7 +33,11 @@ class ObjectFactorySet {
         });
     }
 
-    public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueBuilder(BeanClass<T> propertyType) {
-        return defaultValueBuilders.queryDefaultValueFactory(propertyType.getType());
+    public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueBuilder(BeanClass<T> type) {
+        return defaultValueBuilders.queryDefaultValueFactory(type.getType());
+    }
+
+    public <T> DefaultValueBuilder<T> getDefaultValueBuilder(BeanClass<T> type) {
+        return queryDefaultValueBuilder(type).orElseGet(() -> new DefaultValueBuilders.DefaultTypeBuilder<>(type));
     }
 }

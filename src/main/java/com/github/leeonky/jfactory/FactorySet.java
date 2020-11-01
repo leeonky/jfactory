@@ -6,15 +6,15 @@ import java.util.Arrays;
 
 public class FactorySet {
     private final TypeSequence typeSequence = new TypeSequence();
-    private final ObjectFactorySet objectFactorySet = new ObjectFactorySet();
+    private final FactoryPool factoryPool = new FactoryPool();
     private final DataRepository dataRepository;
 
     public FactorySet() {
         dataRepository = new HashMapDataRepository();
     }
 
-    public ObjectFactorySet getObjectFactorySet() {
-        return objectFactorySet;
+    public FactoryPool getFactoryPool() {
+        return factoryPool;
     }
 
     public TypeSequence getTypeSequence() {
@@ -26,11 +26,11 @@ public class FactorySet {
     }
 
     public <T> Factory<T> factory(Class<T> type) {
-        return objectFactorySet.queryObjectFactory(type);
+        return factoryPool.queryObjectFactory(type);
     }
 
     public <T> Builder<T> type(Class<T> type) {
-        return new DefaultBuilder<>(objectFactorySet.queryObjectFactory(type), this);
+        return new DefaultBuilder<>(factoryPool.queryObjectFactory(type), this);
     }
 
     public <T> Builder<T> spec(Class<? extends Spec<T>> specClass) {
@@ -38,15 +38,15 @@ public class FactorySet {
     }
 
     public <T> SpecClassFactory<T> register(Class<? extends Spec<T>> specClass) {
-        return objectFactorySet.registerSpecClassFactory(specClass);
+        return factoryPool.registerSpecClassFactory(specClass);
     }
 
     public <T> Builder<T> spec(Spec<T> spec) {
-        return new DefaultBuilder<>(new SpecFactory<>(objectFactorySet.queryObjectFactory(spec.getType()), spec), this);
+        return new DefaultBuilder<>(new SpecFactory<>(factoryPool.queryObjectFactory(spec.getType()), spec), this);
     }
 
     public <T> Builder<T> spec(String... mixInsAndSpec) {
-        return new DefaultBuilder<T>(objectFactorySet.querySpecClassFactory(mixInsAndSpec[mixInsAndSpec.length - 1]), this)
+        return new DefaultBuilder<T>(factoryPool.querySpecClassFactory(mixInsAndSpec[mixInsAndSpec.length - 1]), this)
                 .mixIn(Arrays.copyOf(mixInsAndSpec, mixInsAndSpec.length - 1));
     }
 

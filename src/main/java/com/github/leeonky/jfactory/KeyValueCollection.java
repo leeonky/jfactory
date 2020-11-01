@@ -27,16 +27,16 @@ class KeyValueCollection {
         return builder;
     }
 
-    public <T> Collection<PropertyExpression<T>> toExpressions(BeanClass<T> type) {
+    public <T> Collection<Expression<T>> toExpressions(BeanClass<T> type) {
         return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type))
-                .collect(Collectors.groupingBy(PropertyExpression::getProperty)).values().stream()
-                .map(expressions -> expressions.stream().reduce(PropertyExpression::merge).get())
+                .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
+                .map(expressions -> expressions.stream().reduce(Expression::merge).get())
                 .collect(Collectors.toList());
     }
 
-    public <H> PropertyExpression<H> createSubExpression(Property<H> property, MixInsSpec mixInsSpec, Object value) {
-        return isSingleValue() ? new SingleValuePropertyExpression<>(value, mixInsSpec, property)
-                : new SubObjectPropertyExpression<>(this, mixInsSpec, property);
+    public <H> Expression<H> createSubExpression(Property<H> property, MixInsSpec mixInsSpec, Object value) {
+        return isSingleValue() ? new SingleValueExpression<>(value, mixInsSpec, property)
+                : new SubObjectExpression<>(this, mixInsSpec, property);
     }
 
     private boolean isSingleValue() {
@@ -65,7 +65,7 @@ class KeyValueCollection {
     }
 
     class Matcher<T> {
-        private final Collection<PropertyExpression<T>> expressions;
+        private final Collection<Expression<T>> expressions;
 
         public Matcher(BeanClass<T> type) {
             expressions = toExpressions(type);

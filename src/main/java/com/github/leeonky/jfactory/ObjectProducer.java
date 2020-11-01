@@ -34,13 +34,13 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    public Producer<?> getChildOrDefault(String property) {
+    public Producer<?> childOrDefault(String property) {
         Producer<?> producer = children.get(property);
         if (producer == null) {
             BeanClass<?> propertyType = getType().getPropertyWriter(property).getType();
             if (propertyType.isCollection())
-                addChild(property, producer = new CollectionProducer<>(
-                        factorySet.getObjectFactorySet(), getType(), propertyType, instance.sub(property)));
+                addChild(property, producer = new CollectionProducer<>(factorySet.getFactoryPool(), getType(),
+                        propertyType, instance.sub(property)));
         }
         return producer;
     }
@@ -54,7 +54,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    public Optional<Producer<?>> getChild(String property) {
+    public Optional<Producer<?>> child(String property) {
         return Optional.ofNullable(children.get(property));
     }
 
@@ -63,7 +63,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     public ObjectProducer<T> processDependencyAndLink() {
-        processDependencies();
+        doDependencies();
         getAllChildren().values().forEach(Producer::checkChange);
         processLinks();
         uniqSameSubObjectProducer();
@@ -84,8 +84,8 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    protected void processDependencies() {
-        children.values().forEach(Producer::processDependencies);
+    protected void doDependencies() {
+        children.values().forEach(Producer::doDependencies);
         dependencies.values().forEach(dependency -> dependency.process(this));
         beforeCheckChange();
     }
@@ -121,7 +121,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    public Map<PropertyChain, Producer<?>> getChildren() {
+    public Map<PropertyChain, Producer<?>> children() {
         return children.entrySet().stream()
                 .collect(Collectors.toMap(e -> PropertyChain.createChain(e.getKey()), Map.Entry::getValue));
     }

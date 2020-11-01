@@ -4,11 +4,11 @@ import com.github.leeonky.util.Property;
 
 import java.util.Objects;
 
-class SingleValuePropertyExpression<H> extends PropertyExpression<H> {
+class SingleValueExpression<H> extends Expression<H> {
     private final Object value;
     private final MixInsSpec mixInsSpec;
 
-    public SingleValuePropertyExpression(Object value, MixInsSpec mixInsSpec, Property<H> property) {
+    public SingleValueExpression(Object value, MixInsSpec mixInsSpec, Property<H> property) {
         super(property);
         this.value = value;
         this.mixInsSpec = mixInsSpec;
