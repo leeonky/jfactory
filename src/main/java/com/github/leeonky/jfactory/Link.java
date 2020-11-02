@@ -12,7 +12,7 @@ class Link {
     public void process(Producer<?> producer) {
         List<Producer<?>> linkedProducers = properties.stream().map(producer::child).collect(Collectors.toList());
         properties.forEach(linkProperty -> producer.changeChild(linkProperty,
-                (host, property) -> new LinkProducer(linkedProducers, host.getType().getPropertyWriter(property).getType())));
+                (nextToLast, property) -> new LinkProducer(linkedProducers, nextToLast.getType().getPropertyWriter(property).getType())));
     }
 
     public boolean contains(List<PropertyChain> properties) {

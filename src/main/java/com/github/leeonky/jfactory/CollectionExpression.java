@@ -10,10 +10,10 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.util.BeanClass.arrayCollectionToStream;
 import static com.github.leeonky.util.BeanClass.cast;
 
-class CollectionExpression<H, E> extends Expression<H> {
+class CollectionExpression<P, E> extends Expression<P> {
     private final Map<Integer, Expression<E>> children = new LinkedHashMap<>();
 
-    public CollectionExpression(Property<H> property, int index, Expression<E> elementExpression) {
+    public CollectionExpression(Property<P> property, int index, Expression<E> elementExpression) {
         super(property);
         children.put(index, elementExpression);
     }
@@ -30,29 +30,28 @@ class CollectionExpression<H, E> extends Expression<H> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> parent) {
-        CollectionProducer<?, E> collectionProducer = cast(parent.childOrDefault(property.getName()), CollectionProducer.class)
-                .orElseThrow(IllegalArgumentException::new);
+    public Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent) {
+        CollectionProducer<?, E> collectionProducer = cast(parent.childOrDefault(property.getName()),
+                CollectionProducer.class).orElseThrow(IllegalArgumentException::new);
         children.forEach((k, v) ->
                 collectionProducer.addChild(k.toString(), v.buildProducer(factorySet, collectionProducer)));
         return collectionProducer;
     }
 
     @Override
-    public Expression<H> merge(Expression<H> expression) {
-        return expression.mergeBy(this);
+    public Expression<P> merge(Expression<P> another) {
+        return another.mergeBy(this);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Expression<H> mergeBy(CollectionExpression<H, ?> collectionConditionValue) {
-        collectionConditionValue.children.forEach((index, expression) ->
+    protected Expression<P> mergeBy(CollectionExpression<P, ?> another) {
+        another.children.forEach((index, expression) ->
                 children.put(index, mergeOrAssign(index, (Expression<E>) expression)));
         return this;
     }
 
     private Expression<E> mergeOrAssign(Integer index, Expression<E> expression) {
-        return children.containsKey(index) ?
-                expression.merge(children.get(index)) : expression;
+        return children.containsKey(index) ? expression.merge(children.get(index)) : expression;
     }
 }

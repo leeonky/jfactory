@@ -15,10 +15,10 @@ class CollectionProducer<T, C> extends Producer<C> {
     private final List<Producer<?>> children = new ArrayList<>();
     private final Function<Integer, Producer<?>> placeholderFactory;
 
-    public CollectionProducer(FactoryPool factoryPool, BeanClass<T> beanType, BeanClass<C> collectionType,
+    public CollectionProducer(FactoryPool factoryPool, BeanClass<T> parentType, BeanClass<C> collectionType,
                               Instance<T> instance) {
         super(collectionType);
-        placeholderFactory = index -> new DefaultValueProducer<>(beanType,
+        placeholderFactory = index -> new DefaultValueProducer<>(parentType,
                 factoryPool.getDefaultValueBuilder(collectionType.getElementType()),
                 instance.inCollection().element(index));
     }

@@ -10,15 +10,11 @@ public class FactorySet {
     private final DataRepository dataRepository;
 
     public FactorySet() {
-        dataRepository = new HashMapDataRepository();
+        dataRepository = new MemoryDataRepository();
     }
 
     public FactoryPool getFactoryPool() {
         return factoryPool;
-    }
-
-    public TypeSequence getTypeSequence() {
-        return typeSequence;
     }
 
     public DataRepository getDataRepository() {
@@ -63,6 +59,6 @@ public class FactorySet {
     }
 
     public int newSequence(BeanClass<?> type) {
-        return getTypeSequence().generate(type.getType());
+        return typeSequence.generate(type.getType());
     }
 }

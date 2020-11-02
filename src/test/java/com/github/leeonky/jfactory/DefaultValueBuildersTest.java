@@ -26,12 +26,12 @@ class DefaultValueBuildersTest {
     }
 
     private void assertValue(Class<?> type, int sequence, String property, Object expected) {
-        assertThat(new DefaultValueBuilders().queryDefaultValueFactory(type).get()
+        assertThat(new DefaultValueBuilders().query(type).get()
                 .create(null, new Instance<>(sequence, null).sub(property))).isEqualTo(expected);
     }
 
     private void assertValue(Class<?> type, int sequence, Object expected) {
-        assertThat(new DefaultValueBuilders().queryDefaultValueFactory(type).get()
+        assertThat(new DefaultValueBuilders().query(type).get()
                 .create(null, new Instance<>(sequence, null))).isEqualTo(expected);
     }
 
@@ -43,7 +43,7 @@ class DefaultValueBuildersTest {
 
     public static class InvalidGenericArgDefaultValueBuilder<V> implements DefaultValueBuilder<V> {
         @Override
-        public <T> V create(BeanClass<T> type, Instance<T> instance) {
+        public <T> V create(BeanClass<T> beanType, Instance<T> instance) {
             return null;
         }
     }

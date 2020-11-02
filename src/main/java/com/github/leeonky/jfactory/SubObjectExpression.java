@@ -24,7 +24,7 @@ class SubObjectExpression<H> extends Expression<H> {
 
     //TODO too complex
     @Override
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> host) {
+    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> parent) {
         if (isIntently())
             return toBuilder(factorySet, property.getWriterType()).createProducer(true);
         Collection<?> queried = toBuilder(factorySet, property.getReaderType()).queryAll();
@@ -38,8 +38,8 @@ class SubObjectExpression<H> extends Expression<H> {
     }
 
     @Override
-    public Expression<H> merge(Expression<H> expression) {
-        return expression.mergeBy(this);
+    public Expression<H> merge(Expression<H> another) {
+        return another.mergeBy(this);
     }
 
     @Override

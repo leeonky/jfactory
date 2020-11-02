@@ -2,13 +2,13 @@ package com.github.leeonky.jfactory;
 
 import java.util.*;
 
-public class HashMapDataRepository implements DataRepository {
+public class MemoryDataRepository implements DataRepository {
     private Map<Class<?>, Set<Object>> repo = new HashMap<>();
 
     @Override
     public void save(Object object) {
         if (object != null)
-            repo.computeIfAbsent(object.getClass(), c -> new HashSet<>()).add(object);
+            repo.computeIfAbsent(object.getClass(), c -> new LinkedHashSet<>()).add(object);
     }
 
     @Override

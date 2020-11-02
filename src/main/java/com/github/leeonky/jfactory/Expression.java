@@ -2,11 +2,11 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.Property;
 
-abstract class Expression<H> {
-    protected final Property<H> property;
+abstract class Expression<P> {
+    protected final Property<P> property;
     private boolean intently = false;
 
-    public Expression(Property<H> property) {
+    public Expression(Property<P> property) {
         this.property = property;
     }
 
@@ -14,23 +14,23 @@ abstract class Expression<H> {
         return property.getName();
     }
 
-    public boolean isMatch(H object) {
+    public boolean isMatch(P object) {
         return object != null && !isIntently() && isPropertyMatch(property.getValue(object));
     }
 
     protected abstract boolean isPropertyMatch(Object propertyValue);
 
-    public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<H> host);
+    public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent);
 
-    protected Expression<H> merge(Expression<H> expression) {
-        return expression;
+    protected Expression<P> merge(Expression<P> another) {
+        return another;
     }
 
-    protected Expression<H> mergeBy(SubObjectExpression<H> conditionValueSet) {
+    protected Expression<P> mergeBy(SubObjectExpression<P> another) {
         return this;
     }
 
-    protected Expression<H> mergeBy(CollectionExpression<H, ?> collectionConditionValue) {
+    protected Expression<P> mergeBy(CollectionExpression<P, ?> another) {
         return this;
     }
 
@@ -38,7 +38,7 @@ abstract class Expression<H> {
         return intently;
     }
 
-    protected Expression<H> setIntently(boolean intently) {
+    protected Expression<P> setIntently(boolean intently) {
         this.intently = intently;
         return this;
     }

@@ -10,21 +10,23 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 
 class DefaultValueBuilders {
-    private final Map<Class<?>, DefaultValueBuilder<?>> defaultValueBuilders = new HashMap<Class<?>, DefaultValueBuilder<?>>() {{
-        put(String.class, new DefaultStringBuilder());
-        put(Integer.class, new DefaultIntegerBuilder());
-        put(int.class, get(Integer.class));
-    }};
+    private final Map<Class<?>, DefaultValueBuilder<?>> defaultValueBuilders = new HashMap<>();
+
+    public DefaultValueBuilders() {
+        defaultValueBuilders.put(String.class, new DefaultStringBuilder());
+        defaultValueBuilders.put(Integer.class, new DefaultIntegerBuilder());
+        defaultValueBuilders.put(int.class, defaultValueBuilders.get(Integer.class));
+    }
 
     @SuppressWarnings("unchecked")
-    public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueFactory(Class<T> type) {
+    public <T> Optional<DefaultValueBuilder<T>> query(Class<T> type) {
         return ofNullable((DefaultValueBuilder<T>) defaultValueBuilders.get(type));
     }
 
     public static class DefaultStringBuilder implements DefaultValueBuilder<String> {
 
         @Override
-        public <T> String create(BeanClass<T> type, Instance<T> instance) {
+        public <T> String create(BeanClass<T> beanType, Instance<T> instance) {
             return String.format("%s#%d%s", instance.getProperty(), instance.getSequence(),
                     instance.getIndexes().stream().map(i -> String.format("[%d]", i)).collect(Collectors.joining()));
         }
@@ -33,7 +35,7 @@ class DefaultValueBuilders {
     public static class DefaultIntegerBuilder implements DefaultValueBuilder<Integer> {
 
         @Override
-        public <T> Integer create(BeanClass<T> type, Instance<T> instance) {
+        public <T> Integer create(BeanClass<T> beanType, Instance<T> instance) {
             return instance.getSequence();
         }
     }
@@ -46,8 +48,8 @@ class DefaultValueBuilders {
         }
 
         @Override
-        public T create(BeanClass type, Instance instance) {
-            return this.type.createDefault();
+        public T create(BeanClass beanType, Instance instance) {
+            return type.createDefault();
         }
 
         @Override

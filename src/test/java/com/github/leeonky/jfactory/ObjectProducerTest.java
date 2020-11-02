@@ -209,7 +209,7 @@ class ObjectProducerTest {
                         .property("bean1.stringValue").dependsOn("bean2.stringValue", identity()));
                 ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
 
-                producer.processDependencyAndLink();
+                producer.doDependenciesAndLinks();
 
                 assertFalse(producer.child("bean1").get().isNotChange());
             }

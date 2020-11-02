@@ -10,7 +10,7 @@ class DependencyProducer<T> extends Producer<T> {
     private final List<Supplier<Object>> dependencies;
     private final Function<Object[], T> rule;
 
-    public DependencyProducer(List<Supplier<Object>> dependencies, Function<Object[], T> rule, BeanClass<T> type) {
+    public DependencyProducer(BeanClass<T> type, List<Supplier<Object>> dependencies, Function<Object[], T> rule) {
         super(type);
         this.dependencies = dependencies;
         this.rule = rule;

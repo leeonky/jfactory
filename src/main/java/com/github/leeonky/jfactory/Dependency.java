@@ -8,24 +8,24 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 class Dependency<T> {
-    private final Function<Object[], T> function;
+    private final Function<Object[], T> rule;
     private final PropertyChain property;
-    private final List<PropertyChain> dependencyProperties;
+    private final List<PropertyChain> dependencies;
 
-    public Dependency(Function<Object[], T> rule, PropertyChain property, List<PropertyChain> dependencyProperties) {
-        function = rule;
+    public Dependency(PropertyChain property, List<PropertyChain> dependencies, Function<Object[], T> rule) {
         this.property = property;
-        this.dependencyProperties = dependencyProperties;
+        this.dependencies = dependencies;
+        this.rule = rule;
     }
 
     @SuppressWarnings("unchecked")
-    public void process(Producer<?> producer) {
-        producer.changeChild(property, (host, property) -> new DependencyProducer<>(dependencySuppliers(producer),
-                function, (BeanClass<T>) host.getType().getPropertyWriter(property).getType()));
+    public void process(Producer<?> parent) {
+        parent.changeChild(property, (nextToLast, property) -> new DependencyProducer<>(
+                (BeanClass<T>) nextToLast.getType().getPropertyWriter(property).getType(), suppliers(parent), rule));
     }
 
-    private List<Supplier<Object>> dependencySuppliers(Producer<?> producer) {
-        return dependencyProperties.stream().map(dependency ->
+    private List<Supplier<Object>> suppliers(Producer<?> producer) {
+        return dependencies.stream().map(dependency ->
                 // TODO need to check producer.child(dependency) is replaced by linker
                 (Supplier<Object>) () -> producer.child(dependency).getValue()).collect(Collectors.toList());
     }

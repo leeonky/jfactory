@@ -27,7 +27,7 @@ class KeyValueCollection {
         return builder;
     }
 
-    public <T> Collection<Expression<T>> toExpressions(BeanClass<T> type) {
+    public <T> Collection<Expression<T>> expressions(BeanClass<T> type) {
         return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type))
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
                 .map(expressions -> expressions.stream().reduce(Expression::merge).get())
@@ -68,7 +68,7 @@ class KeyValueCollection {
         private final Collection<Expression<T>> expressions;
 
         public Matcher(BeanClass<T> type) {
-            expressions = toExpressions(type);
+            expressions = expressions(type);
         }
 
         public boolean matches(T object) {

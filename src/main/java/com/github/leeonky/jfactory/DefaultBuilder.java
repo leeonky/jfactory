@@ -23,7 +23,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        return createProducer(false).processDependencyAndLink().getValue();
+        return createProducer(false).doDependenciesAndLinks().getValue();
     }
 
     @Override
@@ -76,25 +76,26 @@ class DefaultBuilder<T> implements Builder<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public void establishChildProducers(ObjectProducer<T> parent, Instance<T> instance) {
-        forDefaultValue(parent, instance);
-        forSpec(parent, instance);
-        forInputProperties(parent);
+    public void establishChildProducers(ObjectProducer<T> objectProducer, Instance<T> instance) {
+        forDefaultValue(objectProducer, instance);
+        forSpec(objectProducer, instance);
+        forInputProperties(objectProducer);
     }
 
-    private void forSpec(ObjectProducer<T> parent, Instance<T> instance) {
+    private void forSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
         objectFactory.collectSpec(mixIns, instance);
-        instance.spec().apply(factorySet, parent);
+        instance.spec().apply(factorySet, objectProducer);
     }
 
-    private void forInputProperties(ObjectProducer<T> parent) {
-        properties.toExpressions(objectFactory.getType())
-                .forEach(exp -> parent.addChild(exp.getProperty(), exp.buildProducer(factorySet, parent)));
+    private void forInputProperties(ObjectProducer<T> objectProducer) {
+        properties.expressions(objectFactory.getType()).forEach(exp ->
+                objectProducer.addChild(exp.getProperty(), exp.buildProducer(factorySet, objectProducer)));
     }
 
-    private void forDefaultValue(ObjectProducer<T> parent, Instance<T> instance) {
-        parent.getType().getPropertyWriters().forEach((name, propertyWriter) ->
-                factorySet.getFactoryPool().queryDefaultValueBuilder(propertyWriter.getType()).ifPresent(propertyValueFactory ->
-                        parent.addChild(name, new DefaultValueProducer<>(parent.getType(), propertyValueFactory, instance.sub(name)))));
+    private void forDefaultValue(ObjectProducer<T> objectProducer, Instance<T> instance) {
+        objectProducer.getType().getPropertyWriters().forEach((name, writer) ->
+                factorySet.getFactoryPool().queryDefaultValueBuilder(writer.getType()).ifPresent(builder ->
+                        objectProducer.addChild(name, new DefaultValueProducer<>(objectProducer.getType(), builder,
+                                instance.sub(name)))));
     }
 }

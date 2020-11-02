@@ -51,8 +51,8 @@ abstract class Producer<T> {
 
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
         String lastProperty = property.tail();
-        property.removeTail().applyAccess(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(producer ->
-                producer.changeChild(lastProperty, producerGenerator.apply(producer, lastProperty)));
+        property.removeTail().applyAccess(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(nextToLast ->
+                nextToLast.changeChild(lastProperty, producerGenerator.apply(nextToLast, lastProperty)));
     }
 
     @SuppressWarnings("unchecked")

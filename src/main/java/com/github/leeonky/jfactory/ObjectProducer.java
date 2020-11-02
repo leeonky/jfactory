@@ -39,8 +39,8 @@ class ObjectProducer<T> extends Producer<T> {
         if (producer == null) {
             BeanClass<?> propertyType = getType().getPropertyWriter(property).getType();
             if (propertyType.isCollection())
-                addChild(property, producer = new CollectionProducer<>(factorySet.getFactoryPool(), getType(),
-                        propertyType, instance.sub(property)));
+                addChild(property, producer = new CollectionProducer<>(factorySet.getFactoryPool(),
+                        getType(), propertyType, instance.sub(property)));
         }
         return producer;
     }
@@ -59,10 +59,10 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     public void addDependency(PropertyChain property, Function<Object[], Object> function, List<PropertyChain> propertyChains) {
-        dependencies.put(property, new Dependency<>(function, property, propertyChains));
+        dependencies.put(property, new Dependency<>(property, propertyChains, function));
     }
 
-    public ObjectProducer<T> processDependencyAndLink() {
+    public ObjectProducer<T> doDependenciesAndLinks() {
         doDependencies();
         getAllChildren().values().forEach(Producer::checkChange);
         processLinks();

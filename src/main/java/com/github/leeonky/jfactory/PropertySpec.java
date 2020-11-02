@@ -93,8 +93,8 @@ public class PropertySpec<T> {
 
     private Spec<T> appendProducer(Fuc<FactorySet, Producer<?>, String, Producer<?>> producerGenerator) {
         if (property.isSingle() || property.isTopLevelPropertyCollection())
-            return spec.append((factorySet, objectProducer) -> objectProducer.changeChild(property, ((producer, property) ->
-                    producerGenerator.apply(factorySet, producer, property))));
+            return spec.append((factorySet, objectProducer) -> objectProducer.changeChild(property,
+                    ((nextToLast, property) -> producerGenerator.apply(factorySet, nextToLast, property))));
         throw new IllegalArgumentException(String.format("Not support property chain '%s' in current operation", property.toString()));
     }
 

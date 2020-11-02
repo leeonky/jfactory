@@ -14,7 +14,8 @@ class FactoryPool {
 
     @SuppressWarnings("unchecked")
     public <T> ObjectFactory<T> queryObjectFactory(Class<T> type) {
-        return (ObjectFactory<T>) objectFactories.computeIfAbsent(type, key -> new ObjectFactory<>(BeanClass.create(key)));
+        return (ObjectFactory<T>) objectFactories.computeIfAbsent(type,
+                key -> new ObjectFactory<>(BeanClass.create(key)));
     }
 
     @SuppressWarnings("unchecked")
@@ -34,7 +35,7 @@ class FactoryPool {
     }
 
     public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueBuilder(BeanClass<T> type) {
-        return defaultValueBuilders.queryDefaultValueFactory(type.getType());
+        return defaultValueBuilders.query(type.getType());
     }
 
     public <T> DefaultValueBuilder<T> getDefaultValueBuilder(BeanClass<T> type) {
