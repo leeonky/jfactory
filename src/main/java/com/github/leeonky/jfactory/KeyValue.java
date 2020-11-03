@@ -33,11 +33,7 @@ class KeyValue {
 
     // TODO large method
     public <T> Expression<T> createExpression(BeanClass<T> beanClass) {
-        Matcher matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_COLLECTION_INDEX +
-                PATTERN_MIX_IN_SPEC + PATTERN_INTENTLY + PATTERN_CONDITION).matcher(key);
-        if (!matcher.matches())
-            throw new IllegalArgumentException(String.format("Invalid property `%s` for %s creation.",
-                    key, beanClass.getName()));
+        Matcher matcher = parse(beanClass);
 
         String property = matcher.group(GROUP_PROPERTY);
         String index = matcher.group(GROUP_COLLECTION_INDEX);
@@ -54,6 +50,15 @@ class KeyValue {
         return keyValueCollection.createSubExpression(beanClass.getProperty(property), mixInsSpec, value).setIntently(intently);
     }
 
+    private <T> Matcher parse(BeanClass<T> beanClass) {
+        Matcher matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_COLLECTION_INDEX +
+                PATTERN_MIX_IN_SPEC + PATTERN_INTENTLY + PATTERN_CONDITION).matcher(key);
+        if (!matcher.matches())
+            throw new IllegalArgumentException(String.format("Invalid property `%s` for %s creation.",
+                    key, beanClass.getName()));
+        return matcher;
+    }
+
     public <T> Builder<T> apply(Builder<T> builder) {
         return builder.property(key, value);
     }
@@ -68,10 +73,10 @@ class KeyValue {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return BeanClass.cast(obj, KeyValue.class)
+    public boolean equals(Object another) {
+        return BeanClass.cast(another, KeyValue.class)
                 .map(keyValue -> Objects.equals(key, keyValue.key) && Objects.equals(value, keyValue.value))
-                .orElseGet(() -> super.equals(obj));
+                .orElseGet(() -> super.equals(another));
     }
 }
 
