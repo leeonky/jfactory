@@ -57,7 +57,7 @@ class ObjectFactory<T> implements Factory<T> {
         })).forEach(spec -> spec.accept(instance));
     }
 
-    public Instance<T> createInstance(int sequence) {
-        return new Instance<>(sequence, createSpec());
+    public RootInstance<T> createInstance(int sequence) {
+        return new RootInstance<>(sequence, createSpec());
     }
 }

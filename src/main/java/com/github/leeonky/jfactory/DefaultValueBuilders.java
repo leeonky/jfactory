@@ -5,7 +5,6 @@ import com.github.leeonky.util.BeanClass;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -26,34 +25,33 @@ class DefaultValueBuilders {
     public static class DefaultStringBuilder implements DefaultValueBuilder<String> {
 
         @Override
-        public <T> String create(BeanClass<T> beanType, Instance<T> instance) {
-            return String.format("%s#%d%s", instance.getProperty(), instance.getSequence(),
-                    instance.getIndexes().stream().map(i -> String.format("[%d]", i)).collect(Collectors.joining()));
+        public <T> String create(BeanClass<T> beanType, RootInstance<T>.Sub instance) {
+            return instance.propertyInfo();
         }
     }
 
     public static class DefaultIntegerBuilder implements DefaultValueBuilder<Integer> {
 
         @Override
-        public <T> Integer create(BeanClass<T> beanType, Instance<T> instance) {
+        public <T> Integer create(BeanClass<T> beanType, RootInstance<T>.Sub instance) {
             return instance.getSequence();
         }
     }
 
-    public static class DefaultTypeBuilder<T> implements DefaultValueBuilder<T> {
-        private final BeanClass<T> type;
+    public static class DefaultTypeBuilder<V> implements DefaultValueBuilder<V> {
+        private final BeanClass<V> type;
 
-        public DefaultTypeBuilder(BeanClass<T> type) {
+        public DefaultTypeBuilder(BeanClass<V> type) {
             this.type = type;
         }
 
         @Override
-        public T create(BeanClass beanType, Instance instance) {
+        public <T> V create(BeanClass<T> beanType, RootInstance<T>.Sub instance) {
             return type.createDefault();
         }
 
         @Override
-        public Class<T> getType() {
+        public Class<V> getType() {
             return type.getType();
         }
     }

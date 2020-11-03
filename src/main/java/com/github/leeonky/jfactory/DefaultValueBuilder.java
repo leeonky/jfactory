@@ -5,7 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import static java.lang.String.format;
 
 public interface DefaultValueBuilder<V> {
-    <T> V create(BeanClass<T> beanType, Instance<T> instance);
+    <T> V create(BeanClass<T> beanType, RootInstance<T>.Sub instance);
 
     @SuppressWarnings("unchecked")
     default Class<V> getType() {

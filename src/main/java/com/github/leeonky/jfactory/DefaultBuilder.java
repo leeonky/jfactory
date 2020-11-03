@@ -28,7 +28,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public ObjectProducer<T> createProducer(boolean intently) {
-        Instance<T> instance = objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()));
+        RootInstance<T> instance = objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()));
         ObjectProducer<T> objectProducer = new ObjectProducer<>(factorySet, objectFactory, this, intently, instance);
         establishChildProducers(objectProducer, instance);
         return objectProducer;
@@ -76,7 +76,7 @@ class DefaultBuilder<T> implements Builder<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public void establishChildProducers(ObjectProducer<T> objectProducer, Instance<T> instance) {
+    public void establishChildProducers(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
         forDefaultValue(objectProducer, instance);
         forSpec(objectProducer, instance);
         forInputProperties(objectProducer);
@@ -92,7 +92,7 @@ class DefaultBuilder<T> implements Builder<T> {
                 objectProducer.addChild(exp.getProperty(), exp.buildProducer(factorySet, objectProducer)));
     }
 
-    private void forDefaultValue(ObjectProducer<T> objectProducer, Instance<T> instance) {
+    private void forDefaultValue(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
         objectProducer.getType().getPropertyWriters().forEach((name, writer) ->
                 factorySet.getFactoryPool().queryDefaultValueBuilder(writer.getType()).ifPresent(builder ->
                         objectProducer.addChild(name, new DefaultValueProducer<>(objectProducer.getType(), builder,

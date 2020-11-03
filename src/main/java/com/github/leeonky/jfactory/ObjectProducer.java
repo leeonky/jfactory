@@ -13,13 +13,13 @@ class ObjectProducer<T> extends Producer<T> {
     private final FactorySet factorySet;
     private final DefaultBuilder<T> builder;
     private final boolean intently;
-    private final Instance<T> instance;
+    private final RootInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
     private final List<Link> links = new ArrayList<>();
 
     public ObjectProducer(FactorySet factorySet, ObjectFactory<T> objectFactory, DefaultBuilder<T> builder,
-                          boolean intently, Instance<T> instance) {
+                          boolean intently, RootInstance<T> instance) {
         super(objectFactory.getType());
         this.objectFactory = objectFactory;
         this.factorySet = factorySet;
@@ -47,7 +47,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected T produce() {
-        return instance.getValueCache().cache(() -> objectFactory.create(instance), obj -> {
+        return instance.cache(() -> objectFactory.create(instance), obj -> {
             children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.getValue()));
             factorySet.getDataRepository().save(obj);
         });

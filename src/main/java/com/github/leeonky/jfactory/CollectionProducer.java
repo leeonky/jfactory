@@ -16,7 +16,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     private final Function<Integer, Producer<?>> placeholderFactory;
 
     public CollectionProducer(FactoryPool factoryPool, BeanClass<T> parentType, BeanClass<C> collectionType,
-                              Instance<T> instance) {
+                              RootInstance<T>.Sub instance) {
         super(collectionType);
         placeholderFactory = index -> new DefaultValueProducer<>(parentType,
                 factoryPool.getDefaultValueBuilder(collectionType.getElementType()),
