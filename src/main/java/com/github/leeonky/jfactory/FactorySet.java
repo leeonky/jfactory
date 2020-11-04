@@ -41,9 +41,9 @@ public class FactorySet {
         return new DefaultBuilder<>(new SpecFactory<>(factoryPool.queryObjectFactory(spec.getType()), spec), this);
     }
 
-    public <T> Builder<T> spec(String... mixInsAndSpec) {
-        return new DefaultBuilder<T>(factoryPool.querySpecClassFactory(mixInsAndSpec[mixInsAndSpec.length - 1]), this)
-                .mixIn(Arrays.copyOf(mixInsAndSpec, mixInsAndSpec.length - 1));
+    public <T> Builder<T> spec(String... traitsAndSpec) {
+        return new DefaultBuilder<T>(factoryPool.querySpecClassFactory(traitsAndSpec[traitsAndSpec.length - 1]), this)
+                .trait(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));
     }
 
     public <T> T create(Class<T> type) {
@@ -54,8 +54,8 @@ public class FactorySet {
         return spec(spec).create();
     }
 
-    public <T> T create(String... mixInsAndSpec) {
-        return this.<T>spec(mixInsAndSpec).create();
+    public <T> T create(String... traitsAndSpec) {
+        return this.<T>spec(traitsAndSpec).create();
     }
 
     public int newSequence(BeanClass<?> type) {

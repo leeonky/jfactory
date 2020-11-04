@@ -16,7 +16,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
         super(BeanClass.create(BeanClass.newInstance(specClass).getType()));
         this.specClass = specClass;
         this.base = base;
-        registerMixIns();
+        registerTraits();
         constructor(base::create);
     }
 
@@ -25,21 +25,21 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
         return BeanClass.newInstance(specClass);
     }
 
-    private void registerMixIns() {
+    private void registerTraits() {
         Stream.of(specClass.getMethods())
-                .filter(method -> method.getAnnotation(MixIn.class) != null)
-                .forEach(method -> spec(getMixInName(method),
+                .filter(method -> method.getAnnotation(Trait.class) != null)
+                .forEach(method -> spec(getTraitName(method),
                         instance -> Suppressor.run(() -> method.invoke(instance.spec()))));
     }
 
-    private String getMixInName(Method method) {
-        MixIn annotation = method.getAnnotation(MixIn.class);
+    private String getTraitName(Method method) {
+        Trait annotation = method.getAnnotation(Trait.class);
         return annotation.value().isEmpty() ? method.getName() : annotation.value();
     }
 
     @Override
-    public void collectSpec(Collection<String> mixIns, Instance<T> instance) {
+    public void collectSpec(Collection<String> traits, Instance<T> instance) {
         base.collectSpec(Collections.emptyList(), instance);
-        super.collectSpec(mixIns, instance);
+        super.collectSpec(traits, instance);
     }
 }

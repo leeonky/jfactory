@@ -1,28 +1,28 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Property;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 //TODO move expression classes to new package
 class KeyValue {
     private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
     private static final String PATTERN_COLLECTION_INDEX = "(\\[(\\d+)])?";
-    private static final String PATTERN_MIX_IN = "(([^, ]+[, ])([^, ]+[, ])*)?";
+    private static final String PATTERN_TRAIT = "(([^, ]+[, ])([^, ]+[, ])*)?";
     private static final String PATTERN_SPEC = "(.+)";
-    private static final String PATTERN_CONDITION = "(\\." + PATTERN_SPEC + ")?";
-    private static final String PATTERN_MIX_IN_SPEC = "(\\(" + PATTERN_MIX_IN + PATTERN_SPEC + "\\))?";
+    private static final String PATTERN_CLAUSE = "(\\." + PATTERN_SPEC + ")?";
+    private static final String PATTERN_TRAIT_SPEC = "(\\(" + PATTERN_TRAIT + PATTERN_SPEC + "\\))?";
     private static final String PATTERN_INTENTLY = "(!)?";
     private static final int GROUP_PROPERTY = 1;
     private static final int GROUP_COLLECTION_INDEX = 3;
-    private static final int GROUP_MIX_IN = 5;
+    private static final int GROUP_TRAIT = 5;
     private static final int GROUP_SPEC = 8;
     private static final int GROUP_INTENTLY = 9;
-    private static final int GROUP_CONDITION = 11;
-
+    private static final int GROUP_CLAUSE = 11;
     private final String key;
     private final Object value;
 
@@ -31,28 +31,32 @@ class KeyValue {
         this.value = value;
     }
 
-    // TODO large method
     public <T> Expression<T> createExpression(BeanClass<T> beanClass) {
         Matcher matcher = parse(beanClass);
+        Property<T> property = beanClass.getProperty(matcher.group(GROUP_PROPERTY));
+        return hasIndex(matcher).map(index -> createCollectionExpression(matcher, property, index))
+                .orElseGet(() -> createSubExpression(matcher, property));
+    }
 
-        String property = matcher.group(GROUP_PROPERTY);
-        String index = matcher.group(GROUP_COLLECTION_INDEX);
-        boolean intently = matcher.group(GROUP_INTENTLY) != null;
+    private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index) {
+        return new CollectionExpression<>(property, Integer.valueOf(index),
+                createSubExpression(matcher, property.getWriter().getType().getProperty(index)));
+    }
 
-        MixInsSpec mixInsSpec = new MixInsSpec(matcher.group(GROUP_MIX_IN) != null ?
-                matcher.group(GROUP_MIX_IN).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
-        KeyValueCollection keyValueCollection = new KeyValueCollection().add(matcher.group(GROUP_CONDITION), value);
-        if (index != null)
-            return new CollectionExpression<>(beanClass.getProperty(property), Integer.valueOf(index),
-                    keyValueCollection.createSubExpression(beanClass.getPropertyWriter(property).getType().getProperty(index),
-                            mixInsSpec, value).setIntently(intently));
+    private Optional<String> hasIndex(Matcher matcher) {
+        return Optional.ofNullable(matcher.group(GROUP_COLLECTION_INDEX));
+    }
 
-        return keyValueCollection.createSubExpression(beanClass.getProperty(property), mixInsSpec, value).setIntently(intently);
+    private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property) {
+        KeyValueCollection properties = new KeyValueCollection().add(matcher.group(GROUP_CLAUSE), value);
+        TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
+                matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
+        return properties.createExpression(property, traitsSpec, value).setIntently(matcher.group(GROUP_INTENTLY) != null);
     }
 
     private <T> Matcher parse(BeanClass<T> beanClass) {
         Matcher matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_COLLECTION_INDEX +
-                PATTERN_MIX_IN_SPEC + PATTERN_INTENTLY + PATTERN_CONDITION).matcher(key);
+                PATTERN_TRAIT_SPEC + PATTERN_INTENTLY + PATTERN_CLAUSE).matcher(key);
         if (!matcher.matches())
             throw new IllegalArgumentException(String.format("Invalid property `%s` for %s creation.",
                     key, beanClass.getName()));

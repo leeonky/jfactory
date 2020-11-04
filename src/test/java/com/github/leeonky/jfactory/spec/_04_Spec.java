@@ -1,8 +1,8 @@
 package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.FactorySet;
-import com.github.leeonky.jfactory.MixIn;
 import com.github.leeonky.jfactory.Spec;
+import com.github.leeonky.jfactory.Trait;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Nested;
@@ -38,7 +38,7 @@ class _04_Spec {
             property("content").value("this is a bean");
         }
 
-        @MixIn
+        @Trait
         public ABean int100() {
             property("intValue").value(100);
             return this;
@@ -129,7 +129,7 @@ class _04_Spec {
         @Test
         void support_specify_customized_builder_args() {
             factorySet.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").spec(ABean.class, builder -> builder.mixIn("int100")));
+                    instance.spec().property("bean").spec(ABean.class, builder -> builder.trait("int100")));
 
             assertThat(factorySet.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")

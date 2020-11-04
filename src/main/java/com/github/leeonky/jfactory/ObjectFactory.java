@@ -14,7 +14,7 @@ class ObjectFactory<T> implements Factory<T> {
     private Function<Instance<T>, T> constructor = instance -> getType().newInstance();
     private Consumer<Instance<T>> spec = (instance) -> {
     };
-    private Map<String, Consumer<Instance<T>>> mixIns = new HashMap<>();
+    private Map<String, Consumer<Instance<T>>> traits = new HashMap<>();
 
     public ObjectFactory(BeanClass<T> type) {
         this.type = type;
@@ -37,8 +37,8 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> spec(String name, Consumer<Instance<T>> mixIn) {
-        mixIns.put(name, Objects.requireNonNull(mixIn));
+    public Factory<T> spec(String name, Consumer<Instance<T>> traits) {
+        this.traits.put(name, Objects.requireNonNull(traits));
         return this;
     }
 
@@ -50,10 +50,10 @@ class ObjectFactory<T> implements Factory<T> {
         return type;
     }
 
-    public void collectSpec(Collection<String> mixIns, Instance<T> instance) {
+    public void collectSpec(Collection<String> traits, Instance<T> instance) {
         spec.accept(instance);
-        mixIns.stream().map(name -> this.mixIns.computeIfAbsent(name, k -> {
-            throw new IllegalArgumentException("Mix-in `" + k + "` not exist");
+        traits.stream().map(name -> this.traits.computeIfAbsent(name, k -> {
+            throw new IllegalArgumentException("Trait `" + k + "` not exist");
         })).forEach(spec -> spec.accept(instance));
     }
 

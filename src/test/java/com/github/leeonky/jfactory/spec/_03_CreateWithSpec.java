@@ -1,8 +1,8 @@
 package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.FactorySet;
-import com.github.leeonky.jfactory.MixIn;
 import com.github.leeonky.jfactory.Spec;
+import com.github.leeonky.jfactory.Trait;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Nested;
@@ -34,13 +34,13 @@ public class _03_CreateWithSpec {
             property("content").value("this is a bean");
         }
 
-        @MixIn
+        @Trait
         public ABean int100() {
             property("intValue").value(100);
             return this;
         }
 
-        @MixIn("hello")
+        @Trait("hello")
         public ABean strHello() {
             property("stringValue").value("hello");
             return this;
@@ -64,12 +64,12 @@ public class _03_CreateWithSpec {
         }
 
         @Test
-        void support_define_mix_in_of_type() {
+        void support_define_trait_of_type() {
             factorySet.factory(Bean.class).spec("100", instance -> {
                 instance.spec().property("intValue").value(100);
             });
 
-            assertThat(factorySet.type(Bean.class).mixIn("100").create())
+            assertThat(factorySet.type(Bean.class).trait("100").create())
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
@@ -81,7 +81,7 @@ public class _03_CreateWithSpec {
                             .property("content").value("a bean"))
                     .constructor(instance -> new BeanSub());
 
-            assertThat(factorySet.type(Bean.class).mixIn("a bean").create())
+            assertThat(factorySet.type(Bean.class).trait("a bean").create())
                     .isInstanceOf(BeanSub.class)
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("content", "a bean")
@@ -89,8 +89,8 @@ public class _03_CreateWithSpec {
         }
 
         @Test
-        void raise_error_when_mixin_not_exist() {
-            assertThrows(IllegalArgumentException.class, () -> factorySet.type(Bean.class).mixIn("not exist").create());
+        void raise_error_when_trait_not_exist() {
+            assertThrows(IllegalArgumentException.class, () -> factorySet.type(Bean.class).trait("not exist").create());
         }
     }
 
@@ -99,7 +99,7 @@ public class _03_CreateWithSpec {
 
         @Test
         void support_define_spec_in_class() {
-            assertThat(factorySet.spec(ABean.class).mixIn("int100", "hello").create())
+            assertThat(factorySet.spec(ABean.class).trait("int100", "hello").create())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
@@ -135,7 +135,7 @@ public class _03_CreateWithSpec {
         }
 
         @Test
-        void should_raise_error_when_definition_or_mix_in_not_exist() {
+        void should_raise_error_when_definition_or_trait_not_exist() {
             assertThrows(IllegalArgumentException.class, () -> factorySet.create("ABean"));
         }
 

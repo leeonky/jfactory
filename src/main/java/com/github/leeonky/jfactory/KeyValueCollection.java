@@ -20,7 +20,6 @@ class KeyValueCollection {
         keyValues.putAll(another.keyValues);
     }
 
-    // TODO try clean with reduce
     public Builder<?> apply(Builder<?> builder) {
         for (KeyValue keyValue : keyValues.values())
             builder = keyValue.apply(builder);
@@ -34,9 +33,9 @@ class KeyValueCollection {
                 .collect(Collectors.toList());
     }
 
-    public <H> Expression<H> createSubExpression(Property<H> property, MixInsSpec mixInsSpec, Object value) {
-        return isSingleValue() ? new SingleValueExpression<>(value, mixInsSpec, property)
-                : new SubObjectExpression<>(this, mixInsSpec, property);
+    public <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Object value) {
+        return isSingleValue() ? new SingleValueExpression<>(value, traitsSpec, property)
+                : new SubObjectExpression<>(this, traitsSpec, property);
     }
 
     private boolean isSingleValue() {

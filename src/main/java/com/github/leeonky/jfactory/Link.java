@@ -11,8 +11,8 @@ class Link {
     @SuppressWarnings("unchecked")
     public void process(Producer<?> producer) {
         List<Producer<?>> linkedProducers = properties.stream().map(producer::child).collect(Collectors.toList());
-        properties.forEach(linkProperty -> producer.changeChild(linkProperty,
-                (nextToLast, property) -> new LinkProducer(linkedProducers, nextToLast.getType().getPropertyWriter(property).getType())));
+        properties.forEach(linkProperty -> producer.changeChild(linkProperty, (nextToLast, property) ->
+                new LinkProducer(linkedProducers, nextToLast.getType().getPropertyWriter(property).getType())));
     }
 
     public boolean contains(List<PropertyChain> properties) {

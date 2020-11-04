@@ -2,8 +2,8 @@ package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.Builder;
 import com.github.leeonky.jfactory.FactorySet;
-import com.github.leeonky.jfactory.MixIn;
 import com.github.leeonky.jfactory.Spec;
+import com.github.leeonky.jfactory.Trait;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -52,19 +52,19 @@ class _05_ComplexPropertyArgs {
             property("content").value("this is a bean");
         }
 
-        @MixIn
+        @Trait
         public ABean int100() {
             property("intValue").value(100);
             return this;
         }
 
-        @MixIn
+        @Trait
         public ABean long1000() {
             property("longValue").value(1000);
             return this;
         }
 
-        @MixIn
+        @Trait
         public ABean hello() {
             property("stringValue").value("hello");
             return this;
@@ -78,7 +78,7 @@ class _05_ComplexPropertyArgs {
             property("content").value("this is another bean");
         }
 
-        @MixIn
+        @Trait
         public void int200() {
             property("intValue").value(200);
         }
@@ -164,7 +164,7 @@ class _05_ComplexPropertyArgs {
         }
 
         @Test
-        void should_raise_error_when_property_has_different_mix_in() {
+        void should_raise_error_when_property_has_different_trait() {
             factorySet.register(ABean.class);
 
             assertThrows(IllegalArgumentException.class, () -> factorySet.type(BeansWrapper.class)
@@ -174,7 +174,7 @@ class _05_ComplexPropertyArgs {
         }
 
         @Test
-        void support_merge_with_mix_in_and_empty_mix_in() {
+        void support_merge_with_trait_and_empty_trait() {
             factorySet.register(ABean.class);
 
             assertThat(factorySet.type(BeansWrapper.class)
@@ -294,7 +294,7 @@ class _05_ComplexPropertyArgs {
         }
 
         @Test
-        void also_support_spec_and_mix_in_in_element() {
+        void also_support_spec_and_trait_in_element() {
             factorySet.spec(ABean.class);
 
             BeanCollection beanCollection = factorySet.type(BeanCollection.class)

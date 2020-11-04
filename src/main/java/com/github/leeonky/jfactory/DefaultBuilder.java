@@ -13,7 +13,7 @@ import static java.util.Objects.hash;
 class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
-    private final Set<String> mixIns = new LinkedHashSet<>();
+    private final Set<String> traits = new LinkedHashSet<>();
     private final KeyValueCollection properties = new KeyValueCollection();
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
@@ -35,16 +35,16 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
-    public Builder<T> mixIn(String... mixIns) {
+    public Builder<T> trait(String... traits) {
         DefaultBuilder<T> newBuilder = copy();
-        newBuilder.mixIns.addAll(asList(mixIns));
+        newBuilder.traits.addAll(asList(traits));
         return newBuilder;
     }
 
     private DefaultBuilder<T> copy() {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, factorySet);
         builder.properties.merge(properties);
-        builder.mixIns.addAll(mixIns);
+        builder.traits.addAll(traits);
         return builder;
     }
 
@@ -65,14 +65,14 @@ class DefaultBuilder<T> implements Builder<T> {
     //TODO missing type
     @Override
     public int hashCode() {
-        return hash(DefaultBuilder.class, properties, mixIns);
+        return hash(DefaultBuilder.class, properties, traits);
     }
 
     //TODO missing type
     @Override
     public boolean equals(Object another) {
         return cast(another, DefaultBuilder.class)
-                .map(builder -> properties.equals(builder.properties) && mixIns.equals(builder.mixIns))
+                .map(builder -> properties.equals(builder.properties) && traits.equals(builder.traits))
                 .orElseGet(() -> super.equals(another));
     }
 
@@ -83,7 +83,7 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private void forSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
-        objectFactory.collectSpec(mixIns, instance);
+        objectFactory.collectSpec(traits, instance);
         instance.spec().apply(factorySet, objectProducer);
     }
 

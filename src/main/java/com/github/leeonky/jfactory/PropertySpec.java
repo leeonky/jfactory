@@ -47,13 +47,13 @@ public class PropertySpec<T> {
                 factorySet.spec(spec).createProducer(intently));
     }
 
-    public Spec<T> spec(String... mixInsAndSpec) {
-        return spec(false, mixInsAndSpec);
+    public Spec<T> spec(String... traitsAndSpec) {
+        return spec(false, traitsAndSpec);
     }
 
-    public Spec<T> spec(boolean intently, String... mixInsAndSpec) {
+    public Spec<T> spec(boolean intently, String... traitsAndSpec) {
         return appendProducer((factorySet, producer, property) ->
-                factorySet.spec(mixInsAndSpec).createProducer(intently));
+                factorySet.spec(traitsAndSpec).createProducer(intently));
     }
 
     public <V> Spec<T> spec(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {

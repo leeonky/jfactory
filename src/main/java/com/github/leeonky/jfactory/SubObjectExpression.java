@@ -9,12 +9,12 @@ import static java.lang.String.format;
 
 class SubObjectExpression<H> extends Expression<H> {
     private final KeyValueCollection keyValueCollection;
-    private final MixInsSpec mixInsSpec;
+    private final TraitsSpec traitsSpec;
 
-    public SubObjectExpression(KeyValueCollection keyValueCollection, MixInsSpec mixInsSpec, Property<H> property) {
+    public SubObjectExpression(KeyValueCollection keyValueCollection, TraitsSpec traitsSpec, Property<H> property) {
         super(property);
         this.keyValueCollection = keyValueCollection;
-        this.mixInsSpec = mixInsSpec;
+        this.traitsSpec = traitsSpec;
     }
 
     @Override
@@ -34,7 +34,7 @@ class SubObjectExpression<H> extends Expression<H> {
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-        return keyValueCollection.apply(mixInsSpec.toBuilder(factorySet, propertyType));
+        return keyValueCollection.apply(traitsSpec.toBuilder(factorySet, propertyType));
     }
 
     @Override
@@ -45,7 +45,7 @@ class SubObjectExpression<H> extends Expression<H> {
     @Override
     protected Expression<H> mergeBy(SubObjectExpression<H> another) {
         keyValueCollection.merge(another.keyValueCollection);
-        mixInsSpec.merge(another.mixInsSpec, format("%s.%s", property.getBeanType().getName(), property.getName()));
+        traitsSpec.merge(another.traitsSpec, format("%s.%s", property.getBeanType().getName(), property.getName()));
         setIntently(isIntently() || another.isIntently());
         return this;
     }

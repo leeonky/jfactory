@@ -21,7 +21,7 @@ public interface Builder<T> {
 
     Collection<T> queryAll();
 
-    Builder<T> mixIn(String... mixIns);
+    Builder<T> trait(String... traits);
 
     Producer<T> createProducer(boolean intently);
 }

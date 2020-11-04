@@ -13,7 +13,7 @@ class PropertySpecTest {
         assertThat(propertySpec.value(() -> null)).isEqualTo(spec);
         assertThat(propertySpec.value(1)).isEqualTo(spec);
         assertThat(propertySpec.spec(MySpec.class)).isEqualTo(spec);
-        assertThat(propertySpec.spec(MySpec.class, builder -> builder.mixIn("mix-in"))).isEqualTo(spec);
+        assertThat(propertySpec.spec(MySpec.class, builder -> builder.trait("trait"))).isEqualTo(spec);
         assertThat(propertySpec.spec(spec)).isEqualTo(spec);
         assertThat(propertySpec.spec("A", "Object")).isEqualTo(spec);
     }
