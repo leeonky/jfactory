@@ -17,16 +17,20 @@ class ObjectProducerTest {
 
     private FactorySet factorySet = new FactorySet();
 
-    private Producer buildProducer(Function<Builder<Bean>, Builder<Bean>> modifyBuilder, boolean intently) {
-        return modifyBuilder.apply(factorySet.type(Bean.class)).createProducer(intently);
+    private <T> Producer buildProducer(Function<Builder<T>, Builder<T>> modifyBuilder, boolean intently, Class<T> type) {
+        return modifyBuilder.apply(factorySet.type(type)).createProducer(intently);
     }
 
     private Producer sameProducer() {
-        return buildProducer(builder -> builder.property("intValue", 1).trait("a bean"), false);
+        return producerOf(Bean.class);
+    }
+
+    private Producer producerOf(Class<?> type) {
+        return buildProducer(builder -> builder.property("intValue", 1).trait("a bean"), false, type);
     }
 
     private Producer sameIntentlyProducer() {
-        return buildProducer(builder -> builder.property("intValue", 1).trait("a bean"), true);
+        return buildProducer(builder -> builder.property("intValue", 1).trait("a bean"), true, Bean.class);
     }
 
     private Producer checkChangeSameProducer() {
@@ -102,22 +106,18 @@ class ObjectProducerTest {
         @Test
         void should_not_equal_when_different_trait() {
             assertThat(sameProducer().hashCode())
-                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 1).trait("another bean"), false).hashCode());
+                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 1).trait("another bean"), false, Bean.class).hashCode());
         }
 
         @Test
         void should_not_equal_when_different_property() {
             assertThat(sameProducer().hashCode())
-                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 2000).trait("a bean"), false).hashCode());
+                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 2000).trait("a bean"), false, Bean.class).hashCode());
         }
 
         @Test
         void should_not_equal_for_different_bean() {
-            ObjectFactory<Bean2> objectFactory = factorySet.getFactoryPool().queryObjectFactory(Bean2.class);
-            assertThat(sameProducer().hashCode())
-                    .isNotEqualTo(new ObjectProducer<>(factorySet, objectFactory,
-                            (DefaultBuilder<Bean2>) new DefaultBuilder<>(objectFactory, factorySet)
-                                    .property("intValue", 1).trait("a bean"), false, objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()))).hashCode());
+            assertThat(producerOf(Bean.class).hashCode()).isNotEqualTo(producerOf(Bean2.class).hashCode());
         }
     }
 
@@ -166,22 +166,18 @@ class ObjectProducerTest {
         @Test
         void should_not_equal_when_different_trait() {
             assertThat(sameProducer())
-                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 1).trait("another bean"), false));
+                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 1).trait("another bean"), false, Bean.class));
         }
 
         @Test
         void should_not_equal_when_different_property() {
             assertThat(sameProducer())
-                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 2000).trait("a bean"), false));
+                    .isNotEqualTo(buildProducer(builder1 -> builder1.property("intValue", 2000).trait("a bean"), false, Bean.class));
         }
 
         @Test
         void should_not_equal_for_different_bean() {
-            ObjectFactory<Bean2> objectFactory = factorySet.getFactoryPool().queryObjectFactory(Bean2.class);
-            assertThat(sameProducer())
-                    .isNotEqualTo(new ObjectProducer<>(factorySet, objectFactory,
-                            (DefaultBuilder<Bean2>) new DefaultBuilder<>(objectFactory, factorySet)
-                                    .property("intValue", 1).trait("a bean"), false, objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()))));
+            assertThat(producerOf(Bean.class)).isNotEqualTo(producerOf(Bean2.class));
         }
     }
 

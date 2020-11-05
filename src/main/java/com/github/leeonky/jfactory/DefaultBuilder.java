@@ -28,10 +28,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public ObjectProducer<T> createProducer(boolean intently) {
-        RootInstance<T> instance = objectFactory.createInstance(factorySet.newSequence(objectFactory.getType()));
-        ObjectProducer<T> objectProducer = new ObjectProducer<>(factorySet, objectFactory, this, intently, instance);
-        establishChildProducers(objectProducer, instance);
-        return objectProducer;
+        return new ObjectProducer<>(factorySet, objectFactory, this, intently);
     }
 
     @Override
@@ -76,13 +73,12 @@ class DefaultBuilder<T> implements Builder<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public void establishChildProducers(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
-        forDefaultValue(objectProducer, instance);
+    public void establishSpecProducers(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
         forSpec(objectProducer, instance);
         forInputProperties(objectProducer);
     }
 
-    private void forSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
+    private void forSpec(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
         objectFactory.collectSpec(traits, instance);
         instance.spec().apply(factorySet, objectProducer);
     }
@@ -90,12 +86,5 @@ class DefaultBuilder<T> implements Builder<T> {
     private void forInputProperties(ObjectProducer<T> objectProducer) {
         properties.expressions(objectFactory.getType()).forEach(exp ->
                 objectProducer.addChild(exp.getProperty(), exp.buildProducer(factorySet, objectProducer)));
-    }
-
-    private void forDefaultValue(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
-        objectProducer.getType().getPropertyWriters().forEach((name, writer) ->
-                factorySet.getFactoryPool().queryDefaultValueBuilder(writer.getType()).ifPresent(builder ->
-                        objectProducer.addChild(name, new DefaultValueProducer<>(objectProducer.getType(), builder,
-                                instance.sub(name)))));
     }
 }

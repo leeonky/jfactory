@@ -69,9 +69,8 @@ abstract class Producer<T> {
         Map<PropertyChain, Producer<?>> allChildren = new HashMap<>();
         children().forEach((propertyChain, producer) -> {
             allChildren.put(propertyChain, producer);
-            producer.getAllChildren().forEach((subChain, subProducer) -> {
-                allChildren.put(propertyChain.concat(subChain), subProducer);
-            });
+            producer.getAllChildren().forEach((subChain, subProducer) ->
+                    allChildren.put(propertyChain.concat(subChain), subProducer));
         });
         return allChildren;
     }

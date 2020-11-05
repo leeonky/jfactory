@@ -1,11 +1,8 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
-
 import java.util.Arrays;
 
 public class FactorySet {
-    private final TypeSequence typeSequence = new TypeSequence();
     private final FactoryPool factoryPool = new FactoryPool();
     private final DataRepository dataRepository;
 
@@ -38,7 +35,7 @@ public class FactorySet {
     }
 
     public <T> Builder<T> spec(Spec<T> spec) {
-        return new DefaultBuilder<>(new SpecFactory<>(factoryPool.queryObjectFactory(spec.getType()), spec), this);
+        return new DefaultBuilder<>(new SpecFactory<>(factoryPool.queryObjectFactory(spec.getType()), spec, factoryPool), this);
     }
 
     public <T> Builder<T> spec(String... traitsAndSpec) {
@@ -58,7 +55,4 @@ public class FactorySet {
         return this.<T>spec(traitsAndSpec).create();
     }
 
-    public int newSequence(BeanClass<?> type) {
-        return typeSequence.generate(type.getType());
-    }
 }

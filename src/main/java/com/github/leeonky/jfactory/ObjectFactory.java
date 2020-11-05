@@ -11,13 +11,15 @@ import java.util.function.Function;
 
 class ObjectFactory<T> implements Factory<T> {
     private final BeanClass<T> type;
+    private final FactoryPool factoryPool;
     private Function<Instance<T>, T> constructor = instance -> getType().newInstance();
     private Consumer<Instance<T>> spec = (instance) -> {
     };
     private Map<String, Consumer<Instance<T>>> traits = new HashMap<>();
 
-    public ObjectFactory(BeanClass<T> type) {
+    public ObjectFactory(BeanClass<T> type, FactoryPool factoryPool) {
         this.type = type;
+        this.factoryPool = factoryPool;
     }
 
     protected Spec<T> createSpec() {
@@ -57,7 +59,11 @@ class ObjectFactory<T> implements Factory<T> {
         })).forEach(spec -> spec.accept(instance));
     }
 
-    public RootInstance<T> createInstance(int sequence) {
-        return new RootInstance<>(sequence, createSpec());
+    public RootInstance<T> createInstance() {
+        return new RootInstance<>(factoryPool.nextSequence(type.getType()), createSpec());
+    }
+
+    public FactoryPool getFactoryPool() {
+        return factoryPool;
     }
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 class FactoryPool {
+    public final TypeSequence typeSequence = new TypeSequence();
     private final DefaultValueBuilders defaultValueBuilders = new DefaultValueBuilders();
     private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
@@ -15,14 +16,14 @@ class FactoryPool {
     @SuppressWarnings("unchecked")
     public <T> ObjectFactory<T> queryObjectFactory(Class<T> type) {
         return (ObjectFactory<T>) objectFactories.computeIfAbsent(type,
-                key -> new ObjectFactory<>(BeanClass.create(key)));
+                key -> new ObjectFactory<>(BeanClass.create(key), this));
     }
 
     @SuppressWarnings("unchecked")
     public <T> SpecClassFactory<T> registerSpecClassFactory(Class<? extends Spec<T>> specClass) {
         Spec<T> spec = BeanClass.newInstance(specClass);
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
-                type -> new SpecClassFactory<>(queryObjectFactory(spec.getType()), specClass));
+                type -> new SpecClassFactory<>(queryObjectFactory(spec.getType()), specClass, this));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
         return (SpecClassFactory<T>) specClassFactory;
     }
@@ -40,5 +41,9 @@ class FactoryPool {
 
     public <T> DefaultValueBuilder<T> getDefaultValueBuilder(BeanClass<T> type) {
         return queryDefaultValueBuilder(type).orElseGet(() -> new DefaultValueBuilders.DefaultTypeBuilder<>(type));
+    }
+
+    public int nextSequence(Class<?> type) {
+        return typeSequence.generate(type);
     }
 }
