@@ -5,6 +5,8 @@ import com.github.leeonky.util.BeanClass;
 import java.util.*;
 import java.util.function.BiFunction;
 
+import static java.util.function.Function.identity;
+
 //TODO move to new package
 abstract class Producer<T> {
     private final BeanClass<T> type;
@@ -41,18 +43,18 @@ abstract class Producer<T> {
     }
 
     public Producer<?> child(PropertyChain property) {
-        return property.applyAccess(this, (producer, subProperty) -> producer.child(subProperty)
-                .orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)), Objects::requireNonNull);
+        return property.access(this, (producer, subProperty) -> producer.child(subProperty)
+                .orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)), identity());
     }
 
     protected Producer<T> changeTo(Producer<T> newProducer) {
         return newProducer;
     }
 
-    public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerGenerator) {
+    public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerFactory) {
         String lastProperty = property.tail();
-        property.removeTail().applyAccess(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(nextToLast ->
-                nextToLast.changeChild(lastProperty, producerGenerator.apply(nextToLast, lastProperty)));
+        property.removeTail().access(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(nextToLast ->
+                nextToLast.changeChild(lastProperty, producerFactory.apply(nextToLast, lastProperty)));
     }
 
     @SuppressWarnings("unchecked")
@@ -85,5 +87,9 @@ abstract class Producer<T> {
 
     public boolean isNotChange() {
         return notChange;
+    }
+
+    public BeanClass<?> getPropertyWriterType(String property) {
+        return getType().getPropertyWriter(property).getType();
     }
 }

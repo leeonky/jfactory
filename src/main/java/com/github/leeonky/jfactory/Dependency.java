@@ -21,7 +21,7 @@ class Dependency<T> {
     @SuppressWarnings("unchecked")
     public void process(Producer<?> parent) {
         parent.changeChild(property, (nextToLast, property) -> new DependencyProducer<>(
-                (BeanClass<T>) nextToLast.getType().getPropertyWriter(property).getType(), suppliers(parent), rule));
+                (BeanClass<T>) nextToLast.getPropertyWriterType(property), suppliers(parent), rule));
     }
 
     private List<Supplier<Object>> suppliers(Producer<?> producer) {

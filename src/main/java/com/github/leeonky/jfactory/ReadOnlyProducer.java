@@ -3,8 +3,10 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
+import static java.util.Optional.ofNullable;
+
 class ReadOnlyProducer<T, P> extends Producer<T> {
-    private final PropertyReader<P> propertyReader;
+    private final PropertyReader<P> reader;
     private final Producer<P> parent;
 
     public ReadOnlyProducer(Producer<P> parent, String property) {
@@ -12,18 +14,15 @@ class ReadOnlyProducer<T, P> extends Producer<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private ReadOnlyProducer(Producer<P> parent, PropertyReader<P> propertyReader) {
-        super((BeanClass<T>) propertyReader.getType());
+    private ReadOnlyProducer(Producer<P> parent, PropertyReader<P> reader) {
+        super((BeanClass<T>) reader.getType());
         this.parent = parent;
-        this.propertyReader = propertyReader;
+        this.reader = reader;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected T produce() {
-        P parentValue = parent.getValue();
-        if (parentValue == null)
-            return (T) propertyReader.getType().createDefault();
-        return (T) propertyReader.getValue(parentValue);
+        return (T) ofNullable(parent.getValue()).map(reader::getValue).orElseGet(() -> reader.getType().createDefault());
     }
 }

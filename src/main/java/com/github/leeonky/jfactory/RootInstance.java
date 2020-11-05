@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyList;
 
 class RootInstance<T> implements Instance<T> {
-
     private final ValueCache<T> valueCache = new ValueCache<>();
     private final int sequence;
     private final Spec<T> spec;
@@ -53,7 +52,6 @@ class RootInstance<T> implements Instance<T> {
         public String propertyInfo() {
             return String.format("%s#%d", property, getSequence());
         }
-
 
         public Collection inCollection() {
             return new Collection(emptyList());

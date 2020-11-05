@@ -14,13 +14,7 @@ class PropertyChain {
     private PropertyChain(String property) {
         this.property = Arrays.stream(property.split("[\\[\\].]"))
                 .filter(s -> !s.isEmpty())
-                .map(s -> {
-                    try {
-                        return Integer.valueOf(s);
-                    } catch (Exception ignore) {
-                        return s;
-                    }
-                }).collect(Collectors.toList());
+                .map(this::tryToNumber).collect(Collectors.toList());
     }
 
     private PropertyChain(List<Object> propertyChain) {
@@ -29,6 +23,14 @@ class PropertyChain {
 
     public static PropertyChain createChain(String property) {
         return new PropertyChain(property);
+    }
+
+    private Object tryToNumber(String s) {
+        try {
+            return Integer.valueOf(s);
+        } catch (Exception ignore) {
+            return s;
+        }
     }
 
     public boolean isTopLevelPropertyCollection() {
@@ -61,13 +63,13 @@ class PropertyChain {
         }).collect(Collectors.joining(".")).replace(".[", "[");
     }
 
-    public <T> T applyAccess(Producer<?> producer, BiFunction<Producer<?>, String, Producer<?>> accessor,
-                             Function<Producer<?>, T> returnWrapper) {
+    public <T> T access(Producer<?> producer, BiFunction<Producer<?>, String, Producer<?>> accessor,
+                        Function<Producer<?>, T> returnWrapper) {
         if (property.isEmpty())
             return returnWrapper.apply(producer);
         String head = property.get(0).toString();
         return new PropertyChain(property.subList(1, property.size()))
-                .applyAccess(accessor.apply(producer, head), accessor, returnWrapper);
+                .access(accessor.apply(producer, head), accessor, returnWrapper);
     }
 
     public String tail() {

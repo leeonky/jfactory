@@ -4,11 +4,11 @@ import com.github.leeonky.util.Property;
 
 import java.util.Objects;
 
-class SingleValueExpression<H> extends Expression<H> {
+class SingleValueExpression<P> extends Expression<P> {
     private final Object value;
     private final TraitsSpec traitsSpec;
 
-    public SingleValueExpression(Object value, TraitsSpec traitsSpec, Property<H> property) {
+    public SingleValueExpression(Object value, TraitsSpec traitsSpec, Property<P> property) {
         super(property);
         this.value = value;
         this.traitsSpec = traitsSpec;
@@ -20,8 +20,8 @@ class SingleValueExpression<H> extends Expression<H> {
     }
 
     @Override
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> parent) {
-        if (isIntently())
+    public Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent) {
+        if (intently)
             return traitsSpec.toBuilder(factorySet, property.getWriterType()).createProducer(true);
         return new FixedValueProducer<>(property.getWriterType(), value);
     }

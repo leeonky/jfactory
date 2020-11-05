@@ -3,50 +3,51 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Property;
 
-import java.util.Collection;
+import java.util.Optional;
 
 import static java.lang.String.format;
 
-class SubObjectExpression<H> extends Expression<H> {
-    private final KeyValueCollection keyValueCollection;
+class SubObjectExpression<P> extends Expression<P> {
+    private final KeyValueCollection properties;
     private final TraitsSpec traitsSpec;
 
-    public SubObjectExpression(KeyValueCollection keyValueCollection, TraitsSpec traitsSpec, Property<H> property) {
+    public SubObjectExpression(KeyValueCollection properties, TraitsSpec traitsSpec, Property<P> property) {
         super(property);
-        this.keyValueCollection = keyValueCollection;
+        this.properties = properties;
         this.traitsSpec = traitsSpec;
     }
 
     @Override
     protected boolean isPropertyMatch(Object propertyValue) {
-        return keyValueCollection.matcher(property.getReaderType()).matches(propertyValue);
+        return properties.matcher(property.getReaderType()).matches(propertyValue);
     }
 
-    //TODO too complex
     @Override
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<H> parent) {
-        if (isIntently())
-            return toBuilder(factorySet, property.getWriterType()).createProducer(true);
-        Collection<?> queried = toBuilder(factorySet, property.getReaderType()).queryAll();
-        if (queried.isEmpty())
-            return toBuilder(factorySet, property.getWriterType()).createProducer(false);
-        return new FixedValueProducer<>(property.getWriterType(), queried.iterator().next());
+    public Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent) {
+        return query(factorySet).<Producer<?>>map(object -> new FixedValueProducer<>(property.getWriterType(), object))
+                .orElseGet(() -> toBuilder(factorySet, property.getWriterType()).createProducer(intently));
+    }
+
+    private Optional<?> query(FactorySet factorySet) {
+        if (intently)
+            return Optional.empty();
+        return toBuilder(factorySet, property.getReaderType()).queryAll().stream().findFirst();
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-        return keyValueCollection.apply(traitsSpec.toBuilder(factorySet, propertyType));
+        return properties.apply(traitsSpec.toBuilder(factorySet, propertyType));
     }
 
     @Override
-    public Expression<H> merge(Expression<H> another) {
+    public Expression<P> merge(Expression<P> another) {
         return another.mergeBy(this);
     }
 
     @Override
-    protected Expression<H> mergeBy(SubObjectExpression<H> another) {
-        keyValueCollection.merge(another.keyValueCollection);
+    protected Expression<P> mergeBy(SubObjectExpression<P> another) {
+        properties.merge(another.properties);
         traitsSpec.merge(another.traitsSpec, format("%s.%s", property.getBeanType().getName(), property.getName()));
-        setIntently(isIntently() || another.isIntently());
+        setIntently(intently || another.intently);
         return this;
     }
 }

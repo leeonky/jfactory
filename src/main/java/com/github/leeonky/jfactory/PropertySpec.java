@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 
@@ -26,7 +27,7 @@ public class PropertySpec<T> {
     @SuppressWarnings("unchecked")
     public <V> Spec<T> value(Supplier<V> value) {
         return appendProducer((factorySet, producer, property) ->
-                new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getType().getPropertyWriter(property).getType()));
+                new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getPropertyWriterType(property)));
     }
 
     public <V> Spec<T> spec(Class<? extends Spec<V>> specClass) {
@@ -78,24 +79,25 @@ public class PropertySpec<T> {
     }
 
     private Spec<T> asDefault(boolean intently, Function<Builder<?>, Builder<?>> builder) {
-        return appendProducer((factorySet, producer, property) ->
-                builder.apply(factorySet.type(producer.getType().getPropertyWriter(property).getTypeClass())).createProducer(intently));
+        return appendProducer((factorySet, producer, property) -> builder.apply(
+                factorySet.type(producer.getPropertyWriterType(property).getType())).createProducer(intently));
     }
 
-    public Spec<T> dependsOn(String dependency, Function<Object, Object> function) {
-        return dependsOn(singletonList(dependency), objs -> function.apply(objs[0]));
+    public Spec<T> dependsOn(String dependency, Function<Object, Object> rule) {
+        return dependsOn(singletonList(dependency), objs -> rule.apply(objs[0]));
     }
 
-    public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> function) {
+    public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> rule) {
         return spec.append((factorySet, objectProducer) ->
-                objectProducer.addDependency(property, function, dependencies.stream().map(PropertyChain::createChain).collect(Collectors.toList())));
+                objectProducer.addDependency(property, rule,
+                        dependencies.stream().map(PropertyChain::createChain).collect(Collectors.toList())));
     }
 
-    private Spec<T> appendProducer(Fuc<FactorySet, Producer<?>, String, Producer<?>> producerGenerator) {
+    private Spec<T> appendProducer(Fuc<FactorySet, Producer<?>, String, Producer<?>> producerFactory) {
         if (property.isSingle() || property.isTopLevelPropertyCollection())
             return spec.append((factorySet, objectProducer) -> objectProducer.changeChild(property,
-                    ((nextToLast, property) -> producerGenerator.apply(factorySet, nextToLast, property))));
-        throw new IllegalArgumentException(String.format("Not support property chain '%s' in current operation", property.toString()));
+                    ((nextToLast, property) -> producerFactory.apply(factorySet, nextToLast, property))));
+        throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
     }
 
     @FunctionalInterface

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static java.util.stream.Stream.of;
 
 public class Spec<T> {
     private List<BiConsumer<FactorySet, ObjectProducer<T>>> operations = new ArrayList<>();
@@ -45,7 +46,7 @@ public class Spec<T> {
     }
 
     public Spec<T> link(String property, String... others) {
-        List<PropertyChain> linkProperties = Stream.concat(Stream.of(property), Stream.of(others))
+        List<PropertyChain> linkProperties = Stream.concat(of(property), of(others))
                 .map(PropertyChain::createChain).collect(Collectors.toList());
         append((factorySet, objectProducer) -> objectProducer.link(linkProperties));
         return this;

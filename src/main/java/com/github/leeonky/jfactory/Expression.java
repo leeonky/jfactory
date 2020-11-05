@@ -4,7 +4,7 @@ import com.github.leeonky.util.Property;
 
 abstract class Expression<P> {
     protected final Property<P> property;
-    private boolean intently = false;
+    protected boolean intently = false;
 
     public Expression(Property<P> property) {
         this.property = property;
@@ -15,7 +15,7 @@ abstract class Expression<P> {
     }
 
     public boolean isMatch(P object) {
-        return object != null && !isIntently() && isPropertyMatch(property.getValue(object));
+        return object != null && !intently && isPropertyMatch(property.getValue(object));
     }
 
     protected abstract boolean isPropertyMatch(Object propertyValue);
@@ -32,10 +32,6 @@ abstract class Expression<P> {
 
     protected Expression<P> mergeBy(CollectionExpression<P, ?> another) {
         return this;
-    }
-
-    protected boolean isIntently() {
-        return intently;
     }
 
     protected Expression<P> setIntently(boolean intently) {

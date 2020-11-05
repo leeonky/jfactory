@@ -25,7 +25,7 @@ class CollectionExpression<P, E> extends Expression<P> {
     }
 
     private boolean isMatch(Expression<E> expression, Object value) {
-        return value != null && !expression.isIntently() && expression.isPropertyMatch(value);
+        return value != null && !expression.intently && expression.isPropertyMatch(value);
     }
 
     @Override

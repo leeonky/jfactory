@@ -10,10 +10,6 @@ public class FactorySet {
         dataRepository = new MemoryDataRepository();
     }
 
-    public FactoryPool getFactoryPool() {
-        return factoryPool;
-    }
-
     public DataRepository getDataRepository() {
         return dataRepository;
     }

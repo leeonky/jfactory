@@ -1,12 +1,13 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Stream;
+
+import static com.github.leeonky.util.Suppressor.run;
 
 class SpecClassFactory<T> extends ObjectFactory<T> {
     private final ObjectFactory<T> base;
@@ -27,9 +28,12 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
 
     private void registerTraits() {
         Stream.of(specClass.getMethods())
-                .filter(method -> method.getAnnotation(Trait.class) != null)
-                .forEach(method -> spec(getTraitName(method),
-                        instance -> Suppressor.run(() -> method.invoke(instance.spec()))));
+                .filter(this::isTraitMethod)
+                .forEach(method -> spec(getTraitName(method), instance -> run(() -> method.invoke(instance.spec()))));
+    }
+
+    private boolean isTraitMethod(Method method) {
+        return method.getAnnotation(Trait.class) != null;
     }
 
     private String getTraitName(Method method) {
