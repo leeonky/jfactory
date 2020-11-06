@@ -46,4 +46,8 @@ class FactoryPool {
     public int nextSequence(Class<?> type) {
         return typeSequence.generate(type);
     }
+
+    public <T> SpecFactory<T> createSpecFactory(Spec<T> spec) {
+        return new SpecFactory<>(queryObjectFactory(spec.getType()), spec, this);
+    }
 }

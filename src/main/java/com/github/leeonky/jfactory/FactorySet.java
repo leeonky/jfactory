@@ -31,7 +31,7 @@ public class FactorySet {
     }
 
     public <T> Builder<T> spec(Spec<T> spec) {
-        return new DefaultBuilder<>(new SpecFactory<>(factoryPool.queryObjectFactory(spec.getType()), spec, factoryPool), this);
+        return new DefaultBuilder<>(factoryPool.createSpecFactory(spec), this);
     }
 
     public <T> Builder<T> spec(String... traitsAndSpec) {
@@ -50,5 +50,4 @@ public class FactorySet {
     public <T> T create(String... traitsAndSpec) {
         return this.<T>spec(traitsAndSpec).create();
     }
-
 }

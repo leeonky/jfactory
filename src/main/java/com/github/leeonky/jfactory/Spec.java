@@ -5,10 +5,10 @@ import com.github.leeonky.util.BeanClass;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 public class Spec<T> {
@@ -46,8 +46,7 @@ public class Spec<T> {
     }
 
     public Spec<T> link(String property, String... others) {
-        List<PropertyChain> linkProperties = Stream.concat(of(property), of(others))
-                .map(PropertyChain::createChain).collect(Collectors.toList());
+        List<PropertyChain> linkProperties = concat(of(property), of(others)).map(PropertyChain::createChain).collect(toList());
         append((factorySet, objectProducer) -> objectProducer.link(linkProperties));
         return this;
     }
