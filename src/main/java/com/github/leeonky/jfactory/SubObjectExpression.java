@@ -5,8 +5,6 @@ import com.github.leeonky.util.Property;
 
 import java.util.Optional;
 
-import static java.lang.String.format;
-
 class SubObjectExpression<P> extends Expression<P> {
     private final KeyValueCollection properties;
     private final TraitsSpec traitsSpec;
@@ -46,7 +44,7 @@ class SubObjectExpression<P> extends Expression<P> {
     @Override
     protected Expression<P> mergeBy(SubObjectExpression<P> another) {
         properties.merge(another.properties);
-        traitsSpec.merge(another.traitsSpec, format("%s.%s", property.getBeanType().getName(), property.getName()));
+        traitsSpec.merge(another.traitsSpec, property.toString());
         setIntently(intently || another.intently);
         return this;
     }
