@@ -43,7 +43,7 @@ class DefaultValueBuildersTest {
 
     public static class InvalidGenericArgDefaultValueBuilder<V> implements DefaultValueBuilder<V> {
         @Override
-        public <T> V create(BeanClass<T> beanType, RootInstance<T>.Sub instance) {
+        public <T> V create(BeanClass<T> beanType, SubInstance instance) {
             return null;
         }
     }

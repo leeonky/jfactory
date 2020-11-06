@@ -25,7 +25,7 @@ class DefaultValueBuilders {
     public static class DefaultStringBuilder implements DefaultValueBuilder<String> {
 
         @Override
-        public <T> String create(BeanClass<T> beanType, RootInstance<T>.Sub instance) {
+        public <T> String create(BeanClass<T> beanType, SubInstance instance) {
             return instance.propertyInfo();
         }
     }
@@ -33,7 +33,7 @@ class DefaultValueBuilders {
     public static class DefaultIntegerBuilder implements DefaultValueBuilder<Integer> {
 
         @Override
-        public <T> Integer create(BeanClass<T> beanType, RootInstance<T>.Sub instance) {
+        public <T> Integer create(BeanClass<T> beanType, SubInstance instance) {
             return instance.getSequence();
         }
     }
@@ -46,7 +46,7 @@ class DefaultValueBuilders {
         }
 
         @Override
-        public <T> V create(BeanClass<T> beanType, RootInstance<T>.Sub instance) {
+        public <T> V create(BeanClass<T> beanType, SubInstance instance) {
             return type.createDefault();
         }
 

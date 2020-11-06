@@ -14,10 +14,10 @@ import static java.util.stream.Collectors.toMap;
 class CollectionProducer<T, C> extends Producer<C> {
     private final List<Producer<?>> children = new ArrayList<>();
     private final Function<Integer, Producer<?>> placeholderFactory;
-    private final RootInstance<T>.Sub.Collection collection;
+    private final CollectionInstance collection;
 
     public CollectionProducer(BeanClass<T> parentType, BeanClass<C> collectionType,
-                              RootInstance<T>.Sub instance, DefaultValueBuilder<?> valueBuilder) {
+                              SubInstance instance, DefaultValueBuilder<?> valueBuilder) {
         super(collectionType);
         collection = instance.inCollection();
         placeholderFactory = index -> new DefaultValueProducer<>(parentType, valueBuilder, collection.element(index));
