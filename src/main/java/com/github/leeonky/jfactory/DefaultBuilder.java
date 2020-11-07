@@ -59,17 +59,16 @@ class DefaultBuilder<T> implements Builder<T> {
                 .filter(matcher::matches).collect(Collectors.toList());
     }
 
-    //TODO missing type
     @Override
     public int hashCode() {
-        return hash(DefaultBuilder.class, properties, traits);
+        return hash(DefaultBuilder.class, objectFactory, properties, traits);
     }
 
-    //TODO missing type
     @Override
     public boolean equals(Object another) {
         return cast(another, DefaultBuilder.class)
-                .map(builder -> properties.equals(builder.properties) && traits.equals(builder.traits))
+                .map(builder -> objectFactory.equals(builder.objectFactory) && properties.equals(builder.properties)
+                        && traits.equals(builder.traits))
                 .orElseGet(() -> super.equals(another));
     }
 

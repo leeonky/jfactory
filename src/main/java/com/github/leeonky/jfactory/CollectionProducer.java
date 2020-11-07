@@ -55,7 +55,6 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     @Override
     public Map<PropertyChain, Producer<?>> children() {
-        //TODO move Map<PropertyChain, Producer> a new type?
         Iterator<Integer> index = Stream.iterate(0, i -> i + 1).iterator();
         return children.stream().collect(toMap(p -> createChain(index.next().toString()), identity()));
     }

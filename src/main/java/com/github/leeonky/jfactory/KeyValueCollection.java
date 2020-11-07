@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 class KeyValueCollection {
 
-    //TODO try to use collection with uniq key type
     private final Map<String, KeyValue> keyValues = new LinkedHashMap<>();
 
     public void merge(KeyValueCollection another) {
