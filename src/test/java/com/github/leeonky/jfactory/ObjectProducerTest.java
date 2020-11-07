@@ -184,34 +184,42 @@ class ObjectProducerTest {
     @Nested
     class HasOutsideSpec {
 
-        @Nested
-        class InDependency {
+        @Test
+        void should_not_changed_when_has_outside_spec() {
+            factorySet.factory(Beans.class).spec(instance -> instance.spec().property("bean1").asDefault());
+            ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
 
-            @Test
-            void should_not_has_outside_spec() {
-                factorySet.factory(Beans.class).spec(instance -> instance.spec().property("bean1").asDefault());
-                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
+            producer.doDependenciesAndLinks();
 
-                producer.doDependencies();
-
-                assertTrue(producer.child("bean1").get().isNotChange());
-            }
-
-            @Test
-            void should_has_outside_spec() {
-                factorySet.factory(Beans.class).spec(instance -> instance.spec()
-                        .property("bean1").asDefault()
-                        .property("bean2").asDefault()
-                        .property("bean1.stringValue").dependsOn("bean2.stringValue", identity()));
-                ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
-
-                producer.doDependenciesAndLinks();
-
-                assertFalse(producer.child("bean1").get().isNotChange());
-            }
+            assertTrue(producer.child("bean1").get().isNotChange());
         }
 
-        //TODO for link
+        @Test
+        void should_changed_when_has_outside_spec_with_dependency() {
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean1").asDefault(true)
+                    .property("bean2").asDefault(true)
+                    .property("bean1.stringValue").dependsOn("bean2.stringValue", identity()));
+            ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
+
+            producer.doDependenciesAndLinks();
+
+            assertFalse(producer.child("bean1").get().isNotChange());
+        }
+
+        @Test
+        void should_changed_when_has_outside_spec_with_link() {
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean1").asDefault(true)
+                    .property("bean2").asDefault(true)
+                    .link("bean1.stringValue", "bean2.stringValue"));
+            ObjectProducer<Beans> producer = (ObjectProducer<Beans>) factorySet.type(Beans.class).createProducer(false);
+
+            producer.doDependenciesAndLinks();
+
+            assertFalse(producer.child("bean1").get().isNotChange());
+        }
+
         //TODO for dependency and link
     }
 }

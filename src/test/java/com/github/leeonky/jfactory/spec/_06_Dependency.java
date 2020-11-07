@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
+import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -406,6 +407,21 @@ public class _06_Dependency {
             assertThat(beansWrapper.getBeans())
                     .hasFieldOrPropertyWithValue("bean1", bean)
                     .hasFieldOrPropertyWithValue("bean2", bean);
+        }
+
+        @Test
+        void dependency_in_two_object_spec_definitions_in_collection() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("content").dependsOn("stringValue", identity()));
+
+            factorySet.factory(BeanArray.class).spec(instance -> instance.spec()
+                    .property("beans[0]").asDefault());
+
+            BeanArray beanArray = factorySet.type(BeanArray.class)
+                    .property("beans[0].stringValue", "hello").create();
+
+            assertThat(beanArray.beans[0])
+                    .hasFieldOrPropertyWithValue("content", "hello");
         }
     }
 

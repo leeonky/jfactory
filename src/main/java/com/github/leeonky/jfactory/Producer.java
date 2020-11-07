@@ -30,6 +30,9 @@ abstract class Producer<T> {
     protected void doDependencies() {
     }
 
+    protected void doLinks() {
+    }
+
     public void addChild(String property, Producer<?> producer) {
     }
 
@@ -77,11 +80,12 @@ abstract class Producer<T> {
     }
 
     public void beforeCheckChange() {
-        cachedAllChildren = new HashSet<>(getAllChildren().values());
+        if (notChange)
+            cachedAllChildren = new HashSet<>(getAllChildren().values());
     }
 
     public void checkChange() {
-        notChange = Objects.equals(cachedAllChildren, new HashSet<>(getAllChildren().values()));
+        notChange = notChange && Objects.equals(cachedAllChildren, new HashSet<>(getAllChildren().values()));
     }
 
     public boolean isNotChange() {

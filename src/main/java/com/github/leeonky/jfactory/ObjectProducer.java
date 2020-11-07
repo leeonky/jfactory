@@ -74,9 +74,17 @@ class ObjectProducer<T> extends Producer<T> {
     public ObjectProducer<T> doDependenciesAndLinks() {
         doDependencies();
         getAllChildren().values().forEach(Producer::checkChange);
-        linkCollection.processLinks(this);
+        doLinks();
+        getAllChildren().values().forEach(Producer::checkChange);
         uniqSameSubObjectProducer();
         return this;
+    }
+
+    @Override
+    protected void doLinks() {
+        children.values().forEach(Producer::doLinks);
+        linkCollection.processLinks(this);
+        beforeCheckChange();
     }
 
     private void uniqSameSubObjectProducer() {
@@ -84,7 +92,7 @@ class ObjectProducer<T> extends Producer<T> {
                 .filter(e -> e.getValue() instanceof ObjectProducer)
                 .collect(Collectors.groupingBy(Map.Entry::getValue, mapping(Map.Entry::getKey, toList())))
                 .forEach((_ignore, properties) -> link(properties));
-        linkCollection.processLinks(this);
+        doLinks();
     }
 
     @Override

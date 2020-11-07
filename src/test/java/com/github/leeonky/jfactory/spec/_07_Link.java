@@ -78,4 +78,21 @@ class _07_Link {
         }
     }
 
+    @Nested
+    class NestedLink {
+
+        @Test
+        void support_nest_object_link() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec().link("str1", "str2"));
+
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("bean").asDefault()
+                    .link("str", "bean.str1"));
+
+            BeanWrapper beanWrapper = factorySet.create(BeanWrapper.class);
+
+            assertThat(beanWrapper.getBean().getStr1()).isEqualTo(beanWrapper.getBean().getStr2());
+            assertThat(beanWrapper.getBean().getStr1()).isEqualTo(beanWrapper.getStr());
+        }
+    }
 }
