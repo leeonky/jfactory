@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.util.*;
 import java.util.function.BiFunction;
 
+import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 
 abstract class Producer<T> {
@@ -94,5 +95,9 @@ abstract class Producer<T> {
 
     public BeanClass<?> getPropertyWriterType(String property) {
         return getType().getPropertyWriter(property).getType();
+    }
+
+    public LinkerReference<T> getLinkerReference() {
+        return new LinkerReference<>(new Linker<>(singletonList(this)));
     }
 }
