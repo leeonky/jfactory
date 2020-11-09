@@ -8,6 +8,15 @@ public class LinkerReference<T> {
         linker.linkToReference(this);
     }
 
+    private LinkerReference(Producer<T> producer) {
+        linker = new Linker<>(producer);
+        linker.linkToReference(this);
+    }
+
+    public static <T> LinkerReference<T> defaultLinkerReference(Producer<T> producer) {
+        return new LinkerReference<>(producer);
+    }
+
     public Linker<T> getLinker() {
         return linker;
     }

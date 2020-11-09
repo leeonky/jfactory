@@ -4,11 +4,14 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class Linker<T> {
-    private final Set<Producer<T>> linkedProducers;
+    private final Set<Producer<T>> linkedProducers = new LinkedHashSet<>();
     private List<LinkerReference<T>> references = new ArrayList<>();
 
-    public Linker(List<Producer<T>> linkedProducers) {
-        this.linkedProducers = new LinkedHashSet<>(linkedProducers);
+    public Linker() {
+    }
+
+    public Linker(Producer<T> producer) {
+        linkedProducers.add(producer);
     }
 
     private Optional<Producer<T>> chooseProducer(Class<?> type) {

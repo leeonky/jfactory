@@ -4,8 +4,8 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
-import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 
 abstract class Producer<T> {
@@ -97,7 +97,11 @@ abstract class Producer<T> {
         return getType().getPropertyWriter(property).getType();
     }
 
-    public LinkerReference<T> getLinkerReference() {
-        return new LinkerReference<>(new Linker<>(singletonList(this)));
+    protected LinkerReference<T> getLinkerReference() {
+        return LinkerReference.defaultLinkerReference(this);
+    }
+
+    public Stream<LinkerReference<T>> allLinkerReferences() {
+        return getLinkerReference().getLinker().allLinked();
     }
 }

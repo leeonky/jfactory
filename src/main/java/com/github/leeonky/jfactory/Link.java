@@ -4,8 +4,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Collections.emptyList;
-
 class Link {
     private final Set<PropertyChain> properties = new LinkedHashSet<>();
 
@@ -18,11 +16,10 @@ class Link {
 
     @SuppressWarnings("unchecked")
     private <T> Linker<T> syncLink(Producer<?> producer) {
-        Linker<T> linker = new Linker<>(emptyList());
+        Linker<T> linker = new Linker<>();
         properties.stream().map(property -> (Producer<T>) producer.child(property))
-                .map(Producer::getLinkerReference)
-                .map(LinkerReference::getLinker)
-                .flatMap(Linker::allLinked)
+                .flatMap(Producer::allLinkerReferences)
+                .distinct()
                 .forEach(linker::mergeTo);
         return linker;
     }
