@@ -20,7 +20,7 @@ class Link {
         properties.stream().map(property -> (Producer<T>) producer.child(property))
                 .flatMap(Producer::allLinkerReferences)
                 .distinct()
-                .forEach(linker::mergeTo);
+                .forEach(linker::link);
         return linker;
     }
 

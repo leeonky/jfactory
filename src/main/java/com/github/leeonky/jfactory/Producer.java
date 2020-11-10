@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.jfactory.Linker.Reference.defaultLinkerReference;
 import static java.util.function.Function.identity;
 
 abstract class Producer<T> {
@@ -97,11 +98,7 @@ abstract class Producer<T> {
         return getType().getPropertyWriter(property).getType();
     }
 
-    protected LinkerReference<T> getLinkerReference() {
-        return LinkerReference.defaultLinkerReference(this);
-    }
-
-    public Stream<LinkerReference<T>> allLinkerReferences() {
-        return getLinkerReference().getLinker().allLinked();
+    public Stream<Linker.Reference<T>> allLinkerReferences() {
+        return Stream.of(defaultLinkerReference(this));
     }
 }

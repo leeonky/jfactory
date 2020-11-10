@@ -2,12 +2,14 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-public class LinkProducer<T> extends Producer<T> {
-    private final LinkerReference<T> linkerReference;
+import java.util.stream.Stream;
+
+class LinkProducer<T> extends Producer<T> {
+    private final Linker.Reference<T> linkerReference;
 
     public LinkProducer(BeanClass<T> type, Linker<T> linker) {
         super(type);
-        linkerReference = new LinkerReference<>(linker);
+        linkerReference = new Linker.Reference<T>().setLinker(linker);
     }
 
     @Override
@@ -16,7 +18,7 @@ public class LinkProducer<T> extends Producer<T> {
     }
 
     @Override
-    protected LinkerReference<T> getLinkerReference() {
-        return linkerReference;
+    public Stream<Linker.Reference<T>> allLinkerReferences() {
+        return linkerReference.getLinker().allLinkedReferences();
     }
 }

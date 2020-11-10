@@ -1,17 +1,17 @@
 package com.github.leeonky.jfactory;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
-public class Linker<T> {
+class Linker<T> {
     private final Set<Producer<T>> linkedProducers = new LinkedHashSet<>();
-    private List<LinkerReference<T>> references = new ArrayList<>();
+    private Set<Reference<T>> references = new LinkedHashSet<>();
 
-    public Linker() {
-    }
-
-    public Linker(Producer<T> producer) {
+    public Linker<T> link(Producer<T> producer) {
         linkedProducers.add(producer);
+        return this;
     }
 
     private Optional<Producer<T>> chooseProducer(Class<?> type) {
@@ -23,17 +23,30 @@ public class Linker<T> {
         return chooseProducer(FixedValueProducer.class).orElseGet(() -> linkedProducers.iterator().next()).getValue();
     }
 
-    public void mergeTo(LinkerReference<T> reference) {
+    public void link(Reference<T> reference) {
         linkedProducers.addAll(reference.getLinker().linkedProducers);
         reference.setLinker(this);
-        references.add(reference);
     }
 
-    public Stream<LinkerReference<T>> allLinked() {
+    public Stream<Reference<T>> allLinkedReferences() {
         return references.stream();
     }
 
-    public void linkToReference(LinkerReference<T> reference) {
-        references.add(reference);
+    static class Reference<T> {
+        private Linker<T> linker;
+
+        public static <T> Reference<T> defaultLinkerReference(Producer<T> producer) {
+            return new Reference<T>().setLinker(new Linker<T>().link(producer));
+        }
+
+        public Linker<T> getLinker() {
+            return linker;
+        }
+
+        public Reference<T> setLinker(Linker<T> linker) {
+            this.linker = linker;
+            linker.references.add(this);
+            return this;
+        }
     }
 }
