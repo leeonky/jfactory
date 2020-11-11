@@ -63,5 +63,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     protected void doDependencies() {
         children.forEach(Producer::doDependencies);
     }
-    //TODO should nested process sub link
+
+    @Override
+    protected void doLinks() {
+        children.forEach(Producer::doLinks);
+    }
 }

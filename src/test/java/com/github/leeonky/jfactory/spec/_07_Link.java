@@ -23,6 +23,14 @@ class _07_Link {
     @Getter
     @Setter
     @Accessors(chain = true)
+    public static class Beans {
+        public Bean[] beans;
+        public Bean bean;
+    }
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
     public static class BeanWrapper {
         public Bean bean;
         public String str;
@@ -93,6 +101,17 @@ class _07_Link {
 
             assertThat(beanWrapper.getBean().getStr1()).isEqualTo(beanWrapper.getBean().getStr2());
             assertThat(beanWrapper.getBean().getStr1()).isEqualTo(beanWrapper.getStr());
+        }
+
+        @Test
+        void support_nest_object_link_in_collection() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec().link("str1", "str2"));
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("beans[0]").asDefault());
+
+            Beans beans = factorySet.create(Beans.class);
+
+            assertThat(beans.beans[0].getStr1()).isEqualTo(beans.beans[0].getStr2());
         }
     }
 }

@@ -82,8 +82,7 @@ abstract class Producer<T> {
     }
 
     public void beforeCheckChange() {
-        if (notChange)
-            cachedAllChildren = new HashSet<>(getAllChildren().values());
+        cachedAllChildren = new HashSet<>(getAllChildren().values());
     }
 
     public void checkChange() {
