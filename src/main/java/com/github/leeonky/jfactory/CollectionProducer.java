@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static java.lang.Integer.valueOf;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -14,13 +15,17 @@ import static java.util.stream.Collectors.toMap;
 class CollectionProducer<T, C> extends Producer<C> {
     private final List<Producer<?>> children = new ArrayList<>();
     private final Function<Integer, Producer<?>> placeholderFactory;
-    private final CollectionInstance collection;
+    private final Function<String, Optional<Producer>> subDefaultValueProducerFactory;
 
     public CollectionProducer(BeanClass<T> parentType, BeanClass<C> collectionType,
-                              SubInstance instance, DefaultValueBuilder<?> valueBuilder) {
+                              SubInstance instance, FactoryPool factoryPool) {
         super(collectionType);
-        collection = instance.inCollection();
-        placeholderFactory = index -> new DefaultValueProducer<>(parentType, valueBuilder, collection.element(index));
+        CollectionInstance collection = instance.inCollection();
+        BeanClass<?> elementType = collectionType.getElementType();
+        placeholderFactory = index -> new DefaultValueProducer<>(parentType,
+                factoryPool.getDefaultValueBuilder(elementType), collection.element(index));
+        subDefaultValueProducerFactory = index -> factoryPool.queryDefaultValueBuilder(elementType)
+                .map(builder -> new DefaultValueProducer<>(parentType, builder, collection.element(valueOf(index))));
     }
 
     @Override
@@ -31,12 +36,12 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     @Override
     public Optional<Producer<?>> child(String property) {
-        return Optional.ofNullable(children.get(Integer.valueOf(property)));
+        return Optional.ofNullable(children.get(valueOf(property)));
     }
 
     @Override
     public void addChild(String property, Producer<?> producer) {
-        int intIndex = Integer.valueOf(property);
+        int intIndex = valueOf(property);
         fillCollectionWithDefaultValue(intIndex);
         children.set(intIndex, producer);
     }
@@ -48,7 +53,7 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     @Override
     public Producer<?> childOrDefault(String property) {
-        int index = Integer.valueOf(property);
+        int index = valueOf(property);
         fillCollectionWithDefaultValue(index);
         return children.get(index);
     }
@@ -67,5 +72,10 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     protected void doLinks() {
         children.forEach(Producer::doLinks);
+    }
+
+    @Override
+    public Optional<Producer> subDefaultValueProducer(String property) {
+        return subDefaultValueProducerFactory.apply(property);
     }
 }

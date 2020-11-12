@@ -100,4 +100,8 @@ abstract class Producer<T> {
     public Stream<Linker.Reference<T>> allLinkerReferences() {
         return Stream.of(defaultLinkerReference(this));
     }
+
+    public Optional<Producer> subDefaultValueProducer(String property) {
+        return Optional.empty();
+    }
 }

@@ -79,8 +79,8 @@ public class PropertySpec<T> {
     }
 
     private Spec<T> asDefault(boolean intently, Function<Builder<?>, Builder<?>> builder) {
-        return appendProducer((factorySet, producer, property) -> builder.apply(
-                factorySet.type(producer.getPropertyWriterType(property).getType())).createProducer(intently));
+        return appendProducer((factorySet, producer, property) -> producer.subDefaultValueProducer(property).orElseGet(() ->
+                builder.apply(factorySet.type(producer.getPropertyWriterType(property).getType())).createProducer(intently)));
     }
 
     public Spec<T> dependsOn(String dependency, Function<Object, Object> rule) {

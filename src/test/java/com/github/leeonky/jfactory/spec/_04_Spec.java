@@ -21,6 +21,7 @@ class _04_Spec {
     public static class Bean {
         private String content;
         private String stringValue;
+        private String[] stringValues;
         private int intValue;
         private Bean self;
     }
@@ -158,6 +159,14 @@ class _04_Spec {
             assertThat(factorySet.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
+
+        @Test
+        void support_default_primitive_type_spec() {
+            factorySet.factory(Bean.class).spec(instance ->
+                    instance.spec().property("stringValue").asDefault());
+
+            assertThat(factorySet.create(Bean.class).stringValue).isEqualTo("stringValue#1");
+        }
     }
 
     @Nested
@@ -184,6 +193,14 @@ class _04_Spec {
 
             assertThrows(IllegalArgumentException.class, () ->
                     factorySet.type(Table.class).property("rows[0]", null).create());
+        }
+
+        @Test
+        void support_default_primitive_type_spec() {
+            factorySet.factory(Bean.class).spec(instance ->
+                    instance.spec().property("stringValues[0]").asDefault());
+
+            assertThat(factorySet.create(Bean.class).stringValues[0]).isEqualTo("stringValues#1[0]");
         }
     }
 
