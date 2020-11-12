@@ -116,9 +116,8 @@ public class _03_CreateWithSpec {
 
         @Test
         void should_call_type_base_constructor_and_main_spec() {
-            factorySet.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> {
-                instance.spec().property("intValue").value(50);
-            });
+            factorySet.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> instance.spec()
+                    .property("intValue").value(50));
 
             assertThat(factorySet.create(new ABean()))
                     .isInstanceOf(BeanSub.class)

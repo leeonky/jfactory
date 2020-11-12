@@ -37,6 +37,14 @@ class _07_Link {
         public Bean another;
     }
 
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class Strings {
+        public String[] strings;
+        public String value;
+    }
+
     @Nested
     class FlattenLink {
 
@@ -84,6 +92,46 @@ class _07_Link {
             assertThat(factorySet.type(BeanWrapper.class).property("another", bean).create())
                     .hasFieldOrPropertyWithValue("bean", bean);
         }
+    }
+
+    @Nested
+    class CollectionLink {
+
+        @Test
+        void link_property() {
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("beans[0]").asDefault()
+                    .property("beans[1]").asDefault()
+                    .property("beans[2]").asDefault()
+                    .link("beans[0].str1", "beans[1].str1", "beans[2].str1"));
+
+            Beans beans = factorySet.create(Beans.class);
+
+            assertThat(beans.beans[0].str1).isEqualTo(beans.beans[1].str1);
+            assertThat(beans.beans[1].str1).isEqualTo(beans.beans[2].str1);
+        }
+
+        @Test
+        void support_link_with_bean_object() {
+            factorySet.factory(Beans.class).spec(instance -> instance.spec()
+                    .link("beans[0]", "beans[1]")
+                    .link("beans[1]", "bean"));
+
+            Bean bean = new Bean();
+            Beans beans = factorySet.type(Beans.class).property("bean", bean).create();
+            assertThat(beans.getBeans())
+                    .containsExactly(bean, bean);
+        }
+
+//        @Test
+//        void support_link_with_value_type_collection_element_and_property() {
+//            factorySet.factory(Strings.class).spec(instance -> instance.spec()
+//                    .property("value").value("hello")
+//                    .link("strings[0]", "value"));
+//
+//            Strings strings = factorySet.create(Strings.class);
+//            assertThat(strings.getStrings()[0]).isEqualTo(strings.getValue()).isEqualTo("hello");
+//        }
     }
 
     @Nested
