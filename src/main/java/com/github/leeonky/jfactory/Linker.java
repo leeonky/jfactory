@@ -1,11 +1,17 @@
 package com.github.leeonky.jfactory;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+
 class Linker<T> {
+    private static final List<Class<?>> TYPE_PRIORITY = asList(FixedValueProducer.class,
+            DependencyProducer.class, UnFixedValueProducer.class);
     private final Set<Producer<T>> linkedProducers = new LinkedHashSet<>();
     private Set<Reference<T>> references = new LinkedHashSet<>();
 
@@ -16,11 +22,18 @@ class Linker<T> {
 
     private Optional<Producer<T>> chooseProducer(Class<?> type) {
         //TODO should return only one producer
-        return linkedProducers.stream().filter(type::isInstance).findFirst();
+        List<Producer<T>> producers = linkedProducers.stream().filter(type::isInstance).limit(2).collect(toList());
+        if (producers.size() > 1)
+            throw new IllegalStateException("Ambiguous value in link");
+        return producers.stream().findFirst();
     }
 
     public T produce() {
-        return chooseProducer(FixedValueProducer.class).orElseGet(() -> linkedProducers.iterator().next()).getValue();
+        return TYPE_PRIORITY.stream().map(this::chooseProducer)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .orElseGet(() -> linkedProducers.iterator().next()).getValue();
     }
 
     public void link(Reference<T> reference) {

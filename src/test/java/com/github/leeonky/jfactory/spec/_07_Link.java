@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class _07_Link {
     private FactorySet factorySet = new FactorySet();
@@ -56,17 +57,6 @@ class _07_Link {
             Bean bean = factorySet.create(Bean.class);
 
             assertThat(bean.str1).isEqualTo(bean.str2);
-        }
-
-        @Test
-        void should_use_input_property_in_link() {
-            factorySet.factory(Bean.class).spec(instance -> instance.spec()
-                    .link("str1", "str2"));
-
-            Bean bean = factorySet.type(Bean.class).property("str2", "string").create();
-
-            assertThat(bean.str1).isEqualTo("string");
-            assertThat(bean.str2).isEqualTo("string");
         }
 
         @Test
@@ -123,15 +113,16 @@ class _07_Link {
                     .containsExactly(bean, bean);
         }
 
-//        @Test
-//        void support_link_with_value_type_collection_element_and_property() {
-//            factorySet.factory(Strings.class).spec(instance -> instance.spec()
-//                    .property("value").value("hello")
-//                    .link("strings[0]", "value"));
-//
-//            Strings strings = factorySet.create(Strings.class);
-//            assertThat(strings.getStrings()[0]).isEqualTo(strings.getValue()).isEqualTo("hello");
-//        }
+        @Test
+        void support_link_with_value_type_collection_element_and_property() {
+            factorySet.factory(Strings.class).spec(instance -> instance.spec()
+                    .property("value").value("hello")
+                    .property("strings[0]").asDefault()
+                    .link("strings[0]", "value"));
+
+            Strings strings = factorySet.create(Strings.class);
+            assertThat(strings.getStrings()[0]).isEqualTo(strings.getValue()).isEqualTo("hello");
+        }
     }
 
     @Nested
@@ -160,6 +151,62 @@ class _07_Link {
             Beans beans = factorySet.create(Beans.class);
 
             assertThat(beans.beans[0].getStr1()).isEqualTo(beans.beans[0].getStr2());
+        }
+    }
+
+    @Nested
+    class LinkPriority {
+
+        @Test
+        void use_property_value_in_link() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .link("str1", "str2", "str3", "str4")
+                    .property("str2").dependsOn("s1", obj -> obj)
+                    .property("str3").value("hello"));
+
+            assertThat(factorySet.type(Bean.class).property("str1", "input").create())
+                    .hasFieldOrPropertyWithValue("str1", "input")
+                    .hasFieldOrPropertyWithValue("str2", "input")
+                    .hasFieldOrPropertyWithValue("str3", "input")
+                    .hasFieldOrPropertyWithValue("str4", "input")
+            ;
+        }
+
+        @Test
+        void use_dependency_value_in_link() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .link("str1", "str3", "str2", "str4")
+                    .property("str2").dependsOn("s1", obj -> obj)
+                    .property("str3").value("hello"));
+
+            assertThat(factorySet.type(Bean.class).property("s1", "input").create())
+                    .hasFieldOrPropertyWithValue("str1", "input")
+                    .hasFieldOrPropertyWithValue("str2", "input")
+                    .hasFieldOrPropertyWithValue("str3", "input")
+                    .hasFieldOrPropertyWithValue("str4", "input")
+            ;
+        }
+
+        @Test
+        void should_use_suppose_value_in_link() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("str2").value("suppose")
+                    .link("str1", "str2"));
+
+            Bean bean = factorySet.type(Bean.class).create();
+
+            assertThat(bean.str1).isEqualTo(bean.str2).isEqualTo("suppose");
+        }
+
+        @Test
+        void should_raise_error_when_has_ambiguous() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .link("str1", "str2", "str3"));
+
+            assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class)
+                    .property("str1", "input1")
+                    .property("str2", "input2")
+                    .create());
         }
     }
 }
