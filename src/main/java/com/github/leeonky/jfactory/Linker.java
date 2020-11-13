@@ -10,8 +10,12 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 class Linker<T> {
-    private static final List<Class<?>> TYPE_PRIORITY = asList(FixedValueProducer.class,
-            DependencyProducer.class, UnFixedValueProducer.class);
+    private static final List<Class<?>> TYPE_PRIORITY = asList(
+            FixedValueProducer.class,
+            ReadOnlyProducer.class,
+            DependencyProducer.class,
+            UnFixedValueProducer.class
+    );
     private final Set<Producer<T>> linkedProducers = new LinkedHashSet<>();
     private Set<Reference<T>> references = new LinkedHashSet<>();
 

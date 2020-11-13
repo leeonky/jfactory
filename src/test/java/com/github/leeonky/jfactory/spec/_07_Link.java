@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -34,7 +35,7 @@ class _07_Link {
     @Accessors(chain = true)
     public static class BeanWrapper {
         public Bean bean;
-        public String str;
+        public String str, str2;
         public Bean another;
     }
 
@@ -158,17 +159,30 @@ class _07_Link {
     class LinkPriority {
 
         @Test
-        void use_property_value_in_link() {
-            factorySet.factory(Bean.class).spec(instance -> instance.spec()
-                    .link("str1", "str2", "str3", "str4")
-                    .property("str2").dependsOn("s1", obj -> obj)
-                    .property("str3").value("hello"));
+        void use_property_value_in_link_and_keey_readonly_value() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .link("bean.str1", "str"));
 
-            assertThat(factorySet.type(Bean.class).property("str1", "input").create())
-                    .hasFieldOrPropertyWithValue("str1", "input")
-                    .hasFieldOrPropertyWithValue("str2", "input")
-                    .hasFieldOrPropertyWithValue("str3", "input")
-                    .hasFieldOrPropertyWithValue("str4", "input")
+            BeanWrapper beanWrapper = factorySet.type(BeanWrapper.class)
+                    .property("str", "input")
+                    .property("bean", new Bean().setStr1("read only value"))
+                    .create();
+            assertThat(beanWrapper)
+                    .hasFieldOrPropertyWithValue("str", "input");
+            assertThat(beanWrapper.getBean())
+                    .hasFieldOrPropertyWithValue("str1", "read only value");
+        }
+
+        @Test
+        void use_readonly_value_in_link() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("str").dependsOn("str2", identity())
+                    .link("str", "bean.str1")
+            );
+
+            assertThat(factorySet.type(BeanWrapper.class)
+                    .property("bean", new Bean().setStr1("read only value")).create())
+                    .hasFieldOrPropertyWithValue("str", "read only value")
             ;
         }
 
@@ -188,7 +202,7 @@ class _07_Link {
         }
 
         @Test
-        void should_use_suppose_value_in_link() {
+        void use_suppose_value_in_link() {
             factorySet.factory(Bean.class).spec(instance -> instance.spec()
                     .property("str2").value("suppose")
                     .link("str1", "str2"));
@@ -208,5 +222,47 @@ class _07_Link {
                     .property("str2", "input2")
                     .create());
         }
+    }
+
+    @Nested
+    class LinkToNoProducerField {
+
+//        @Test
+//        void should_return_property_value_when_parent_object_is_property() {
+//            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+//                    .link("bean.str1", "str"));
+//
+//            assertThat(factorySet.type(BeanWrapper.class).property("bean", new Bean().setStr1("hello")).create().getStr())
+//                    .isEqualTo("hello");
+//
+//            assertThat(factorySet.type(BeanWrapper.class).property("bean", null).create().getStr()).isInstanceOf(String.class);
+//        }
+
+//        @Test
+//        void should_use_suggested_value_when_parent_object_is_suggested_value() {
+//            factorySet.factory(BeanWrapper.class).define((argument, spec) -> {
+//                spec.property("bean").value(new Bean().setStr1("hello"));
+//                spec.link("bean.str1", "str");
+//            });
+//
+//            assertThat(factorySet.type(BeanWrapper.class).create().getStr()).isEqualTo("hello");
+//
+//            factorySet.factory(BeanWrapper.class).define((argument, spec) -> {
+//                spec.property("bean").value(null);
+//                spec.link("bean.str1", "str");
+//            });
+//
+//            assertThat(factorySet.type(BeanWrapper.class).create().getStr()).isInstanceOf(String.class);
+//        }
+//
+//        @Test
+//        void should_use_as_suggested_value_when_parent_object_is_link() {
+//            factorySet.factory(BeanWrapper.class).define((argument, spec) -> {
+//                spec.link("bean", "another");
+//                spec.link("bean.str1", "str");
+//            });
+//
+//            assertThat(factorySet.type(BeanWrapper.class).property("another", new Bean().setStr1("hello")).create().getStr()).isEqualTo("hello");
+//        }
     }
 }
