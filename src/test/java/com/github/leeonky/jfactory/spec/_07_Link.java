@@ -225,44 +225,42 @@ class _07_Link {
     }
 
     @Nested
-    class LinkToNoProducerField {
+    class LinkToReadOnlyProducer {
 
-//        @Test
-//        void should_return_property_value_when_parent_object_is_property() {
-//            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-//                    .link("bean.str1", "str"));
-//
-//            assertThat(factorySet.type(BeanWrapper.class).property("bean", new Bean().setStr1("hello")).create().getStr())
-//                    .isEqualTo("hello");
-//
-//            assertThat(factorySet.type(BeanWrapper.class).property("bean", null).create().getStr()).isInstanceOf(String.class);
-//        }
+        @Test
+        void link_with_read_only_value_from_input() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .link("bean.str1", "str"));
 
-//        @Test
-//        void should_use_suggested_value_when_parent_object_is_suggested_value() {
-//            factorySet.factory(BeanWrapper.class).define((argument, spec) -> {
-//                spec.property("bean").value(new Bean().setStr1("hello"));
-//                spec.link("bean.str1", "str");
-//            });
-//
-//            assertThat(factorySet.type(BeanWrapper.class).create().getStr()).isEqualTo("hello");
-//
-//            factorySet.factory(BeanWrapper.class).define((argument, spec) -> {
-//                spec.property("bean").value(null);
-//                spec.link("bean.str1", "str");
-//            });
-//
-//            assertThat(factorySet.type(BeanWrapper.class).create().getStr()).isInstanceOf(String.class);
-//        }
-//
-//        @Test
-//        void should_use_as_suggested_value_when_parent_object_is_link() {
-//            factorySet.factory(BeanWrapper.class).define((argument, spec) -> {
-//                spec.link("bean", "another");
-//                spec.link("bean.str1", "str");
-//            });
-//
-//            assertThat(factorySet.type(BeanWrapper.class).property("another", new Bean().setStr1("hello")).create().getStr()).isEqualTo("hello");
-//        }
+            assertThat(factorySet.type(BeanWrapper.class).property("bean", new Bean().setStr1("hello")).create().getStr())
+                    .isEqualTo("hello");
+        }
+
+        @Test
+        void should_user_default_type_value_when_parent_object_is_null() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .link("bean.str1", "str"));
+
+            assertThat(factorySet.type(BeanWrapper.class).create().getStr()).isNull();
+        }
+
+        @Test
+        void link_with_read_only_value_from_suggestion_value() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("bean").value(new Bean().setStr1("hello"))
+                    .link("bean.str1", "str"));
+
+            assertThat(factorySet.type(BeanWrapper.class).create().getStr()).isEqualTo("hello");
+        }
+
+        @Test
+        void link_with_read_only_value_from_link() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .link("bean", "another")
+                    .link("bean.str1", "str"));
+
+            assertThat(factorySet.type(BeanWrapper.class).property("another", new Bean().setStr1("hello")).create().getStr())
+                    .isEqualTo("hello");
+        }
     }
 }
