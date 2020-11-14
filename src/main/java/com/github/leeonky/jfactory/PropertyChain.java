@@ -81,8 +81,12 @@ class PropertyChain {
     }
 
     public PropertyChain concat(PropertyChain subChain) {
-        ArrayList<Object> chain = new ArrayList<>(property);
+        List<Object> chain = new ArrayList<>(property);
         chain.addAll(subChain.property);
         return new PropertyChain(chain);
+    }
+
+    public PropertyChain concat(String node) {
+        return concat(createChain(node));
     }
 }

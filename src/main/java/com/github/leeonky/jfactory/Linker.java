@@ -16,6 +16,7 @@ class Linker<T> {
             DependencyProducer.class,
             UnFixedValueProducer.class
     );
+    @Deprecated
     private final Set<Producer<T>> linkedProducers = new LinkedHashSet<>();
     private Set<Reference<T>> references = new LinkedHashSet<>();
 

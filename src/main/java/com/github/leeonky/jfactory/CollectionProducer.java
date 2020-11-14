@@ -11,6 +11,7 @@ import static java.lang.Integer.valueOf;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.IntStream.range;
 
 class CollectionProducer<T, C> extends Producer<C> {
     private final List<Producer<?>> children = new ArrayList<>();
@@ -70,8 +71,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    protected void doLinks() {
-        children.forEach(Producer::doLinks);
+    protected void doLinks(Producer<?> root, PropertyChain current) {
+        range(0, children.size()).forEach(i ->
+                children.get(i).doLinks(root, current.concat(String.valueOf(i))));
     }
 
     @Override

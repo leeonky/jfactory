@@ -7,8 +7,8 @@ class LinkCollection {
 
     private final List<Link> links = new ArrayList<>();
 
-    public void processLinks(Producer<?> producer) {
-        links.forEach(link -> link.process(producer));
+    public void processLinks(Producer<?> root, PropertyChain current) {
+        links.forEach(link -> link.process(root, current));
         links.clear();
     }
 

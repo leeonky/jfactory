@@ -263,4 +263,21 @@ class _07_Link {
                     .isEqualTo("hello");
         }
     }
+
+    @Nested
+    class Limitation {
+
+        @Test
+        void linked_producer_was_changed_by_other_link() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec().property("str1").value("hello"));
+
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("bean").asDefault()
+                    .link("bean.str1", "str")
+                    .link("bean", "another"));
+
+            assertThat(factorySet.type(BeanWrapper.class).property("another", new Bean().setStr1("world")).create())
+                    .hasFieldOrPropertyWithValue("str", "world");
+        }
+    }
 }

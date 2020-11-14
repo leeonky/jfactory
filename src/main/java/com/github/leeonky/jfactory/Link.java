@@ -3,21 +3,28 @@ package com.github.leeonky.jfactory;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 class Link {
+    //TODO use absolute property chain and root producer
     private final Set<PropertyChain> properties = new LinkedHashSet<>();
 
     @SuppressWarnings("unchecked")
-    public void process(Producer<?> producer) {
-        Linker linker = syncLink(producer);
-        properties.forEach(linkProperty -> producer.changeChild(linkProperty, (nextToLast, property) ->
-                new LinkProducer(nextToLast.getPropertyWriterType(property), linker)));
+    public void process(Producer<?> root, PropertyChain current) {
+        Linker linker = syncLink(root, current);
+        absoluteProperties(current)
+                .forEach(linkProperty -> root.changeChild(linkProperty, (nextToLast, property) ->
+                        new LinkProducer(nextToLast.getPropertyWriterType(property), linker)));
+    }
+
+    private Stream<PropertyChain> absoluteProperties(PropertyChain current) {
+        return properties.stream().map(current::concat);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Linker<T> syncLink(Producer<?> producer) {
+    private <T> Linker<T> syncLink(Producer<?> root, PropertyChain current) {
         Linker<T> linker = new Linker<>();
-        properties.stream().map(property -> (Producer<T>) producer.child(property))
+        absoluteProperties(current).map(property -> (Producer<T>) root.child(property))
                 .flatMap(Producer::allLinkerReferences)
                 .distinct()
                 .forEach(linker::link);
