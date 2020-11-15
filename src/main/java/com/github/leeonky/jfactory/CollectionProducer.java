@@ -37,7 +37,8 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     @Override
     public Optional<Producer<?>> child(String property) {
-        return Optional.ofNullable(children.get(valueOf(property)));
+        int index = valueOf(property);
+        return Optional.ofNullable(index < children.size() ? children.get(index) : null);
     }
 
     @Override
