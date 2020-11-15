@@ -82,11 +82,11 @@ abstract class Producer<T> {
     }
 
     public void beforeCheckChange() {
-        cachedAllChildren = new HashSet<>(getAllChildren().values());
+        cachedAllChildren = new LinkedHashSet<>(getAllChildren().values());
     }
 
     public void checkChange() {
-        notChange = notChange && Objects.equals(cachedAllChildren, new HashSet<>(getAllChildren().values()));
+        notChange = notChange && Objects.equals(cachedAllChildren, new LinkedHashSet<>(getAllChildren().values()));
     }
 
     public boolean isNotChange() {
@@ -97,11 +97,15 @@ abstract class Producer<T> {
         return getType().getPropertyWriter(property).getType();
     }
 
-    public Stream<Linker.Reference<T>> allLinkerReferences() {
-        return Stream.of(defaultLinkerReference(this));
+    public Stream<Linker.Reference<T>> allLinkerReferences(Producer<?> root, PropertyChain absoluteCurrent) {
+        return Stream.of(defaultLinkerReference(this, root, absoluteCurrent));
     }
 
     public Optional<Producer> subDefaultValueProducer(String property) {
         return Optional.empty();
+    }
+
+    public Producer<T> getLinkOrigin() {
+        return this;
     }
 }

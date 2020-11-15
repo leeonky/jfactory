@@ -13,8 +13,9 @@ class Link {
     public void process(Producer<?> root, PropertyChain current) {
         Linker linker = syncLink(root, current);
         absoluteProperties(current)
+                //TODO need more args in lambda?
                 .forEach(linkProperty -> root.changeChild(linkProperty, (nextToLast, property) ->
-                        new LinkProducer(nextToLast.getPropertyWriterType(property), linker)));
+                        new LinkProducer(nextToLast.getPropertyWriterType(property), linker, root.child(linkProperty))));
     }
 
     private Stream<PropertyChain> absoluteProperties(PropertyChain current) {
@@ -23,9 +24,12 @@ class Link {
 
     @SuppressWarnings("unchecked")
     private <T> Linker<T> syncLink(Producer<?> root, PropertyChain current) {
-        Linker<T> linker = new Linker<>();
-        absoluteProperties(current).map(property -> (Producer<T>) root.child(property))
-                .flatMap(Producer::allLinkerReferences)
+        Linker<T> linker = new Linker<>(root);
+        absoluteProperties(current)
+                .flatMap(property -> {
+                    Producer<T> producer = (Producer<T>) root.child(property);
+                    return producer.allLinkerReferences(root, property);
+                })
                 .distinct()
                 .forEach(linker::link);
         return linker;

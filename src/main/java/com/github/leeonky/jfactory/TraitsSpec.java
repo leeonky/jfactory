@@ -3,7 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 
 import static java.util.Arrays.asList;
@@ -27,7 +27,7 @@ class TraitsSpec {
 
     private boolean isDifferentTraits(TraitsSpec another) {
         return traits.length != 0 && another.traits.length != 0
-                && !new HashSet<>(asList(traits)).equals(new HashSet<>(asList(another.traits)));
+                && !new LinkedHashSet<>(asList(traits)).equals(new LinkedHashSet<>(asList(another.traits)));
     }
 
     private void mergeSpec(TraitsSpec another, String property) {

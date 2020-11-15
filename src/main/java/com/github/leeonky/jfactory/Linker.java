@@ -1,9 +1,6 @@
 package com.github.leeonky.jfactory;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -18,14 +15,21 @@ class Linker<T> {
     );
     @Deprecated
     private final Set<Producer<T>> linkedProducers = new LinkedHashSet<>();
+    private final Set<PropertyChain> linkedAbsoluteProperties = new LinkedHashSet<>();
+    private final Producer<?> root;
     private Set<Reference<T>> references = new LinkedHashSet<>();
 
-    public Linker<T> link(Producer<T> producer) {
+    public Linker(Producer<?> root) {
+        this.root = root;
+    }
+
+    public Linker<T> link(@Deprecated Producer<T> producer, PropertyChain absoluteCurrent) {
         linkedProducers.add(producer);
+        linkedAbsoluteProperties.add(absoluteCurrent);
         return this;
     }
 
-    private Optional<Producer<T>> chooseProducer(Class<?> type) {
+    private Optional<Producer<T>> chooseProducer(Class<?> type, Collection<Producer<T>> linkedProducers) {
         //TODO should return only one producer
         List<Producer<T>> producers = linkedProducers.stream().filter(type::isInstance).limit(2).collect(toList());
         if (producers.size() > 1)
@@ -33,16 +37,20 @@ class Linker<T> {
         return producers.stream().findFirst();
     }
 
-    public T produce() {
-        return TYPE_PRIORITY.stream().map(this::chooseProducer)
+    public Producer<T> chooseProducer() {
+        List<Producer<T>> linkedProducers = linkedAbsoluteProperties.stream()
+                .map(p -> (Producer<T>) root.child(p))
+                .map(Producer::getLinkOrigin).collect(toList());
+        return TYPE_PRIORITY.stream().map(type -> chooseProducer(type, linkedProducers))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
-                .orElseGet(() -> linkedProducers.iterator().next()).getValue();
+                .orElseGet(() -> linkedProducers.iterator().next());
     }
 
     public void link(Reference<T> reference) {
         linkedProducers.addAll(reference.getLinker().linkedProducers);
+        linkedAbsoluteProperties.addAll(reference.getLinker().linkedAbsoluteProperties);
         reference.setLinker(this);
     }
 
@@ -53,8 +61,8 @@ class Linker<T> {
     static class Reference<T> {
         private Linker<T> linker;
 
-        public static <T> Reference<T> defaultLinkerReference(Producer<T> producer) {
-            return new Reference<T>().setLinker(new Linker<T>().link(producer));
+        public static <T> Reference<T> defaultLinkerReference(Producer<T> producer, Producer<?> root, PropertyChain absoluteCurrent) {
+            return new Reference<T>().setLinker(new Linker<T>(root).link(producer, absoluteCurrent));
         }
 
         public Linker<T> getLinker() {
