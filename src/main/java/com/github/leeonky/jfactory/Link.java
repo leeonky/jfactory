@@ -6,14 +6,12 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 class Link {
-    //TODO use absolute property chain and root producer
     private final Set<PropertyChain> properties = new LinkedHashSet<>();
 
     @SuppressWarnings("unchecked")
     public void process(Producer<?> root, PropertyChain current) {
         Linker linker = syncLink(root, current);
         absoluteProperties(current)
-                //TODO need more args in lambda?
                 .forEach(linkProperty -> root.changeChild(linkProperty, (nextToLast, property) ->
                         new LinkProducer(nextToLast.getPropertyWriterType(property), linker, root.child(linkProperty))));
     }
