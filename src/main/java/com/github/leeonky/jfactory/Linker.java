@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.util.BeanClass.cast;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
@@ -36,8 +37,8 @@ class Linker<T> {
     @SuppressWarnings("unchecked")
     public Producer<T> chooseProducer() {
         List<Producer<T>> linkedProducers = linkedAbsoluteProperties.stream()
-                .map(p -> (Producer<T>) root.child(p))
-                .map(Producer::getLinkOrigin).collect(toList());
+                .map(p -> (Producer<T>) root.child(p).getLinkOrigin())
+                .collect(toList());
         return TYPE_PRIORITY.stream().map(type -> chooseProducer(type, linkedProducers))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -55,10 +56,15 @@ class Linker<T> {
     }
 
     static class Reference<T> {
+        private final PropertyChain absoluteCurrent;
         private Linker<T> linker;
 
+        public Reference(PropertyChain absoluteCurrent) {
+            this.absoluteCurrent = absoluteCurrent;
+        }
+
         public static <T> Reference<T> defaultLinkerReference(Producer<?> root, PropertyChain absoluteCurrent) {
-            return new Reference<T>().setLinker(new Linker<T>(root).link(absoluteCurrent));
+            return new Reference<T>(absoluteCurrent).setLinker(new Linker<T>(root).link(absoluteCurrent));
         }
 
         public Linker<T> getLinker() {
@@ -69,6 +75,18 @@ class Linker<T> {
             this.linker = linker;
             linker.references.add(this);
             return this;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(Reference.class, absoluteCurrent);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return cast(obj, Reference.class)
+                    .map(another -> Objects.equals(absoluteCurrent, another.absoluteCurrent))
+                    .orElseGet(() -> super.equals(obj));
         }
     }
 }

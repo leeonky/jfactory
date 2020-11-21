@@ -157,6 +157,19 @@ class _07_Link {
 
             assertThat(beans.beans[0].getStr1()).isEqualTo(beans.beans[0].getStr2());
         }
+
+        @Test
+        void linked_producer_was_changed_by_other_link() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec().property("str1").value("hello"));
+
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("bean").asDefault()
+                    .link("bean.str1", "str")
+                    .link("bean", "another"));
+
+            assertThat(factorySet.type(BeanWrapper.class).property("another", new Bean().setStr1("world")).create())
+                    .hasFieldOrPropertyWithValue("str", "world");
+        }
     }
 
     @Nested
@@ -265,23 +278,6 @@ class _07_Link {
 
             assertThat(factorySet.type(BeanWrapper.class).property("another", new Bean().setStr1("hello")).create().getStr())
                     .isEqualTo("hello");
-        }
-    }
-
-    @Nested
-    class Limitation {
-
-        @Test
-        void linked_producer_was_changed_by_other_link() {
-            factorySet.factory(Bean.class).spec(instance -> instance.spec().property("str1").value("hello"));
-
-            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                    .property("bean").asDefault()
-                    .link("bean.str1", "str")
-                    .link("bean", "another"));
-
-            assertThat(factorySet.type(BeanWrapper.class).property("another", new Bean().setStr1("world")).create())
-                    .hasFieldOrPropertyWithValue("str", "world");
         }
     }
 }

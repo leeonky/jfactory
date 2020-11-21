@@ -9,9 +9,9 @@ class LinkProducer<T> extends Producer<T> {
     private final Linker.Reference<T> linkerReference;
     private final Producer<T> origin;
 
-    public LinkProducer(BeanClass<T> type, Linker<T> linker, Producer<T> origin) {
+    public LinkProducer(BeanClass<T> type, Linker<T> linker, Producer<T> origin, PropertyChain linkProperty) {
         super(type);
-        linkerReference = new Linker.Reference<T>().setLinker(linker);
+        linkerReference = new Linker.Reference<T>(linkProperty).setLinker(linker);
         this.origin = origin;
     }
 
