@@ -21,7 +21,7 @@ class Linker<T> {
         this.root = root;
     }
 
-    public Linker<T> link(@Deprecated Producer<T> producer, PropertyChain absoluteCurrent) {
+    public Linker<T> link(PropertyChain absoluteCurrent) {
         linkedAbsoluteProperties.add(absoluteCurrent);
         return this;
     }
@@ -57,8 +57,8 @@ class Linker<T> {
     static class Reference<T> {
         private Linker<T> linker;
 
-        public static <T> Reference<T> defaultLinkerReference(Producer<T> producer, Producer<?> root, PropertyChain absoluteCurrent) {
-            return new Reference<T>().setLinker(new Linker<T>(root).link(producer, absoluteCurrent));
+        public static <T> Reference<T> defaultLinkerReference(Producer<?> root, PropertyChain absoluteCurrent) {
+            return new Reference<T>().setLinker(new Linker<T>(root).link(absoluteCurrent));
         }
 
         public Linker<T> getLinker() {

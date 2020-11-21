@@ -98,7 +98,7 @@ abstract class Producer<T> {
     }
 
     public Stream<Linker.Reference<T>> allLinkerReferences(Producer<?> root, PropertyChain absoluteCurrent) {
-        return Stream.of(defaultLinkerReference(this, root, absoluteCurrent));
+        return Stream.of(defaultLinkerReference(root, absoluteCurrent));
     }
 
     public Optional<Producer> subDefaultValueProducer(String property) {

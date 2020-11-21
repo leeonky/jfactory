@@ -11,9 +11,9 @@ class Link {
     @SuppressWarnings("unchecked")
     public void process(Producer<?> root, PropertyChain current) {
         Linker linker = syncLink(root, current);
-        absoluteProperties(current)
-                .forEach(linkProperty -> root.changeChild(linkProperty, (nextToLast, property) ->
-                        new LinkProducer(nextToLast.getPropertyWriterType(property), linker, root.child(linkProperty))));
+        absoluteProperties(current).forEach(linkProperty ->
+                root.changeChild(linkProperty, (nextToLast, property) -> new LinkProducer(
+                        nextToLast.getPropertyWriterType(property), linker, root.child(linkProperty).getLinkOrigin())));
     }
 
     private Stream<PropertyChain> absoluteProperties(PropertyChain current) {
