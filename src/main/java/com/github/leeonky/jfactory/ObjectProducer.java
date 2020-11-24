@@ -13,7 +13,7 @@ import static java.util.stream.Collectors.*;
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
     private final FactorySet factorySet;
-    private final Builder<T> builder;
+    private final DefaultBuilder<T> builder;
     private final boolean intently;
     private final RootInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
@@ -140,5 +140,19 @@ class ObjectProducer<T> extends Producer<T> {
     public Optional<Producer> subDefaultValueProducer(String property) {
         return factory.getFactoryPool().queryDefaultValueBuilder(getPropertyWriterType(property))
                 .map(builder -> new DefaultValueProducer<>(getType(), builder, instance.sub(property)));
+    }
+
+    @Override
+    protected Producer<T> changeTo(Producer<T> newProducer) {
+        return newProducer.changeFrom(this);
+    }
+
+    @Override
+    protected Producer<T> changeFrom(ObjectProducer<T> origin) {
+        return origin.clone(builder);
+    }
+
+    private Producer<T> clone(DefaultBuilder<T> another) {
+        return builder.clone(another).createProducer(intently);
     }
 }

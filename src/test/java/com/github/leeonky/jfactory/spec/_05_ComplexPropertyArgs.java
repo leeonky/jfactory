@@ -85,6 +85,13 @@ class _05_ComplexPropertyArgs {
 
     }
 
+    public static class ABeans extends Spec<Beans> {
+        @Override
+        public void main() {
+            property("bean").spec(new ABean().int100());
+        }
+    }
+
     @Getter
     @Setter
     public static class BeansPair {
@@ -447,6 +454,28 @@ class _05_ComplexPropertyArgs {
 
             assertThat(factorySet.type(Bean.class).queryAll()).hasSize(1);
             assertThat(beanArray.beanArray[0]).isEqualTo(beanArray.beanArray[1]);
+        }
+    }
+
+    @Nested
+    class OverrideDefinition {
+
+        @Test
+        void should_use_pre_define_spec_when_property_not_specify_spec() {
+            assertThat(factorySet.spec(ABeans.class).property("bean.stringValue", "hello").create().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+                    .hasFieldOrPropertyWithValue("intValue", 100);
+        }
+
+        @Test
+        void should_use_specified_spec_when_property_specify_spec() {
+            factorySet.spec(AnotherBean.class);
+
+            assertThat(factorySet.spec(ABeans.class).property("bean(int200 AnotherBean).stringValue", "hello").create().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("content", "this is another bean")
+                    .hasFieldOrPropertyWithValue("intValue", 200);
         }
     }
 }

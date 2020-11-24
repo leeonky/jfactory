@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import static com.github.leeonky.jfactory.Linker.Reference.defaultLinkerReference;
 import static java.util.function.Function.identity;
 
+//TODO too many child access method
 abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
@@ -62,9 +63,9 @@ abstract class Producer<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> void changeChild(String property, Producer<T> producer) {
-        Producer<T> original = (Producer<T>) childOrDefault(property);
-        addChild(property, original == null ? producer : original.changeTo(producer));
+    public <T> void changeChild(String property, Producer<T> producer) {
+        Producer<T> origin = (Producer<T>) childOrDefault(property);
+        addChild(property, origin == null ? producer : origin.changeTo(producer));
     }
 
     public Map<PropertyChain, Producer<?>> children() {
@@ -106,6 +107,10 @@ abstract class Producer<T> {
     }
 
     public Producer<T> getLinkOrigin() {
+        return this;
+    }
+
+    protected Producer<T> changeFrom(ObjectProducer<T> producer) {
         return this;
     }
 }

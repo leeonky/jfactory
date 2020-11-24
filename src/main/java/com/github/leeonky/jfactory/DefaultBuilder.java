@@ -33,12 +33,13 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Builder<T> trait(String... traits) {
-        DefaultBuilder<T> newBuilder = copy();
+        DefaultBuilder<T> newBuilder = clone();
         newBuilder.traits.addAll(asList(traits));
         return newBuilder;
     }
 
-    private DefaultBuilder<T> copy() {
+    @Override
+    public DefaultBuilder<T> clone() {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, factorySet);
         builder.properties.merge(properties);
         builder.traits.addAll(traits);
@@ -47,7 +48,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Builder<T> properties(Map<String, ?> properties) {
-        DefaultBuilder<T> newBuilder = copy();
+        DefaultBuilder<T> newBuilder = clone();
         properties.forEach(newBuilder.properties::add);
         return newBuilder;
     }
@@ -83,7 +84,17 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private void forInputProperties(ObjectProducer<T> objectProducer) {
-        properties.expressions(objectFactory.getType()).forEach(exp ->
-                objectProducer.addChild(exp.getProperty(), exp.buildProducer(factorySet, objectProducer)));
+        properties.expressions(objectFactory.getType()).forEach(exp -> {
+            objectProducer.changeChild(exp.getProperty(), exp.buildProducer(factorySet, objectProducer));
+        });
+    }
+
+    public DefaultBuilder<T> clone(DefaultBuilder<T> another) {
+        if (another.objectFactory instanceof SpecClassFactory)
+            return another;
+        DefaultBuilder<T> newBuilder = clone();
+        newBuilder.properties.merge(another.properties);
+        newBuilder.traits.addAll(another.traits);
+        return newBuilder;
     }
 }
