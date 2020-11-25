@@ -8,4 +8,9 @@ public interface Instance<T> {
     Spec<T> spec();
 
     Supplier<T> reference();
+
+    <P> P param(String key);
+
+    //TODO support namespace
+    <P> P param(String key, P defaultValue);
 }

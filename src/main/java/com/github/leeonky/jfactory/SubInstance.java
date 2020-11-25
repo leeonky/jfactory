@@ -1,12 +1,14 @@
 package com.github.leeonky.jfactory;
 
+import java.util.Map;
+
 import static java.util.Collections.emptyList;
 
 class SubInstance<T> extends RootInstance<T> {
     protected final String property;
 
-    public SubInstance(String property, int sequence, Spec<T> spec) {
-        super(sequence, spec);
+    public SubInstance(String property, int sequence, Spec<T> spec, Map<String, Object> params) {
+        super(sequence, spec, params);
         this.property = property;
     }
 
@@ -15,6 +17,6 @@ class SubInstance<T> extends RootInstance<T> {
     }
 
     public CollectionInstance<T> inCollection() {
-        return new CollectionInstance<>(emptyList(), property, getSequence(), spec);
+        return new CollectionInstance<>(emptyList(), property, getSequence(), spec, params);
     }
 }

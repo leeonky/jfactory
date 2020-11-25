@@ -1,9 +1,6 @@
 package com.github.leeonky.jfactory;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.cast;
@@ -14,6 +11,11 @@ class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
     private final FactorySet factorySet;
     private final Set<String> traits = new LinkedHashSet<>();
+
+    //TODO equal hashcode
+    //TODO support namespace
+    //TODO extract to class
+    private final Map<String, Object> params = new LinkedHashMap<>();
     private final KeyValueCollection properties = new KeyValueCollection();
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
@@ -29,6 +31,13 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public ObjectProducer<T> createProducer(boolean intently) {
         return new ObjectProducer<>(factorySet, objectFactory, this, intently);
+    }
+
+    @Override
+    public Builder<T> param(String key, Object value) {
+        DefaultBuilder<T> newBuilder = clone();
+        newBuilder.params.put(key, value);
+        return newBuilder;
     }
 
     @Override
@@ -96,5 +105,9 @@ class DefaultBuilder<T> implements Builder<T> {
         newBuilder.properties.merge(another.properties);
         newBuilder.traits.addAll(another.traits);
         return newBuilder;
+    }
+
+    public Map<String, Object> getParams() {
+        return params;
     }
 }

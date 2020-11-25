@@ -24,4 +24,6 @@ public interface Builder<T> {
     Builder<T> trait(String... traits);
 
     Producer<T> createProducer(boolean intently);
+
+    Builder<T> param(String key, Object value);
 }
