@@ -68,11 +68,11 @@ class _01_BeanType {
         @Test
         void support_specify_params() {
             factorySet.factory(BeanWithNoDefaultConstructor.class).constructor(instance ->
-                    new BeanWithNoDefaultConstructor(instance.param("p"), instance.getSequence()));
+                    new BeanWithNoDefaultConstructor(instance.param("p"), instance.param("i")));
 
-            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).param("p", "hello").create())
+            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).arg("p", "hello").arg("i", 100).create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
-                    .hasFieldOrPropertyWithValue("intValue", 1);
+                    .hasFieldOrPropertyWithValue("intValue", 100);
 
             factorySet.factory(BeanWithNoDefaultConstructor.class).constructor(instance ->
                     new BeanWithNoDefaultConstructor(instance.param("p", "default"), instance.getSequence()));

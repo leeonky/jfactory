@@ -25,5 +25,5 @@ public interface Builder<T> {
 
     Producer<T> createProducer(boolean intently);
 
-    Builder<T> param(String key, Object value);
+    Builder<T> arg(String key, Object value);
 }

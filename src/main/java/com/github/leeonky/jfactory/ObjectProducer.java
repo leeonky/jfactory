@@ -26,7 +26,7 @@ class ObjectProducer<T> extends Producer<T> {
         this.factorySet = factorySet;
         this.builder = builder;
         this.intently = intently;
-        instance = factory.createInstance(builder.getParams());
+        instance = factory.createInstance(builder.getArgument());
         establishDefaultValueProducers();
         builder.establishSpecProducers(this, instance);
     }

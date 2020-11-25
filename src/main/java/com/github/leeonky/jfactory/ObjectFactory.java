@@ -59,8 +59,8 @@ class ObjectFactory<T> implements Factory<T> {
         })).forEach(spec -> spec.accept(instance));
     }
 
-    public RootInstance<T> createInstance(Map<String, Object> params) {
-        return new RootInstance<>(factoryPool.nextSequence(type.getType()), createSpec(), params);
+    public RootInstance<T> createInstance(DefaultArguments argument) {
+        return new RootInstance<>(factoryPool.nextSequence(type.getType()), createSpec(), argument);
     }
 
     public FactoryPool getFactoryPool() {
