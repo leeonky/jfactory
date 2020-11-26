@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 class FactoryPool {
     public final TypeSequence typeSequence = new TypeSequence();
@@ -47,7 +48,8 @@ class FactoryPool {
         return typeSequence.generate(type);
     }
 
-    public <T> SpecFactory<T> createSpecFactory(Spec<T> spec) {
-        return new SpecFactory<>(queryObjectFactory(spec.getType()), spec, this);
+    public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {
+        S spec = BeanClass.newInstance(specClass);
+        return new SpecFactory<>(queryObjectFactory(spec.getType()), spec, this, trait);
     }
 }

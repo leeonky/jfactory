@@ -13,10 +13,7 @@ import static java.util.stream.Stream.of;
 
 public class Spec<T> {
     private List<BiConsumer<FactorySet, ObjectProducer<T>>> operations = new ArrayList<>();
-
-    public Spec() {
-        main();
-    }
+    private Instance<T> instance;
 
     public void main() {
     }
@@ -48,6 +45,15 @@ public class Spec<T> {
     public Spec<T> link(String property, String... others) {
         List<PropertyChain> linkProperties = concat(of(property), of(others)).map(PropertyChain::createChain).collect(toList());
         append((factorySet, objectProducer) -> objectProducer.link(linkProperties));
+        return this;
+    }
+
+    public Instance<T> instance() {
+        return instance;
+    }
+
+    Spec<T> setInstance(Instance<T> instance) {
+        this.instance = instance;
         return this;
     }
 }

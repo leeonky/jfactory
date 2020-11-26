@@ -88,7 +88,7 @@ class _05_ComplexPropertyArgs {
     public static class ABeans extends Spec<Beans> {
         @Override
         public void main() {
-            property("bean").spec(new ABean().int100());
+            property("bean").specFrom(ABean.class, ABean::int100);
         }
     }
 

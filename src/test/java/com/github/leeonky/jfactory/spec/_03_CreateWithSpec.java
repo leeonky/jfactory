@@ -22,9 +22,17 @@ public class _03_CreateWithSpec {
         private int intValue;
     }
 
+    public static class Spec2<T> extends Spec<T> {
+
+    }
+
     @Getter
     @Setter
     public static class BeanSub extends Bean {
+    }
+
+    public static class InvalidGenericArgSpec extends Spec2<String> {
+
     }
 
     public static class ABean extends Spec<Bean> {
@@ -45,9 +53,6 @@ public class _03_CreateWithSpec {
             property("stringValue").value("hello");
             return this;
         }
-    }
-
-    class InvalidGenericArgSpec<T> extends Spec<T> {
     }
 
     @Nested
@@ -103,11 +108,14 @@ public class _03_CreateWithSpec {
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
+
+            assertThat(factorySet.createFrom(ABean.class))
+                    .hasFieldOrPropertyWithValue("content", "this is a bean");
         }
 
         @Test
         void support_pass_spec_arg_in_java_code() {
-            assertThat(factorySet.create(new ABean().int100().strHello()))
+            assertThat(factorySet.createFrom(ABean.class, spec -> spec.int100().strHello()))
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
@@ -119,7 +127,7 @@ public class _03_CreateWithSpec {
             factorySet.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> instance.spec()
                     .property("intValue").value(50));
 
-            assertThat(factorySet.create(new ABean()))
+            assertThat(factorySet.createFrom(ABean.class))
                     .isInstanceOf(BeanSub.class)
                     .hasFieldOrPropertyWithValue("intValue", 50);
         }
@@ -140,7 +148,7 @@ public class _03_CreateWithSpec {
 
         @Test
         void should_raise_error_when_invalid_generic_args() {
-            assertThrows(IllegalStateException.class, () -> factorySet.create(new InvalidGenericArgSpec<>()));
+            assertThrows(IllegalStateException.class, () -> factorySet.createFrom(InvalidGenericArgSpec.class));
         }
     }
 }

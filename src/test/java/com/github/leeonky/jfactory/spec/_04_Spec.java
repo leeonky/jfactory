@@ -108,7 +108,7 @@ class _04_Spec {
         @Test
         void support_specify_spec_instance() {
             factorySet.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").spec(new ABean().int100()));
+                    instance.spec().property("bean").specFrom(ABean.class, ABean::int100));
 
             assertThat(factorySet.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")

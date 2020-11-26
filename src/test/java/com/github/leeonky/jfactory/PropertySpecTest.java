@@ -14,10 +14,15 @@ class PropertySpecTest {
         assertThat(propertySpec.value(1)).isEqualTo(spec);
         assertThat(propertySpec.spec(MySpec.class)).isEqualTo(spec);
         assertThat(propertySpec.spec(MySpec.class, builder -> builder.trait("trait"))).isEqualTo(spec);
-        assertThat(propertySpec.spec(spec)).isEqualTo(spec);
+        assertThat(propertySpec.specFrom(MySpec.class, MySpec::someSpec)).isEqualTo(spec);
         assertThat(propertySpec.spec("A", "Object")).isEqualTo(spec);
     }
 
     static class MySpec extends Spec<Object> {
+
+        @Trait
+        public MySpec someSpec() {
+            return this;
+        }
     }
 }

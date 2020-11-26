@@ -43,7 +43,12 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
 
     @Override
     public void collectSpec(Collection<String> traits, Instance<T> instance) {
+        collectClassSpec(instance);
         base.collectSpec(Collections.emptyList(), instance);
         super.collectSpec(traits, instance);
+    }
+
+    protected void collectClassSpec(Instance<T> instance) {
+        instance.spec().main();
     }
 }

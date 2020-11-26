@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -34,18 +35,18 @@ public class PropertySpec<T> {
         return spec(false, specClass);
     }
 
+    public <V, S extends Spec<V>> Spec<T> specFrom(Class<S> specClass, Consumer<S> trait) {
+        return specFrom(false, specClass, trait);
+    }
+
+    public <V, S extends Spec<V>> Spec<T> specFrom(boolean intently, Class<S> specClass, Consumer<S> trait) {
+        return appendProducer((factorySet, producer, property) ->
+                factorySet.spec(specClass, trait).createProducer(intently));
+    }
+
     public <V> Spec<T> spec(boolean intently, Class<? extends Spec<V>> specClass) {
         return appendProducer((factorySet, producer, property) ->
                 factorySet.spec(specClass).createProducer(intently));
-    }
-
-    public <V> Spec<T> spec(Spec<V> spec) {
-        return spec(false, spec);
-    }
-
-    public <V> Spec<T> spec(boolean intently, Spec<V> spec) {
-        return appendProducer((factorySet, producer, property) ->
-                factorySet.spec(spec).createProducer(intently));
     }
 
     public Spec<T> spec(String... traitsAndSpec) {

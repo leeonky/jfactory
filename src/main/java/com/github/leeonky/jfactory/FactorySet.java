@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 public class FactorySet {
     private final FactoryPool factoryPool = new FactoryPool();
@@ -22,16 +23,16 @@ public class FactorySet {
         return new DefaultBuilder<>(factoryPool.queryObjectFactory(type), this);
     }
 
-    public <T> Builder<T> spec(Class<? extends Spec<T>> specClass) {
+    public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass) {
         return new DefaultBuilder<>(register(specClass), this);
+    }
+
+    public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass, Consumer<S> trait) {
+        return new DefaultBuilder<>(factoryPool.createSpecFactory(specClass, trait), this);
     }
 
     public <T> SpecClassFactory<T> register(Class<? extends Spec<T>> specClass) {
         return factoryPool.registerSpecClassFactory(specClass);
-    }
-
-    public <T> Builder<T> spec(Spec<T> spec) {
-        return new DefaultBuilder<>(factoryPool.createSpecFactory(spec), this);
     }
 
     public <T> Builder<T> spec(String... traitsAndSpec) {
@@ -43,8 +44,12 @@ public class FactorySet {
         return type(type).create();
     }
 
-    public <T> T create(Spec<T> spec) {
+    public <T, S extends Spec<T>> T createFrom(Class<S> spec) {
         return spec(spec).create();
+    }
+
+    public <T, S extends Spec<T>> T createFrom(Class<S> spec, Consumer<S> trait) {
+        return spec(spec, trait).create();
     }
 
     public <T> T create(String... traitsAndSpec) {
