@@ -13,4 +13,6 @@ public interface Instance<T> {
 
     //TODO support namespace
     <P> P param(String key, P defaultValue);
+
+    Arguments params();
 }

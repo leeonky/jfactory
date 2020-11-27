@@ -31,22 +31,20 @@ public class PropertySpec<T> {
                 new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getPropertyWriterType(property)));
     }
 
-    public <V> Spec<T> spec(Class<? extends Spec<V>> specClass) {
-        return spec(false, specClass);
-    }
-
     public <V, S extends Spec<V>> Spec<T> specFrom(Class<S> specClass, Consumer<S> trait) {
         return specFrom(false, specClass, trait);
     }
 
     public <V, S extends Spec<V>> Spec<T> specFrom(boolean intently, Class<S> specClass, Consumer<S> trait) {
-        return appendProducer((factorySet, producer, property) ->
-                factorySet.spec(specClass, trait).createProducer(intently));
+        return appendProducer(factorySet -> createProducer(intently, factorySet.spec(specClass, trait)));
+    }
+
+    public <V> Spec<T> spec(Class<? extends Spec<V>> specClass) {
+        return spec(false, specClass);
     }
 
     public <V> Spec<T> spec(boolean intently, Class<? extends Spec<V>> specClass) {
-        return appendProducer((factorySet, producer, property) ->
-                factorySet.spec(specClass).createProducer(intently));
+        return appendProducer(factorySet -> createProducer(intently, factorySet.spec(specClass)));
     }
 
     public Spec<T> spec(String... traitsAndSpec) {
@@ -54,8 +52,7 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> spec(boolean intently, String... traitsAndSpec) {
-        return appendProducer((factorySet, producer, property) ->
-                factorySet.spec(traitsAndSpec).createProducer(intently));
+        return appendProducer(factorySet -> createProducer(intently, factorySet.spec(traitsAndSpec)));
     }
 
     public <V> Spec<T> spec(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
@@ -63,8 +60,7 @@ public class PropertySpec<T> {
     }
 
     public <V> Spec<T> spec(boolean intently, Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
-        return appendProducer((factorySet, producer, property) ->
-                builder.apply(factorySet.spec(specClass)).createProducer(intently));
+        return appendProducer(factorySet -> createProducer(intently, builder.apply(factorySet.spec(specClass))));
     }
 
     public Spec<T> asDefault() {
@@ -80,8 +76,9 @@ public class PropertySpec<T> {
     }
 
     private Spec<T> asDefault(boolean intently, Function<Builder<?>, Builder<?>> builder) {
-        return appendProducer((factorySet, producer, property) -> producer.subDefaultValueProducer(property).orElseGet(() ->
-                builder.apply(factorySet.type(producer.getPropertyWriterType(property).getType())).createProducer(intently)));
+        return appendProducer((factorySet, producer, property) -> producer.subDefaultValueProducer(property)
+                .orElseGet(() -> createProducer(intently, builder.apply(factorySet.type(
+                        producer.getPropertyWriterType(property).getType())))));
     }
 
     public Spec<T> dependsOn(String dependency, Function<Object, Object> rule) {
@@ -99,6 +96,14 @@ public class PropertySpec<T> {
             return spec.append((factorySet, objectProducer) -> objectProducer.changeChild(property,
                     ((nextToLast, property) -> producerFactory.apply(factorySet, nextToLast, property))));
         throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
+    }
+
+    private Spec<T> appendProducer(Function<FactorySet, Producer<?>> producerFactory) {
+        return appendProducer((factorySet, producer, s) -> producerFactory.apply(factorySet));
+    }
+
+    private <V> Producer<V> createProducer(boolean intently, Builder<V> builder) {
+        return builder.args(spec.params()).createProducer(intently);
     }
 
     @FunctionalInterface

@@ -56,4 +56,8 @@ public class Spec<T> {
         this.instance = instance;
         return this;
     }
+
+    Arguments params() {
+        return instance().params();
+    }
 }

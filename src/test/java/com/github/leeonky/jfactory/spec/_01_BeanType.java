@@ -1,8 +1,10 @@
 package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.FactorySet;
+import com.github.leeonky.jfactory.Spec;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,6 +52,8 @@ class _01_BeanType {
 
     @Getter
     @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Bean {
         private String stringValue;
         private int intValue;
@@ -62,23 +66,99 @@ class _01_BeanType {
         private int intValue;
     }
 
+    @Getter
+    @Setter
+    public static class BeanWrapper {
+        private Bean bean;
+    }
+
+    public static class ABeanWrapper extends Spec<BeanWrapper> {
+
+        @Override
+        public void main() {
+            property("bean").asDefault();
+        }
+    }
+
+    public static class ABean extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            property("stringValue").value((Object) instance().param("p"));
+        }
+    }
+
     @Nested
     class Params {
 
         @Test
         void support_specify_params() {
-            factorySet.factory(BeanWithNoDefaultConstructor.class).constructor(instance ->
-                    new BeanWithNoDefaultConstructor(instance.param("p"), instance.param("i")));
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("stringValue").value((Object) instance.param("p"))
+                    .property("intValue").value((Object) instance.param("i")));
 
-            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).arg("p", "hello").arg("i", 100).create())
+            assertThat(factorySet.type(Bean.class).arg("p", "hello").arg("i", 100).create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
+        }
 
-            factorySet.factory(BeanWithNoDefaultConstructor.class).constructor(instance ->
-                    new BeanWithNoDefaultConstructor(instance.param("p", "default"), instance.getSequence()));
+        @Test
+        void support_default_params() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("stringValue").value(instance.param("p", "default")));
 
-            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).create())
+            assertThat(factorySet.type(Bean.class).create())
                     .hasFieldOrPropertyWithValue("stringValue", "default");
+        }
+
+        @Test
+        void pass_arg_to_nested_spec_type() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("stringValue").value((Object) instance.param("p")));
+
+            assertThat(factorySet.spec(ABeanWrapper.class).arg("p", "hello").create().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
+
+        @Test
+        void pass_arg_to_nested_spec_with_spec_class() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("bean").spec(ABean.class));
+
+            assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
+
+        @Test
+        void pass_arg_to_nested_spec_with_spec_instance() {
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("bean").specFrom(ABean.class, spec -> {
+                    }));
+
+            assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
+
+        @Test
+        void pass_arg_to_nested_spec_with_spec_name() {
+            factorySet.register(ABean.class);
+
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("bean").spec("ABean"));
+
+            assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
+
+        @Test
+        void pass_arg_to_nested_spec_with_spec_class_and_properties() {
+            factorySet.register(ABean.class);
+
+            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                    .property("bean").spec(ABean.class, builder -> builder.property("intValue", 1)));
+
+            assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
     }
 }

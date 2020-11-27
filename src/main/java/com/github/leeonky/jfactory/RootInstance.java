@@ -45,6 +45,11 @@ class RootInstance<T> implements Instance<T> {
         return arguments.param(key, defaultValue);
     }
 
+    @Override
+    public Arguments params() {
+        return arguments;
+    }
+
     public T cache(Supplier<T> supplier, Consumer<T> operation) {
         return valueCache.cache(supplier, operation);
     }

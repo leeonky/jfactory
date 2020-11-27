@@ -16,7 +16,7 @@ class DefaultBuilder<T> implements Builder<T> {
     private final Set<String> traits = new LinkedHashSet<>();
 
     private final KeyValueCollection properties = new KeyValueCollection();
-    private final DefaultArguments argument = new DefaultArguments();
+    private final DefaultArguments arguments = new DefaultArguments();
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
         this.factorySet = factorySet;
@@ -36,7 +36,14 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Builder<T> arg(String key, Object value) {
         DefaultBuilder<T> newBuilder = clone();
-        newBuilder.argument.set(key, value);
+        newBuilder.arguments.put(key, value);
+        return newBuilder;
+    }
+
+    @Override
+    public Builder<T> args(Arguments arguments) {
+        DefaultBuilder<T> newBuilder = clone();
+        newBuilder.arguments.merge((DefaultArguments) arguments);
         return newBuilder;
     }
 
@@ -52,7 +59,7 @@ class DefaultBuilder<T> implements Builder<T> {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, factorySet);
         builder.properties.merge(properties);
         builder.traits.addAll(traits);
-        builder.argument.merge(argument);
+        builder.arguments.merge(arguments);
         return builder;
     }
 
@@ -83,12 +90,12 @@ class DefaultBuilder<T> implements Builder<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public void establishSpecProducers(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
+    public void establishSpecProducers(ObjectProducer<T> objectProducer, Instance<T> instance) {
         forSpec(objectProducer, instance);
         forInputProperties(objectProducer);
     }
 
-    private void forSpec(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
+    private void forSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
         objectFactory.collectSpec(traits, instance);
         instance.spec().apply(factorySet, objectProducer);
     }
@@ -108,7 +115,7 @@ class DefaultBuilder<T> implements Builder<T> {
         return newBuilder;
     }
 
-    public DefaultArguments getArgument() {
-        return argument;
+    public DefaultArguments getArguments() {
+        return arguments;
     }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 
 //TODO should pass argument to all builder in creation
 class DefaultArguments implements Arguments {
+
     //TODO support namespace
     final Map<String, Object> params = new LinkedHashMap<>();
 
@@ -24,7 +25,7 @@ class DefaultArguments implements Arguments {
         return (P) params.getOrDefault(key, defaultValue);
     }
 
-    public void set(String key, Object value) {
+    public void put(String key, Object value) {
         params.put(key, value);
     }
 }
