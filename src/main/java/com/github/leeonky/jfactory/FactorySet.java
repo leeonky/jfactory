@@ -23,7 +23,7 @@ public class FactorySet {
         return new DefaultBuilder<>(factoryPool.queryObjectFactory(type), this);
     }
 
-    public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass) {
+    public <T, S extends Spec<T>> Builder<T> from(Class<S> specClass) {
         return new DefaultBuilder<>(register(specClass), this);
     }
 
@@ -35,7 +35,7 @@ public class FactorySet {
         return factoryPool.registerSpecClassFactory(specClass);
     }
 
-    public <T> Builder<T> spec(String... traitsAndSpec) {
+    public <T> Builder<T> from(String... traitsAndSpec) {
         return new DefaultBuilder<T>(factoryPool.querySpecClassFactory(traitsAndSpec[traitsAndSpec.length - 1]), this)
                 .trait(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));
     }
@@ -45,7 +45,7 @@ public class FactorySet {
     }
 
     public <T, S extends Spec<T>> T createFrom(Class<S> spec) {
-        return spec(spec).create();
+        return from(spec).create();
     }
 
     public <T, S extends Spec<T>> T createFrom(Class<S> spec, Consumer<S> trait) {
@@ -53,6 +53,6 @@ public class FactorySet {
     }
 
     public <T> T create(String... traitsAndSpec) {
-        return this.<T>spec(traitsAndSpec).create();
+        return this.<T>from(traitsAndSpec).create();
     }
 }

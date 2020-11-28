@@ -31,36 +31,36 @@ public class PropertySpec<T> {
                 new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getPropertyWriterType(property)));
     }
 
-    public <V, S extends Spec<V>> Spec<T> specFrom(Class<S> specClass, Consumer<S> trait) {
-        return specFrom(false, specClass, trait);
+    public <V, S extends Spec<V>> Spec<T> spec(Class<S> specClass, Consumer<S> trait) {
+        return spec(false, specClass, trait);
     }
 
-    public <V, S extends Spec<V>> Spec<T> specFrom(boolean intently, Class<S> specClass, Consumer<S> trait) {
+    public <V, S extends Spec<V>> Spec<T> spec(boolean intently, Class<S> specClass, Consumer<S> trait) {
         return appendProducer(factorySet -> createProducer(intently, factorySet.spec(specClass, trait)));
     }
 
-    public <V> Spec<T> spec(Class<? extends Spec<V>> specClass) {
-        return spec(false, specClass);
+    public <V> Spec<T> from(Class<? extends Spec<V>> specClass) {
+        return from(false, specClass);
     }
 
-    public <V> Spec<T> spec(boolean intently, Class<? extends Spec<V>> specClass) {
-        return appendProducer(factorySet -> createProducer(intently, factorySet.spec(specClass)));
+    public <V> Spec<T> from(boolean intently, Class<? extends Spec<V>> specClass) {
+        return appendProducer(factorySet -> createProducer(intently, factorySet.from(specClass)));
     }
 
-    public Spec<T> spec(String... traitsAndSpec) {
-        return spec(false, traitsAndSpec);
+    public Spec<T> from(String... traitsAndSpec) {
+        return from(false, traitsAndSpec);
     }
 
-    public Spec<T> spec(boolean intently, String... traitsAndSpec) {
-        return appendProducer(factorySet -> createProducer(intently, factorySet.spec(traitsAndSpec)));
+    public Spec<T> from(boolean intently, String... traitsAndSpec) {
+        return appendProducer(factorySet -> createProducer(intently, factorySet.from(traitsAndSpec)));
     }
 
-    public <V> Spec<T> spec(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
-        return spec(false, specClass, builder);
+    public <V> Spec<T> from(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
+        return from(false, specClass, builder);
     }
 
-    public <V> Spec<T> spec(boolean intently, Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
-        return appendProducer(factorySet -> createProducer(intently, builder.apply(factorySet.spec(specClass))));
+    public <V> Spec<T> from(boolean intently, Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
+        return appendProducer(factorySet -> createProducer(intently, builder.apply(factorySet.from(specClass))));
     }
 
     public Spec<T> asDefault() {

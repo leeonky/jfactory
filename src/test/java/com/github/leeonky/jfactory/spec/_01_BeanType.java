@@ -84,6 +84,7 @@ class _01_BeanType {
 
         @Override
         public void main() {
+            //TODO delegate instance::param**method in spec
             property("stringValue").value((Object) instance().param("p"));
         }
     }
@@ -116,14 +117,14 @@ class _01_BeanType {
             factorySet.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value((Object) instance.param("p")));
 
-            assertThat(factorySet.spec(ABeanWrapper.class).arg("p", "hello").create().getBean())
+            assertThat(factorySet.from(ABeanWrapper.class).arg("p", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
 
         @Test
         void pass_arg_to_nested_spec_with_spec_class() {
             factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                    .property("bean").spec(ABean.class));
+                    .property("bean").from(ABean.class));
 
             assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
@@ -132,7 +133,7 @@ class _01_BeanType {
         @Test
         void pass_arg_to_nested_spec_with_spec_instance() {
             factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                    .property("bean").specFrom(ABean.class, spec -> {
+                    .property("bean").spec(ABean.class, spec -> {
                     }));
 
             assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
@@ -144,7 +145,7 @@ class _01_BeanType {
             factorySet.register(ABean.class);
 
             factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                    .property("bean").spec("ABean"));
+                    .property("bean").from("ABean"));
 
             assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
@@ -155,7 +156,7 @@ class _01_BeanType {
             factorySet.register(ABean.class);
 
             factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                    .property("bean").spec(ABean.class, builder -> builder.property("intValue", 1)));
+                    .property("bean").from(ABean.class, builder -> builder.property("intValue", 1)));
 
             assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");

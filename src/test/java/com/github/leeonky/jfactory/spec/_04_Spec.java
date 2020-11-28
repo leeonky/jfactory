@@ -98,7 +98,7 @@ class _04_Spec {
         @Test
         void support_specify_spec_class() {
             factorySet.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").spec(ABean.class));
+                    instance.spec().property("bean").from(ABean.class));
 
             assertThat(factorySet.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
@@ -108,7 +108,7 @@ class _04_Spec {
         @Test
         void support_specify_spec_instance() {
             factorySet.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").specFrom(ABean.class, ABean::int100));
+                    instance.spec().property("bean").spec(ABean.class, ABean::int100));
 
             assertThat(factorySet.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
@@ -120,7 +120,7 @@ class _04_Spec {
             factorySet.register(ABean.class);
 
             factorySet.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").spec("int100", "ABean"));
+                    instance.spec().property("bean").from("int100", "ABean"));
 
             assertThat(factorySet.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("intValue", 100)
@@ -130,7 +130,7 @@ class _04_Spec {
         @Test
         void support_specify_customized_builder_args() {
             factorySet.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").spec(ABean.class, builder -> builder.trait("int100")));
+                    instance.spec().property("bean").from(ABean.class, builder -> builder.trait("int100")));
 
             assertThat(factorySet.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")

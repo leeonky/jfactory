@@ -104,7 +104,7 @@ public class _03_CreateWithSpec {
 
         @Test
         void support_define_spec_in_class() {
-            assertThat(factorySet.spec(ABean.class).trait("int100", "hello").create())
+            assertThat(factorySet.from(ABean.class).trait("int100", "hello").create())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
@@ -134,7 +134,7 @@ public class _03_CreateWithSpec {
 
         @Test
         void support_build_through_spec_name() {
-            factorySet.spec(ABean.class);
+            factorySet.from(ABean.class);
 
             assertThat((Bean) factorySet.create("hello", "ABean"))
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
