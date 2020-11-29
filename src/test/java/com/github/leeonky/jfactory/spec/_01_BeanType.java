@@ -9,6 +9,9 @@ import lombok.Setter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
+import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -113,6 +116,31 @@ class _01_BeanType {
         }
 
         @Test
+        void support_specify_params_in_map() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("stringValue").value((Object) instance.param("p"))
+                    .property("intValue").value((Object) instance.param("i")));
+
+            assertThat(factorySet.type(Bean.class).args(new HashMap<String, Object>() {{
+                put("p", "hello");
+                put("i", 100);
+            }}).create())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100);
+        }
+
+        @Test
+        void support_specify_params_in_arg() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("stringValue").value((Object) instance.param("p"))
+                    .property("intValue").value((Object) instance.param("i")));
+
+            assertThat(factorySet.type(Bean.class).args(arg("p", "hello").arg("i", 100)).create())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100);
+        }
+
+        @Test
         void pass_arg_to_nested_spec_type() {
             factorySet.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value((Object) instance.param("p")));
@@ -160,6 +188,22 @@ class _01_BeanType {
 
             assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
+
+        @Nested
+        class Namespace {
+
+            @Test
+            void should_support_namespace_in_params() {
+                factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                        .property("stringValue").value((Object) instance.param("n.p"))
+                        .property("intValue").value((Object) instance.param("n.i")));
+
+                assertThat(factorySet.type(Bean.class).arg("n.p", "hello").arg("n.i", 100).create())
+                        .hasFieldOrPropertyWithValue("stringValue", "hello")
+                        .hasFieldOrPropertyWithValue("intValue", 100);
+
+            }
         }
     }
 }

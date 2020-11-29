@@ -28,4 +28,6 @@ public interface Builder<T> {
     Builder<T> arg(String key, Object value);
 
     Builder<T> args(Arguments arguments);
+
+    Builder<T> args(Map<String, ?> args);
 }

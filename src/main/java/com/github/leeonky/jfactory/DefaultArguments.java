@@ -3,7 +3,6 @@ package com.github.leeonky.jfactory;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-//TODO should pass argument to all builder in creation
 class DefaultArguments implements Arguments {
 
     //TODO support namespace
