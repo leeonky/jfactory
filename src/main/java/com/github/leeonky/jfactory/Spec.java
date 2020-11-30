@@ -57,7 +57,13 @@ public class Spec<T> {
         return this;
     }
 
-    Arguments params() {
-        return instance().params();
+    public Arguments params(PropertyChain propertyChain) {
+        return instance().params(propertyChain);
     }
+
+    // TODO
+//    Arguments params(String);
+
+    // TODO
+//    Arguments params();
 }

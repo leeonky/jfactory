@@ -1,12 +1,11 @@
 package com.github.leeonky.jfactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.Optional.of;
 
 class PropertyChain {
     public final List<Object> property;
@@ -88,5 +87,10 @@ class PropertyChain {
 
     public PropertyChain concat(String node) {
         return concat(createChain(node));
+    }
+
+    //TODO miss UT
+    public Optional<PropertyChain> sub(PropertyChain propertyChain) {
+        return of(createChain("p"));
     }
 }

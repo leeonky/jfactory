@@ -11,8 +11,13 @@ public interface Instance<T> {
 
     <P> P param(String key);
 
-    //TODO support namespace
     <P> P param(String key, P defaultValue);
 
-    Arguments params();
+    Arguments params(PropertyChain propertyChain);
+
+    // TODO
+//    Arguments params(String);
+
+    // TODO
+//    Arguments params();
 }

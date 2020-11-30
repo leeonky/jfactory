@@ -55,6 +55,13 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public Builder<T> args(String property, Map<String, Object> args) {
+        DefaultBuilder<T> newBuilder = clone();
+        args.forEach((key, value) -> newBuilder.arguments.put(property, key, value));
+        return newBuilder;
+    }
+
+    @Override
     public Builder<T> trait(String... traits) {
         DefaultBuilder<T> newBuilder = clone();
         newBuilder.traits.addAll(asList(traits));

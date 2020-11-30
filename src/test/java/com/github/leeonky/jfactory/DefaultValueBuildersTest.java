@@ -27,12 +27,12 @@ class DefaultValueBuildersTest {
 
     private void assertValue(Class<?> type, int sequence, String property, Object expected) {
         assertThat(new DefaultValueBuilders().query(type).get()
-                .create(null, new RootInstance<>(sequence, new Spec<>(), null).sub(property))).isEqualTo(expected);
+                .create(null, new RootInstance<>(sequence, new Spec<>(), new DefaultArguments()).sub(property))).isEqualTo(expected);
     }
 
     private void assertValue(Class<?> type, int sequence, Object expected) {
         assertThat(new DefaultValueBuilders().query(type).get()
-                .create(null, new RootInstance<>(sequence, new Spec<>(), null).sub(null))).isEqualTo(expected);
+                .create(null, new RootInstance<>(sequence, new Spec<>(), new DefaultArguments()).sub(null))).isEqualTo(expected);
     }
 
     @Test

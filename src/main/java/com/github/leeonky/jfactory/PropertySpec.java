@@ -103,7 +103,7 @@ public class PropertySpec<T> {
     }
 
     private <V> Producer<V> createProducer(boolean intently, Builder<V> builder) {
-        return builder.args(spec.params()).createProducer(intently);
+        return builder.args(spec.params(property)).createProducer(intently);
     }
 
     @FunctionalInterface
