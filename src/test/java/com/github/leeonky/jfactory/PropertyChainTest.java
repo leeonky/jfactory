@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,6 +86,22 @@ class PropertyChainTest {
 
         private void assertHashEqual(String value) {
             assertThat(createChain(value).hashCode()).isEqualTo(createChain(value).hashCode());
+        }
+    }
+
+    @Nested
+    class SubShould {
+
+        @Test
+        void return_empty_when_not_matches() {
+            assertThat(createChain("a").sub(createChain("b"))).isEmpty();
+            assertThat(createChain("a.x").sub(createChain("a.x.y"))).isEmpty();
+        }
+
+        @Test
+        void return_the_left_chain() {
+            assertThat(createChain("a.b").sub(createChain("a"))).isEqualTo(of(createChain("b")));
+            assertThat(createChain("a[1].b").sub(createChain("a[1]"))).isEqualTo(of(createChain("b")));
         }
     }
 }

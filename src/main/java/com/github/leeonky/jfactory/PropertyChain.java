@@ -5,7 +5,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.stream.IntStream.range;
 
 class PropertyChain {
     public final List<Object> property;
@@ -89,8 +91,15 @@ class PropertyChain {
         return concat(createChain(node));
     }
 
-    //TODO miss UT
     public Optional<PropertyChain> sub(PropertyChain propertyChain) {
-        return of(createChain("p"));
+        if (contains(propertyChain))
+            return of(new PropertyChain(property.subList(propertyChain.property.size(), property.size())));
+        return empty();
+    }
+
+    private boolean contains(PropertyChain propertyChain) {
+        return propertyChain.property.size() <= property.size()
+                && range(0, propertyChain.property.size())
+                .allMatch(i -> Objects.equals(propertyChain.property.get(i), property.get(i)));
     }
 }

@@ -145,7 +145,7 @@ class _01_BeanType {
         class NestedParams {
 
             @Test
-            void should_pass_params_to_nested_creation() {
+            void pass_arg_to_nested_spec_type() {
                 factorySet.factory(Bean.class).spec(instance -> instance.spec()
                         .property("stringValue").value((Object) instance.param("p")));
 
@@ -154,55 +154,46 @@ class _01_BeanType {
 
             }
 
-//        @Test
-//        void pass_arg_to_nested_spec_type() {
-//            factorySet.factory(Bean.class).spec(instance -> instance.spec()
-//                    .property("stringValue").value((Object) instance.param("p")));
-//
-//            assertThat(factorySet.from(ABeanWrapper.class).arg("p", "hello").create().getBean())
-//                    .hasFieldOrPropertyWithValue("stringValue", "hello");
-//        }
-//
-//        @Test
-//        void pass_arg_to_nested_spec_with_spec_class() {
-//            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-//                    .property("bean").from(ABean.class));
-//
-//            assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
-//                    .hasFieldOrPropertyWithValue("stringValue", "hello");
-//        }
-//
-//        @Test
-//        void pass_arg_to_nested_spec_with_spec_instance() {
-//            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-//                    .property("bean").spec(ABean.class, spec -> {
-//                    }));
-//
-//            assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
-//                    .hasFieldOrPropertyWithValue("stringValue", "hello");
-//        }
-//
-//        @Test
-//        void pass_arg_to_nested_spec_with_spec_name() {
-//            factorySet.register(ABean.class);
-//
-//            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-//                    .property("bean").from("ABean"));
-//
-//            assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
-//                    .hasFieldOrPropertyWithValue("stringValue", "hello");
-//        }
-//
-//        @Test
-//        void pass_arg_to_nested_spec_with_spec_class_and_properties() {
-//            factorySet.register(ABean.class);
-//
-//            factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-//                    .property("bean").from(ABean.class, builder -> builder.property("intValue", 1)));
-//
-//            assertThat(factorySet.type(BeanWrapper.class).arg("p", "hello").create().getBean())
-//                    .hasFieldOrPropertyWithValue("stringValue", "hello");
-//        }
+            @Test
+            void pass_arg_to_nested_spec_with_spec_class() {
+                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                        .property("bean").from(ABean.class));
+
+                assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                        .hasFieldOrPropertyWithValue("stringValue", "hello");
+            }
+
+            @Test
+            void pass_arg_to_nested_spec_with_spec_instance() {
+                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                        .property("bean").spec(ABean.class, spec -> {
+                        }));
+
+                assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                        .hasFieldOrPropertyWithValue("stringValue", "hello");
+            }
+
+            @Test
+            void pass_arg_to_nested_spec_with_spec_name() {
+                factorySet.register(ABean.class);
+
+                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                        .property("bean").from("ABean"));
+
+                assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                        .hasFieldOrPropertyWithValue("stringValue", "hello");
+            }
+
+            @Test
+            void pass_arg_to_nested_spec_with_spec_class_and_properties() {
+                factorySet.register(ABean.class);
+
+                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                        .property("bean").from(ABean.class, builder -> builder.property("intValue", 1)));
+
+                assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                        .hasFieldOrPropertyWithValue("stringValue", "hello");
+            }
         }
     }
 }
