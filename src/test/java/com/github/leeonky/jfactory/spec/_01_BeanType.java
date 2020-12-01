@@ -75,6 +75,12 @@ class _01_BeanType {
         private Bean bean;
     }
 
+    @Getter
+    @Setter
+    public static class BeanWrapperWrapper {
+        private BeanWrapper beanWrapper;
+    }
+
     public static class ABeanWrapper extends Spec<BeanWrapper> {
 
         @Override
@@ -152,6 +158,22 @@ class _01_BeanType {
                 assertThat(factorySet.from(ABeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
 
+            }
+
+            @Test
+            void pass_arg_to_nested_spec_type_in_2_levels() {
+                factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                        .property("stringValue").value((Object) instance.param("p")));
+
+                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                        .property("bean").asDefault());
+
+                factorySet.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
+                        .property("beanWrapper").asDefault());
+
+                assertThat(factorySet.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello"))
+                        .create().getBeanWrapper().getBean())
+                        .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
             @Test
