@@ -13,11 +13,7 @@ public interface Instance<T> {
 
     <P> P param(String key, P defaultValue);
 
-    Arguments params(PropertyChain propertyChain);
+    Arguments params(String property);
 
-    // TODO
-//    Arguments params(String);
-
-    // TODO
-//    Arguments params();
+    Arguments params();
 }

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -57,6 +58,7 @@ class _01_BeanType {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @Accessors(chain = true)
     public static class Bean {
         private String stringValue;
         private int intValue;
@@ -71,12 +73,14 @@ class _01_BeanType {
 
     @Getter
     @Setter
+    @Accessors(chain = true)
     public static class BeanWrapper {
         private Bean bean;
     }
 
     @Getter
     @Setter
+    @Accessors(chain = true)
     public static class BeanWrapperWrapper {
         private BeanWrapper beanWrapper;
     }
@@ -86,6 +90,7 @@ class _01_BeanType {
         @Override
         public void main() {
             property("bean").asDefault();
+            super.main();
         }
     }
 
@@ -93,8 +98,7 @@ class _01_BeanType {
 
         @Override
         public void main() {
-            //TODO delegate instance::param**method in spec
-            property("stringValue").value((Object) instance().param("p"));
+            property("stringValue").value((Object) param("p"));
         }
     }
 
@@ -215,6 +219,63 @@ class _01_BeanType {
 
                 assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
+            }
+
+            @Test
+            void support_access_nested_args() {
+                factorySet.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
+                        .property("beanWrapper").value(new BeanWrapper().setBean(new Bean()
+                                .setStringValue(instance.params("beanWrapper").params("bean").param("p")))));
+
+                assertThat(factorySet.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello"))
+                        .create().getBeanWrapper().getBean())
+                        .hasFieldOrPropertyWithValue("stringValue", "hello");
+            }
+
+
+            @Nested
+            class AccessArg {
+
+                @Nested
+                class FromInstance {
+
+                    @Test
+                    void get_args_from_instance() {
+                        factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                                .property("stringValue").value((Object) instance.param("p")));
+
+                        factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                                .property("bean").asDefault(builder -> builder.args(instance.params())));
+
+                        assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                                .hasFieldOrPropertyWithValue("stringValue", "hello");
+                    }
+                }
+
+                @Nested
+                class FromSpec {
+
+                    @Test
+                    void get_with_default() {
+                        factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                                .property("stringValue").value(instance.spec().param("p", "default")));
+
+                        assertThat(factorySet.type(Bean.class).create())
+                                .hasFieldOrPropertyWithValue("stringValue", "default");
+                    }
+
+                    @Test
+                    void get_all_args() {
+                        factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                                .property("stringValue").value((Object) instance.param("p")));
+
+                        factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                                .property("bean").asDefault(builder -> builder.args(instance.spec().params())));
+
+                        assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                                .hasFieldOrPropertyWithValue("stringValue", "hello");
+                    }
+                }
             }
         }
     }

@@ -32,13 +32,13 @@ public class Spec<T> {
     }
 
     @SuppressWarnings("unchecked")
-    Class<T> getType() {
+    protected Class<T> getType() {
         return (Class<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
                 .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"))
                 .getType();
     }
 
-    String getName() {
+    protected String getName() {
         return getClass().getSimpleName();
     }
 
@@ -48,22 +48,24 @@ public class Spec<T> {
         return this;
     }
 
-    public Instance<T> instance() {
-        return instance;
-    }
-
     Spec<T> setInstance(Instance<T> instance) {
         this.instance = instance;
         return this;
     }
 
-    public Arguments params(PropertyChain propertyChain) {
-        return instance().params(propertyChain);
+    public <P> P param(String key) {
+        return instance.param(key);
     }
 
-    // TODO
-//    Arguments params(String);
+    public <P> P param(String key, P defaultValue) {
+        return instance.param(key, defaultValue);
+    }
 
-    // TODO
-//    Arguments params();
+    public Arguments params(String property) {
+        return instance.params(property);
+    }
+
+    public Arguments params() {
+        return instance.params();
+    }
 }
