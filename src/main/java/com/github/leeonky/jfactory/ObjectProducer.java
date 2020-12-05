@@ -1,6 +1,6 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Function;
@@ -40,16 +40,15 @@ class ObjectProducer<T> extends Producer<T> {
     public Producer<?> childOrDefault(String property) {
         Producer<?> producer = children.get(property);
         if (producer == null)
-            producer = addDefaultCollectionProducer(property);
+            producer = addDefaultCollectionProducer(getType().getPropertyWriter(property));
         return producer;
     }
 
-    private Producer<?> addDefaultCollectionProducer(String property) {
+    private Producer<?> addDefaultCollectionProducer(PropertyWriter<?> property) {
         Producer<?> result = null;
-        BeanClass<?> propertyType = getPropertyWriterType(property);
-        if (propertyType.isCollection())
-            addChild(property, result = new CollectionProducer<>(getType(), propertyType, instance.sub(property),
-                    factory.getFactoryPool()));
+        if (property.getType().isCollection())
+            addChild(property.getName(), result = new CollectionProducer<>(getType(), property.getType(),
+                    instance.sub(property), factory.getFactoryPool()));
         return result;
     }
 
@@ -132,13 +131,13 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private void establishDefaultValueProducers() {
-        getType().getPropertyWriters().values().forEach(writer -> subDefaultValueProducer(writer.getName())
+        getType().getPropertyWriters().values().forEach(writer -> subDefaultValueProducer(writer)
                 .ifPresent(producer -> addChild(writer.getName(), producer)));
     }
 
     @Override
-    public Optional<Producer> subDefaultValueProducer(String property) {
-        return factory.getFactoryPool().queryDefaultValueBuilder(getPropertyWriterType(property))
+    public Optional<Producer> subDefaultValueProducer(PropertyWriter<?> property) {
+        return factory.getFactoryPool().queryDefaultValueBuilder(property.getType())
                 .map(builder -> new DefaultValueProducer<>(getType(), builder, instance.sub(property)));
     }
 

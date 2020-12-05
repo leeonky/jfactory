@@ -1,7 +1,10 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyWriter;
 import org.junit.jupiter.api.Test;
+
+import java.lang.annotation.Annotation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,12 +30,47 @@ class DefaultValueBuildersTest {
 
     private void assertValue(Class<?> type, int sequence, String property, Object expected) {
         assertThat(new DefaultValueBuilders().query(type).get()
-                .create(null, new RootInstance<>(sequence, new Spec<>(), new DefaultArguments()).sub(property))).isEqualTo(expected);
+                .create(null, new RootInstance<>(sequence, new Spec<>(), new DefaultArguments())
+                        .sub(stubPropertyWriter(property)))).isEqualTo(expected);
+    }
+
+    private PropertyWriter<?> stubPropertyWriter(String property) {
+        return new PropertyWriter<Object>() {
+            @Override
+            public void setValue(Object bean, Object value) {
+            }
+
+            @Override
+            public String getName() {
+                return property;
+            }
+
+            @Override
+            public Object tryConvert(Object value) {
+                return null;
+            }
+
+            @Override
+            public BeanClass<Object> getBeanType() {
+                return null;
+            }
+
+            @Override
+            public BeanClass<?> getType() {
+                return null;
+            }
+
+            @Override
+            public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+                return null;
+            }
+        };
     }
 
     private void assertValue(Class<?> type, int sequence, Object expected) {
         assertThat(new DefaultValueBuilders().query(type).get()
-                .create(null, new RootInstance<>(sequence, new Spec<>(), new DefaultArguments()).sub(null))).isEqualTo(expected);
+                .create(null, new RootInstance<>(sequence, new Spec<>(), new DefaultArguments())
+                        .sub(stubPropertyWriter(null)))).isEqualTo(expected);
     }
 
     @Test

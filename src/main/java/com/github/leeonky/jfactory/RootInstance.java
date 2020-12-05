@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.PropertyWriter;
+
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -21,7 +23,7 @@ class RootInstance<T> implements Instance<T> {
         return sequence;
     }
 
-    public SubInstance<T> sub(String property) {
+    public SubInstance<T> sub(PropertyWriter<?> property) {
         return new SubInstance<>(property, sequence, spec, arguments);
     }
 

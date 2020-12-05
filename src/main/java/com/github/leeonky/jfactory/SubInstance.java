@@ -1,17 +1,19 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.PropertyWriter;
+
 import static java.util.Collections.emptyList;
 
-class SubInstance<T> extends RootInstance<T> {
-    protected final String property;
+public class SubInstance<T> extends RootInstance<T> {
+    protected final PropertyWriter<?> property;
 
-    public SubInstance(String property, int sequence, Spec<T> spec, DefaultArguments argument) {
+    public SubInstance(PropertyWriter<?> property, int sequence, Spec<T> spec, DefaultArguments argument) {
         super(sequence, spec, argument);
         this.property = property;
     }
 
     public String propertyInfo() {
-        return String.format("%s#%d", property, getSequence());
+        return String.format("%s#%d", property.getName(), getSequence());
     }
 
     public CollectionInstance<T> inCollection() {

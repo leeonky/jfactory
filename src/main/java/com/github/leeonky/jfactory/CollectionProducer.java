@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Function;
@@ -78,7 +79,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Optional<Producer> subDefaultValueProducer(String property) {
-        return subDefaultValueProducerFactory.apply(property);
+    public Optional<Producer> subDefaultValueProducer(PropertyWriter<?> property) {
+        return subDefaultValueProducerFactory.apply(property.getName());
     }
 }

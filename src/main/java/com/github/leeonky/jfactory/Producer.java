@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -102,7 +103,7 @@ abstract class Producer<T> {
         return Stream.of(defaultLinkerReference(root, absoluteCurrent));
     }
 
-    public Optional<Producer> subDefaultValueProducer(String property) {
+    public Optional<Producer> subDefaultValueProducer(PropertyWriter<?> property) {
         return Optional.empty();
     }
 
