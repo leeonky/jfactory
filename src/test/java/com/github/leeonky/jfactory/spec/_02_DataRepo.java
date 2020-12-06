@@ -1,10 +1,16 @@
 package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.Builder;
+import com.github.leeonky.jfactory.DataRepository;
 import com.github.leeonky.jfactory.FactorySet;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -85,6 +91,56 @@ class _02_DataRepo {
         assertThat(factorySet.type(Beans.class).property("bean.stringValue", "hello").query()).isEqualTo(beans);
         assertThat(beans.getBean())
                 .hasFieldOrPropertyWithValue("stringValue", "hello");
+    }
+
+    @Test
+    void support_use_customer_data_repo() {
+        List<Object> saved = new ArrayList<>();
+
+        factorySet = new FactorySet(new DataRepository() {
+            @Override
+            public void save(Object object) {
+                saved.add(object);
+            }
+
+            @Override
+            public <T> Collection<T> queryAll(Class<T> type) {
+                return null;
+            }
+
+            @Override
+            public void clear() {
+            }
+        });
+
+        Bean bean = factorySet.create(Bean.class);
+
+        assertThat(saved).containsOnly(bean);
+    }
+
+    @Test
+    void should_save_object_in_right_sequence() {
+        List<Object> saved = new ArrayList<>();
+
+        factorySet = new FactorySet(new DataRepository() {
+            @Override
+            public void save(Object object) {
+                saved.add(object);
+            }
+
+            @Override
+            public <T> Collection<T> queryAll(Class<T> type) {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void clear() {
+            }
+        });
+
+        BeansWrapper beansWrapper = factorySet.type(BeansWrapper.class).property("beans.bean.stringValue", "hello").create();
+
+        assertThat(saved).containsOnly(beansWrapper.beans.bean, beansWrapper.beans, beansWrapper);
     }
 
     @Getter

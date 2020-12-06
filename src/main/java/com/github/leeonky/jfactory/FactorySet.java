@@ -17,6 +17,10 @@ public class FactorySet {
         dataRepository = new MemoryDataRepository();
     }
 
+    public FactorySet(DataRepository dataRepository) {
+        this.dataRepository = dataRepository;
+    }
+
     public DataRepository getDataRepository() {
         return dataRepository;
     }
