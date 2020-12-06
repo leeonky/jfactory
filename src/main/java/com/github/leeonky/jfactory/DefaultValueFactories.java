@@ -10,47 +10,51 @@ import java.util.*;
 
 import static java.util.Optional.ofNullable;
 
-class DefaultValueBuilders {
+class DefaultValueFactories {
     private static final LocalDate LOCAL_DATE_START = LocalDate.parse("1996-01-23");
     private static final LocalDateTime LOCAL_DATE_TIME_START = LocalDateTime.parse("1996-01-23T00:00:00");
     private static final LocalTime LOCAL_TIME_START = LocalTime.parse("00:00:00");
     private static final Instant INSTANT_START = Instant.parse("1996-01-23T00:00:00Z");
-    private final Map<Class<?>, DefaultValueBuilder<?>> defaultValueBuilders = new HashMap<>();
+    private final Map<Class<?>, DefaultValueFactory<?>> defaultValueBuilders = new HashMap<>();
 
-    public DefaultValueBuilders() {
-        defaultValueBuilders.put(String.class, new DefaultStringBuilder());
-        defaultValueBuilders.put(Integer.class, new DefaultIntegerBuilder());
-        defaultValueBuilders.put(int.class, defaultValueBuilders.get(Integer.class));
-        defaultValueBuilders.put(Short.class, new DefaultShortBuilder());
-        defaultValueBuilders.put(short.class, defaultValueBuilders.get(Short.class));
-        defaultValueBuilders.put(Byte.class, new DefaultByteBuilder());
-        defaultValueBuilders.put(byte.class, defaultValueBuilders.get(Byte.class));
-        defaultValueBuilders.put(Long.class, new DefaultLongBuilder());
-        defaultValueBuilders.put(long.class, defaultValueBuilders.get(Long.class));
-        defaultValueBuilders.put(Float.class, new DefaultFloatBuilder());
-        defaultValueBuilders.put(float.class, defaultValueBuilders.get(Float.class));
-        defaultValueBuilders.put(Double.class, new DefaultDoubleBuilder());
-        defaultValueBuilders.put(double.class, defaultValueBuilders.get(Double.class));
-        defaultValueBuilders.put(Boolean.class, new DefaultBooleanBuilder());
-        defaultValueBuilders.put(boolean.class, defaultValueBuilders.get(Boolean.class));
-        defaultValueBuilders.put(BigInteger.class, new DefaultBigIntegerBuilder());
-        defaultValueBuilders.put(BigDecimal.class, new DefaultBigDecimalBuilder());
-        defaultValueBuilders.put(UUID.class, new DefaultUUIDBuilder());
-        defaultValueBuilders.put(Date.class, new DefaultDateBuilder());
-        defaultValueBuilders.put(Instant.class, new DefaultInstantBuilder());
-        defaultValueBuilders.put(LocalDate.class, new DefaultLocalDateBuilder());
-        defaultValueBuilders.put(LocalTime.class, new DefaultLocalTimeBuilder());
-        defaultValueBuilders.put(LocalDateTime.class, new DefaultLocalDateTimeBuilder());
-        defaultValueBuilders.put(OffsetDateTime.class, new DefaultOffsetDateTimeBuilder());
-        defaultValueBuilders.put(ZonedDateTime.class, new DefaultZoneDateTimeBuilder());
+    public DefaultValueFactories() {
+        register(String.class, new DefaultStringFactory());
+        register(Integer.class, new DefaultIntegerFactory());
+        register(int.class, defaultValueBuilders.get(Integer.class));
+        register(Short.class, new DefaultShortFactory());
+        register(short.class, defaultValueBuilders.get(Short.class));
+        register(Byte.class, new DefaultByteFactory());
+        register(byte.class, defaultValueBuilders.get(Byte.class));
+        register(Long.class, new DefaultLongFactory());
+        register(long.class, defaultValueBuilders.get(Long.class));
+        register(Float.class, new DefaultFloatFactory());
+        register(float.class, defaultValueBuilders.get(Float.class));
+        register(Double.class, new DefaultDoubleFactory());
+        register(double.class, defaultValueBuilders.get(Double.class));
+        register(Boolean.class, new DefaultBooleanFactory());
+        register(boolean.class, defaultValueBuilders.get(Boolean.class));
+        register(BigInteger.class, new DefaultBigIntegerFactory());
+        register(BigDecimal.class, new DefaultBigDecimalFactory());
+        register(UUID.class, new DefaultUUIDFactory());
+        register(Date.class, new DefaultDateFactory());
+        register(Instant.class, new DefaultInstantFactory());
+        register(LocalDate.class, new DefaultLocalDateFactory());
+        register(LocalTime.class, new DefaultLocalTimeFactory());
+        register(LocalDateTime.class, new DefaultLocalDateTimeFactory());
+        register(OffsetDateTime.class, new DefaultOffsetDateTimeFactory());
+        register(ZonedDateTime.class, new DefaultZoneDateTimeFactory());
+    }
+
+    public void register(Class<?> type, DefaultValueFactory<?> factory) {
+        defaultValueBuilders.put(type, factory);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Optional<DefaultValueBuilder<T>> query(Class<T> type) {
-        return ofNullable((DefaultValueBuilder<T>) defaultValueBuilders.get(type));
+    public <T> Optional<DefaultValueFactory<T>> query(Class<T> type) {
+        return ofNullable((DefaultValueFactory<T>) defaultValueBuilders.get(type));
     }
 
-    public static class DefaultStringBuilder implements DefaultValueBuilder<String> {
+    public static class DefaultStringFactory implements DefaultValueFactory<String> {
 
         @Override
         public <T> String create(BeanClass<T> beanType, SubInstance instance) {
@@ -58,7 +62,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultLongBuilder implements DefaultValueBuilder<Long> {
+    public static class DefaultLongFactory implements DefaultValueFactory<Long> {
 
         @Override
         public <T> Long create(BeanClass<T> beanType, SubInstance instance) {
@@ -66,7 +70,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultIntegerBuilder implements DefaultValueBuilder<Integer> {
+    public static class DefaultIntegerFactory implements DefaultValueFactory<Integer> {
 
         @Override
         public <T> Integer create(BeanClass<T> beanType, SubInstance instance) {
@@ -74,7 +78,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultShortBuilder implements DefaultValueBuilder<Short> {
+    public static class DefaultShortFactory implements DefaultValueFactory<Short> {
 
         @Override
         public <T> Short create(BeanClass<T> beanType, SubInstance instance) {
@@ -82,7 +86,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultByteBuilder implements DefaultValueBuilder<Byte> {
+    public static class DefaultByteFactory implements DefaultValueFactory<Byte> {
 
         @Override
         public <T> Byte create(BeanClass<T> beanType, SubInstance instance) {
@@ -90,7 +94,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultDoubleBuilder implements DefaultValueBuilder<Double> {
+    public static class DefaultDoubleFactory implements DefaultValueFactory<Double> {
 
         @Override
         public <T> Double create(BeanClass<T> beanType, SubInstance instance) {
@@ -98,7 +102,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultFloatBuilder implements DefaultValueBuilder<Float> {
+    public static class DefaultFloatFactory implements DefaultValueFactory<Float> {
 
         @Override
         public <T> Float create(BeanClass<T> beanType, SubInstance instance) {
@@ -106,7 +110,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultBooleanBuilder implements DefaultValueBuilder<Boolean> {
+    public static class DefaultBooleanFactory implements DefaultValueFactory<Boolean> {
 
         @Override
         public <T> Boolean create(BeanClass<T> beanType, SubInstance instance) {
@@ -114,7 +118,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultBigIntegerBuilder implements DefaultValueBuilder<BigInteger> {
+    public static class DefaultBigIntegerFactory implements DefaultValueFactory<BigInteger> {
 
         @Override
         public <T> BigInteger create(BeanClass<T> beanType, SubInstance instance) {
@@ -122,7 +126,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultBigDecimalBuilder implements DefaultValueBuilder<BigDecimal> {
+    public static class DefaultBigDecimalFactory implements DefaultValueFactory<BigDecimal> {
 
         @Override
         public <T> BigDecimal create(BeanClass<T> beanType, SubInstance instance) {
@@ -130,7 +134,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultUUIDBuilder implements DefaultValueBuilder<UUID> {
+    public static class DefaultUUIDFactory implements DefaultValueFactory<UUID> {
 
         @Override
         public <T> UUID create(BeanClass<T> beanType, SubInstance instance) {
@@ -138,7 +142,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultDateBuilder implements DefaultValueBuilder<Date> {
+    public static class DefaultDateFactory implements DefaultValueFactory<Date> {
 
         @Override
         public <T> Date create(BeanClass<T> beanType, SubInstance instance) {
@@ -146,7 +150,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultInstantBuilder implements DefaultValueBuilder<Instant> {
+    public static class DefaultInstantFactory implements DefaultValueFactory<Instant> {
 
         @Override
         public <T> Instant create(BeanClass<T> beanType, SubInstance instance) {
@@ -154,7 +158,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultLocalTimeBuilder implements DefaultValueBuilder<LocalTime> {
+    public static class DefaultLocalTimeFactory implements DefaultValueFactory<LocalTime> {
 
         @Override
         public <T> LocalTime create(BeanClass<T> beanType, SubInstance instance) {
@@ -162,7 +166,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultLocalDateBuilder implements DefaultValueBuilder<LocalDate> {
+    public static class DefaultLocalDateFactory implements DefaultValueFactory<LocalDate> {
 
         @Override
         public <T> LocalDate create(BeanClass<T> beanType, SubInstance instance) {
@@ -170,7 +174,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultLocalDateTimeBuilder implements DefaultValueBuilder<LocalDateTime> {
+    public static class DefaultLocalDateTimeFactory implements DefaultValueFactory<LocalDateTime> {
 
         @Override
         public <T> LocalDateTime create(BeanClass<T> beanType, SubInstance instance) {
@@ -178,7 +182,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultOffsetDateTimeBuilder implements DefaultValueBuilder<OffsetDateTime> {
+    public static class DefaultOffsetDateTimeFactory implements DefaultValueFactory<OffsetDateTime> {
 
         @Override
         public <T> OffsetDateTime create(BeanClass<T> beanType, SubInstance instance) {
@@ -186,7 +190,7 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultZoneDateTimeBuilder implements DefaultValueBuilder<ZonedDateTime> {
+    public static class DefaultZoneDateTimeFactory implements DefaultValueFactory<ZonedDateTime> {
 
         @Override
         public <T> ZonedDateTime create(BeanClass<T> beanType, SubInstance instance) {
@@ -194,10 +198,10 @@ class DefaultValueBuilders {
         }
     }
 
-    public static class DefaultTypeBuilder<V> implements DefaultValueBuilder<V> {
+    public static class DefaultTypeFactory<V> implements DefaultValueFactory<V> {
         private final BeanClass<V> type;
 
-        public DefaultTypeBuilder(BeanClass<V> type) {
+        public DefaultTypeFactory(BeanClass<V> type) {
             this.type = type;
         }
 

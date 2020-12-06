@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 class FactoryPool {
     public final TypeSequence typeSequence = new TypeSequence();
-    private final DefaultValueBuilders defaultValueBuilders = new DefaultValueBuilders();
+    private final DefaultValueFactories defaultValueFactories = new DefaultValueFactories();
     private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
     private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new HashMap<>();
@@ -36,12 +36,12 @@ class FactoryPool {
         });
     }
 
-    public <T> Optional<DefaultValueBuilder<T>> queryDefaultValueBuilder(BeanClass<T> type) {
-        return defaultValueBuilders.query(type.getType());
+    public <T> Optional<DefaultValueFactory<T>> queryDefaultValueBuilder(BeanClass<T> type) {
+        return defaultValueFactories.query(type.getType());
     }
 
-    public <T> DefaultValueBuilder<T> getDefaultValueBuilder(BeanClass<T> type) {
-        return queryDefaultValueBuilder(type).orElseGet(() -> new DefaultValueBuilders.DefaultTypeBuilder<>(type));
+    public <T> DefaultValueFactory<T> getDefaultValueBuilder(BeanClass<T> type) {
+        return queryDefaultValueBuilder(type).orElseGet(() -> new DefaultValueFactories.DefaultTypeFactory<>(type));
     }
 
     public int nextSequence(Class<?> type) {
@@ -51,5 +51,9 @@ class FactoryPool {
     public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {
         S spec = BeanClass.newInstance(specClass);
         return new SpecFactory<>(queryObjectFactory(spec.getType()), spec, this, trait);
+    }
+
+    public <T> void registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {
+        defaultValueFactories.register(type, factory);
     }
 }

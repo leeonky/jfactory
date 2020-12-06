@@ -14,7 +14,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class DefaultValueBuildersTest {
+class DefaultValueFactoriesTest {
 
     @Test
     void default_string() {
@@ -60,7 +60,7 @@ class DefaultValueBuildersTest {
 
     @Test
     void should_raise_error_when_invalid_generic_args() {
-        assertThrows(IllegalStateException.class, () -> new InvalidGenericArgDefaultValueBuilder<>().getType());
+        assertThrows(IllegalStateException.class, () -> new InvalidGenericArgDefaultValueFactory<>().getType());
     }
 
     @Test
@@ -131,7 +131,7 @@ class DefaultValueBuildersTest {
     }
 
     private void assertValue(Class<?> type, int sequence, String property, Object expected) {
-        assertThat(new DefaultValueBuilders().query(type).get()
+        assertThat(new DefaultValueFactories().query(type).get()
                 .create(null, new RootInstance<>(sequence, new Spec<>(), new DefaultArguments())
                         .sub(stubPropertyWriter(property)))).isEqualTo(expected);
     }
@@ -170,18 +170,18 @@ class DefaultValueBuildersTest {
     }
 
     private void assertValue(Class<?> type, int sequence, Object expected) {
-        assertThat(new DefaultValueBuilders().query(type).get()
+        assertThat(new DefaultValueFactories().query(type).get()
                 .create(null, new RootInstance<>(sequence, new Spec<>(), new DefaultArguments())
                         .sub(stubPropertyWriter(null)))).isEqualTo(expected);
     }
 
     @Test
     void default_value_builder_create_default_value() {
-        assertThat(new DefaultValueBuilders.DefaultTypeBuilder<>(BeanClass.create(int.class)).create(null, null))
+        assertThat(new DefaultValueFactories.DefaultTypeFactory<>(BeanClass.create(int.class)).create(null, null))
                 .isInstanceOf(Integer.class);
     }
 
-    public static class InvalidGenericArgDefaultValueBuilder<V> implements DefaultValueBuilder<V> {
+    public static class InvalidGenericArgDefaultValueFactory<V> implements DefaultValueFactory<V> {
         @Override
         public <T> V create(BeanClass<T> beanType, SubInstance instance) {
             return null;

@@ -1,7 +1,10 @@
 package com.github.leeonky.jfactory.spec;
 
+import com.github.leeonky.jfactory.DefaultValueFactory;
 import com.github.leeonky.jfactory.FactorySet;
 import com.github.leeonky.jfactory.Spec;
+import com.github.leeonky.jfactory.SubInstance;
+import com.github.leeonky.util.BeanClass;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -277,6 +280,24 @@ class _01_BeanType {
                     }
                 }
             }
+        }
+    }
+
+    @Nested
+    class CustomizedDefaultValue {
+
+        @Test
+        void support_define_default_value_factory_by_type() {
+            factorySet.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
+
+                @Override
+                public <T> String create(BeanClass<T> beanType, SubInstance instance) {
+                    return "hello";
+                }
+            });
+
+            assertThat(factorySet.create(Bean.class))
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
     }
 }

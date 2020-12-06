@@ -55,4 +55,9 @@ public class FactorySet {
     public <T> T create(String... traitsAndSpec) {
         return this.<T>from(traitsAndSpec).create();
     }
+
+    public <T> FactorySet registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {
+        factoryPool.registerDefaultValueFactory(type, factory);
+        return this;
+    }
 }

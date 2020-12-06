@@ -4,10 +4,10 @@ import com.github.leeonky.util.BeanClass;
 
 class DefaultValueProducer<T, V> extends Producer<V> {
     private final BeanClass<T> beanType;
-    private final DefaultValueBuilder<V> builder;
+    private final DefaultValueFactory<V> builder;
     private final SubInstance instance;
 
-    public DefaultValueProducer(BeanClass<T> beanType, DefaultValueBuilder<V> builder, SubInstance instance) {
+    public DefaultValueProducer(BeanClass<T> beanType, DefaultValueFactory<V> builder, SubInstance instance) {
         super(BeanClass.create(builder.getType()));
         this.beanType = beanType;
         this.builder = builder;
