@@ -288,16 +288,24 @@ class _01_BeanType {
 
         @Test
         void support_define_default_value_factory_by_type() {
-            factorySet.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
-
+            Bean bean = factorySet.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
                 @Override
                 public <T> String create(BeanClass<T> beanType, SubInstance instance) {
                     return "hello";
                 }
-            });
+            }).create(Bean.class);
 
-            assertThat(factorySet.create(Bean.class))
+            assertThat(bean)
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
+
+        @Test
+        void support_skip_property_default_value_creation() {
+            Bean bean = factorySet.ignoreDefaultValue(propertyWriter -> "stringValue".equals(propertyWriter.getName()))
+                    .create(Bean.class);
+
+            assertThat(bean)
+                    .hasFieldOrPropertyWithValue("stringValue", null);
         }
     }
 }

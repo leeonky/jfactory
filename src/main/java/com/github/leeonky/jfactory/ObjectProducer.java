@@ -131,8 +131,10 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private void establishDefaultValueProducers() {
-        getType().getPropertyWriters().values().forEach(writer -> subDefaultValueProducer(writer)
-                .ifPresent(producer -> addChild(writer.getName(), producer)));
+        getType().getPropertyWriters().values().stream()
+                .filter(factorySet::shouldCreateDefaultValue)
+                .forEach(propertyWriter -> subDefaultValueProducer(propertyWriter)
+                        .ifPresent(producer -> addChild(propertyWriter.getName(), producer)));
     }
 
     @Override

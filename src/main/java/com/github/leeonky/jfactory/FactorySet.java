@@ -1,11 +1,17 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.PropertyWriter;
+
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class FactorySet {
     private final FactoryPool factoryPool = new FactoryPool();
     private final DataRepository dataRepository;
+    private final Set<Predicate<PropertyWriter<?>>> ignoreDefaultValues = new LinkedHashSet<>();
 
     public FactorySet() {
         dataRepository = new MemoryDataRepository();
@@ -59,5 +65,14 @@ public class FactorySet {
     public <T> FactorySet registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {
         factoryPool.registerDefaultValueFactory(type, factory);
         return this;
+    }
+
+    public FactorySet ignoreDefaultValue(Predicate<PropertyWriter<?>> ignoreProperty) {
+        ignoreDefaultValues.add(ignoreProperty);
+        return this;
+    }
+
+    <T> boolean shouldCreateDefaultValue(PropertyWriter<T> propertyWriter) {
+        return ignoreDefaultValues.stream().noneMatch(p -> p.test(propertyWriter));
     }
 }

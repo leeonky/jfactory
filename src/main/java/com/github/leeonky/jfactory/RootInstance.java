@@ -23,7 +23,7 @@ class RootInstance<T> implements Instance<T> {
         return sequence;
     }
 
-    public SubInstance<T> sub(PropertyWriter<?> property) {
+    SubInstance<T> sub(PropertyWriter<?> property) {
         return new SubInstance<>(property, sequence, spec, arguments);
     }
 
@@ -57,7 +57,7 @@ class RootInstance<T> implements Instance<T> {
         return arguments;
     }
 
-    public T cache(Supplier<T> supplier, Consumer<T> operation) {
+    T cache(Supplier<T> supplier, Consumer<T> operation) {
         return valueCache.cache(supplier, operation);
     }
 }

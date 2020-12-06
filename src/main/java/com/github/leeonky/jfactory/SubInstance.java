@@ -12,11 +12,11 @@ public class SubInstance<T> extends RootInstance<T> {
         this.property = property;
     }
 
-    public String propertyInfo() {
+    String propertyInfo() {
         return String.format("%s#%d", property.getName(), getSequence());
     }
 
-    public CollectionInstance<T> inCollection() {
+    CollectionInstance<T> inCollection() {
         return new CollectionInstance<>(emptyList(), property, getSequence(), spec, arguments);
     }
 }
