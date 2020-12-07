@@ -47,7 +47,7 @@ class KeyValue {
     }
 
     private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property) {
-        KeyValueCollection properties = new KeyValueCollection().add(matcher.group(GROUP_CLAUSE), value);
+        KeyValueCollection properties = new KeyValueCollection().append(matcher.group(GROUP_CLAUSE), value);
         TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
                 matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
         return properties.createExpression(property, traitsSpec, value).setIntently(matcher.group(GROUP_INTENTLY) != null);

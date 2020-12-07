@@ -48,6 +48,7 @@ class ObjectFactory<T> implements Factory<T> {
         return constructor.apply(instance);
     }
 
+    @Override
     public BeanClass<T> getType() {
         return type;
     }

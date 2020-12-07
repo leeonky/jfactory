@@ -20,13 +20,11 @@ class FactoryPool {
                 key -> new ObjectFactory<>(BeanClass.create(key), this));
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> SpecClassFactory<T> registerSpecClassFactory(Class<? extends Spec<T>> specClass) {
+    public <T> void registerSpecClassFactory(Class<? extends Spec<T>> specClass) {
         Spec<T> spec = BeanClass.newInstance(specClass);
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
                 type -> new SpecClassFactory<>(queryObjectFactory(spec.getType()), specClass, this));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
-        return (SpecClassFactory<T>) specClassFactory;
     }
 
     @SuppressWarnings("unchecked")

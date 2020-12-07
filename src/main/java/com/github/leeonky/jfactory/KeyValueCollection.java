@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-class KeyValueCollection {
+public class KeyValueCollection {
 
     private final Map<String, KeyValue> keyValues = new LinkedHashMap<>();
 
@@ -19,20 +19,20 @@ class KeyValueCollection {
         keyValues.putAll(another.keyValues);
     }
 
-    public Builder<?> apply(Builder<?> builder) {
+    Builder<?> apply(Builder<?> builder) {
         for (KeyValue keyValue : keyValues.values())
             builder = keyValue.apply(builder);
         return builder;
     }
 
-    public <T> Collection<Expression<T>> expressions(BeanClass<T> type) {
+    <T> Collection<Expression<T>> expressions(BeanClass<T> type) {
         return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type))
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
                 .map(expressions -> expressions.stream().reduce(Expression::merge).get())
                 .collect(Collectors.toList());
     }
 
-    public <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Object value) {
+    <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Object value) {
         return isSingleValue() ? new SingleValueExpression<>(value, traitsSpec, property)
                 : new SubObjectExpression<>(this, traitsSpec, property);
     }
@@ -41,7 +41,7 @@ class KeyValueCollection {
         return keyValues.size() == 1 && keyValues.values().iterator().next().nullKey();
     }
 
-    public KeyValueCollection add(String key, Object value) {
+    public KeyValueCollection append(String key, Object value) {
         keyValues.put(key, new KeyValue(key, value));
         return this;
     }
@@ -62,10 +62,10 @@ class KeyValueCollection {
         return new Matcher<>(type);
     }
 
-    class Matcher<T> {
+    public class Matcher<T> {
         private final Collection<Expression<T>> expressions;
 
-        public Matcher(BeanClass<T> type) {
+        Matcher(BeanClass<T> type) {
             expressions = expressions(type);
         }
 

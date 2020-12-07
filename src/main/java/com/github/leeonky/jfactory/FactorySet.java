@@ -41,8 +41,9 @@ public class FactorySet {
         return new DefaultBuilder<>(factoryPool.createSpecFactory(specClass, trait), this);
     }
 
-    public <T> FactorySet register(Class<? extends Spec<T>> specClass) {
-        factoryPool.registerSpecClassFactory(specClass);
+    @SuppressWarnings("unchecked")
+    public FactorySet register(Class<? extends Spec<?>> specClass) {
+        factoryPool.registerSpecClassFactory((Class) specClass);
         return this;
     }
 

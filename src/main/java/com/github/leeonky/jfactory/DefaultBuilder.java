@@ -80,7 +80,7 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> newBuilder = clone();
-        properties.forEach(newBuilder.properties::add);
+        properties.forEach(newBuilder.properties::append);
         return newBuilder;
     }
 
