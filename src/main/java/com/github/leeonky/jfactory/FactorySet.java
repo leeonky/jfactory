@@ -34,20 +34,30 @@ public class FactorySet {
     }
 
     public <T, S extends Spec<T>> Builder<T> from(Class<S> specClass) {
-        return new DefaultBuilder<>(register(specClass), this);
+        return new DefaultBuilder<>((ObjectFactory<T>) factoryFrom(specClass), this);
     }
 
     public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass, Consumer<S> trait) {
         return new DefaultBuilder<>(factoryPool.createSpecFactory(specClass, trait), this);
     }
 
-    public <T> SpecClassFactory<T> register(Class<? extends Spec<T>> specClass) {
-        return factoryPool.registerSpecClassFactory(specClass);
+    public <T> FactorySet register(Class<? extends Spec<T>> specClass) {
+        factoryPool.registerSpecClassFactory(specClass);
+        return this;
     }
 
     public <T> Builder<T> from(String... traitsAndSpec) {
-        return new DefaultBuilder<T>(factoryPool.querySpecClassFactory(traitsAndSpec[traitsAndSpec.length - 1]), this)
+        return new DefaultBuilder<>((ObjectFactory<T>) factoryFrom(traitsAndSpec[traitsAndSpec.length - 1]), this)
                 .trait(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));
+    }
+
+    public <T> Factory<T> factoryFrom(String specName) {
+        return factoryPool.querySpecClassFactory(specName);
+    }
+
+    public <T> Factory<T> factoryFrom(Class<? extends Spec<T>> specClass) {
+        register(specClass);
+        return factoryPool.querySpecClassFactory(specClass);
     }
 
     public <T> T create(Class<T> type) {

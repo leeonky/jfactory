@@ -36,6 +36,13 @@ class FactoryPool {
         });
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> SpecClassFactory<T> querySpecClassFactory(Class<? extends Spec<T>> specClass) {
+        return (SpecClassFactory<T>) specClassFactoriesWithType.computeIfAbsent(specClass, key -> {
+            throw new IllegalArgumentException("Spec `" + specClass.getName() + "` not exist");
+        });
+    }
+
     public <T> Optional<DefaultValueFactory<T>> queryDefaultValueBuilder(BeanClass<T> type) {
         return defaultValueFactories.query(type.getType());
     }
