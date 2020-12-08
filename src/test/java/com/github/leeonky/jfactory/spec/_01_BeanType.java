@@ -1,9 +1,6 @@
 package com.github.leeonky.jfactory.spec;
 
-import com.github.leeonky.jfactory.DefaultValueFactory;
-import com.github.leeonky.jfactory.FactorySet;
-import com.github.leeonky.jfactory.Spec;
-import com.github.leeonky.jfactory.SubInstance;
+import com.github.leeonky.jfactory.*;
 import com.github.leeonky.util.BeanClass;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -63,7 +60,7 @@ class _01_BeanType {
     @NoArgsConstructor
     @Accessors(chain = true)
     public static class Bean {
-        private String stringValue;
+        private String stringValue, stringValue2;
         private int intValue;
     }
 
@@ -306,6 +303,21 @@ class _01_BeanType {
 
             assertThat(bean)
                     .hasFieldOrPropertyWithValue("stringValue", null);
+        }
+
+        @Test
+        void support_define_default_value_factory_by_property() {
+            Bean bean = factorySet.registerDefaultValueFactory(String.class, new DefaultValueFactories.DefaultStringFactory() {
+                @Override
+                public <T> String create(BeanClass<T> beanType, SubInstance instance) {
+                    if (instance.getProperty().getName().equals("stringValue"))
+                        return "hello";
+                    return super.create(beanType, instance);
+                }
+            }).create(Bean.class);
+
+            assertThat(bean.getStringValue()).isEqualTo("hello");
+            assertThat(bean.getStringValue2()).startsWith("stringValue2");
         }
     }
 }

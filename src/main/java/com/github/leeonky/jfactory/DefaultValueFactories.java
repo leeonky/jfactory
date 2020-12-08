@@ -10,14 +10,14 @@ import java.util.*;
 
 import static java.util.Optional.ofNullable;
 
-class DefaultValueFactories {
+public class DefaultValueFactories {
     private static final LocalDate LOCAL_DATE_START = LocalDate.parse("1996-01-23");
     private static final LocalDateTime LOCAL_DATE_TIME_START = LocalDateTime.parse("1996-01-23T00:00:00");
     private static final LocalTime LOCAL_TIME_START = LocalTime.parse("00:00:00");
     private static final Instant INSTANT_START = Instant.parse("1996-01-23T00:00:00Z");
     private final Map<Class<?>, DefaultValueFactory<?>> defaultValueBuilders = new HashMap<>();
 
-    public DefaultValueFactories() {
+    DefaultValueFactories() {
         register(String.class, new DefaultStringFactory());
         register(Integer.class, new DefaultIntegerFactory());
         register(int.class, defaultValueBuilders.get(Integer.class));
