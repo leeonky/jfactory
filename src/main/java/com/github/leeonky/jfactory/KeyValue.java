@@ -11,9 +11,10 @@ import java.util.regex.Pattern;
 class KeyValue {
     private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
     private static final String PATTERN_COLLECTION_INDEX = "(\\[(\\d+)])?";
-    private static final String PATTERN_TRAIT = "(([^, ]+[, ])([^, ]+[, ])*)?";
-    private static final String PATTERN_SPEC = "(.+)";
-    private static final String PATTERN_CLAUSE = "(\\." + PATTERN_SPEC + ")?";
+    private static final String PATTERN_SPEC_TRAIT_WORD = "[^, )]";
+    private static final String PATTERN_TRAIT = "((" + PATTERN_SPEC_TRAIT_WORD + "+[, ])(" + PATTERN_SPEC_TRAIT_WORD + "+[, ])*)?";
+    private static final String PATTERN_SPEC = "(" + PATTERN_SPEC_TRAIT_WORD + "+)";
+    private static final String PATTERN_CLAUSE = "(\\." + "(.+)" + ")?";
     private static final String PATTERN_TRAIT_SPEC = "(\\(" + PATTERN_TRAIT + PATTERN_SPEC + "\\))?";
     private static final String PATTERN_INTENTLY = "(!)?";
     private static final int GROUP_PROPERTY = 1;

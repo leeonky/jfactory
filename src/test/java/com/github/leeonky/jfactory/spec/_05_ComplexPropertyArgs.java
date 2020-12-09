@@ -431,6 +431,7 @@ class _05_ComplexPropertyArgs {
         }
     }
 
+    //TODO to be removed
     @Nested
     class UniqCreation {
 
@@ -476,6 +477,19 @@ class _05_ComplexPropertyArgs {
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("content", "this is another bean")
                     .hasFieldOrPropertyWithValue("intValue", 200);
+        }
+
+        @Test
+        void use_spec_chain_in_property() {
+            factorySet.register(ABean.class);
+            factorySet.register(ABeans.class);
+
+            BeansWrapper beansWrapper = factorySet.type(BeansWrapper.class)
+                    .property("beans(ABeans).bean(int100 ABean).stringValue", "hello").create();
+
+            assertThat(beansWrapper.getBeans().getBean())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+                    .hasFieldOrPropertyWithValue("intValue", 100);
         }
     }
 }

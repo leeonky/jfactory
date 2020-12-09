@@ -204,6 +204,7 @@ public class DefaultValueFactories {
 
     public static class DefaultEnumFactory implements DefaultValueFactory<Object> {
 
+        // TODO enum for collection element
         @Override
         public <T> Object create(BeanClass<T> beanType, SubInstance<T> instance) {
             Object[] enumConstants = instance.getProperty().getType().getType().getEnumConstants();
