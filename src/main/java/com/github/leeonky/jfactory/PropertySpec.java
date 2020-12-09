@@ -27,6 +27,8 @@ public class PropertySpec<T> {
 
     @SuppressWarnings("unchecked")
     public <V> Spec<T> value(Supplier<V> value) {
+        if (value == null)
+            return value(() -> null);
         return appendProducer((factorySet, producer, property) ->
                 new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getPropertyWriterType(property)));
     }

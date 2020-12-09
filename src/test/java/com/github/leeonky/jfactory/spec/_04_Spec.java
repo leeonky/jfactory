@@ -90,6 +90,16 @@ class _04_Spec {
             Bean bean = factorySet.create(Bean.class);
             assertThat(bean).isEqualTo(bean.getSelf());
         }
+
+        @Test
+        void should_process_null_as_null_value() {
+            factorySet.factory(Bean.class).spec(instance ->
+                    instance.spec().property("content").value(null));
+
+            assertThat(factorySet.create(Bean.class))
+                    .hasFieldOrPropertyWithValue("content", null)
+            ;
+        }
     }
 
     @Nested

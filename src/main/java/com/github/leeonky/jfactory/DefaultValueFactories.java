@@ -207,7 +207,7 @@ public class DefaultValueFactories {
         @Override
         public <T> Object create(BeanClass<T> beanType, SubInstance<T> instance) {
             Object[] enumConstants = instance.getProperty().getType().getType().getEnumConstants();
-            return enumConstants[(instance.getSequence() + 1) % enumConstants.length];
+            return enumConstants[(instance.getSequence() - 1) % enumConstants.length];
         }
     }
 
