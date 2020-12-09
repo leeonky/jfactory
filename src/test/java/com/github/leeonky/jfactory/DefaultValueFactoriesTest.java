@@ -183,7 +183,7 @@ class DefaultValueFactoriesTest {
 
     public static class InvalidGenericArgDefaultValueFactory<V> implements DefaultValueFactory<V> {
         @Override
-        public <T> V create(BeanClass<T> beanType, SubInstance instance) {
+        public <T> V create(BeanClass<T> beanType, SubInstance<T> instance) {
             return null;
         }
     }

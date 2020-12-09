@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 
 import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;
+import static com.github.leeonky.jfactory.spec._01_BeanType.Enums.A;
+import static com.github.leeonky.jfactory.spec._01_BeanType.Enums.B;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -52,6 +54,25 @@ class _01_BeanType {
         assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).create())
                 .hasFieldOrPropertyWithValue("stringValue", "hello")
                 .hasFieldOrPropertyWithValue("intValue", 100);
+    }
+
+    @Test
+    void support_default_enum_value() {
+        FactorySet factorySet = new FactorySet();
+        assertThat(factorySet.create(EnumBean.class))
+                .hasFieldOrPropertyWithValue("enums", A);
+        assertThat(factorySet.create(EnumBean.class))
+                .hasFieldOrPropertyWithValue("enums", B);
+    }
+
+    enum Enums {
+        A, B
+    }
+
+    @Getter
+    @Setter
+    public static class EnumBean {
+        private Enums enums;
     }
 
     @Getter
@@ -287,7 +308,7 @@ class _01_BeanType {
         void support_define_default_value_factory_by_type() {
             Bean bean = factorySet.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
                 @Override
-                public <T> String create(BeanClass<T> beanType, SubInstance instance) {
+                public <T> String create(BeanClass<T> beanType, SubInstance<T> instance) {
                     return "hello";
                 }
             }).create(Bean.class);
@@ -309,7 +330,7 @@ class _01_BeanType {
         void support_define_default_value_factory_by_property() {
             Bean bean = factorySet.registerDefaultValueFactory(String.class, new DefaultValueFactories.DefaultStringFactory() {
                 @Override
-                public <T> String create(BeanClass<T> beanType, SubInstance instance) {
+                public <T> String create(BeanClass<T> beanType, SubInstance<T> instance) {
                     if (instance.getProperty().getName().equals("stringValue"))
                         return "hello";
                     return super.create(beanType, instance);
