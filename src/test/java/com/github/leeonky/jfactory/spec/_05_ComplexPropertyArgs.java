@@ -12,12 +12,18 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.github.leeonky.jfactory.spec._05_ComplexPropertyArgs.Enums.A;
+import static com.github.leeonky.jfactory.spec._05_ComplexPropertyArgs.Enums.B;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class _05_ComplexPropertyArgs {
 
     private FactorySet factorySet = new FactorySet();
+
+    public enum Enums {
+        A, B
+    }
 
     @Getter
     @Setter
@@ -44,6 +50,13 @@ class _05_ComplexPropertyArgs {
     @Accessors(chain = true)
     public static class Strings {
         public String[] strings;
+    }
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class EnumArray {
+        public Enums[] enums;
     }
 
     public static class ABean extends Spec<Bean> {
@@ -338,6 +351,12 @@ class _05_ComplexPropertyArgs {
             ;
 
             assertThat(builder.queryAll()).containsOnly(beanCollection);
+        }
+
+        @Test
+        void should_create_default_enum_value_type_element_when_not_specified() {
+            assertThat(factorySet.type(EnumArray.class).property("enums[1]", B).create().getEnums())
+                    .containsOnly(A, B);
         }
     }
 
