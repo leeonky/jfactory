@@ -55,9 +55,22 @@ class ObjectProducer<T> extends Producer<T> {
     @Override
     protected T produce() {
         return instance.cache(() -> factory.create(instance), obj -> {
-            children.forEach((property, producer) -> getType().setPropertyValue(obj, property, producer.getValue()));
+            produceSubs(obj);
             factorySet.getDataRepository().save(obj);
         });
+    }
+
+    private void produceSubs(T obj) {
+        children.entrySet().stream().filter(this::isDefaultValueProducer).forEach(e -> produceSub(obj, e));
+        children.entrySet().stream().filter(e -> !(isDefaultValueProducer(e))).forEach(e -> produceSub(obj, e));
+    }
+
+    private void produceSub(T obj, Map.Entry<String, Producer<?>> e) {
+        getType().setPropertyValue(obj, e.getKey(), e.getValue().getValue());
+    }
+
+    private boolean isDefaultValueProducer(Map.Entry<String, Producer<?>> e) {
+        return e.getValue() instanceof DefaultValueProducer;
     }
 
     @Override
