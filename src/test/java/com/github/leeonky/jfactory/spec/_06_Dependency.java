@@ -158,7 +158,7 @@ public class _06_Dependency {
             Bean bean = new Bean();
 
             assertThat(factorySet.type(BeanArray.class).property("beans[0]", bean).create().getBeans())
-                    .containsOnly(bean, bean);
+                    .containsExactly(bean, bean);
         }
 
         @Test
@@ -170,7 +170,7 @@ public class _06_Dependency {
             Bean bean = new Bean();
 
             assertThat(factorySet.type(BeanArray.class).property("beans[0]", bean).create().getBeans())
-                    .containsOnly(bean, bean, bean);
+                    .containsExactly(bean, bean, bean);
         }
 
         @Test
@@ -182,7 +182,7 @@ public class _06_Dependency {
             Bean bean = new Bean();
 
             BeanArray beanArray = factorySet.type(BeanArray.class).property("bean", bean).create();
-            assertThat(beanArray.getBeans()).containsOnly(bean, bean);
+            assertThat(beanArray.getBeans()).containsExactly(bean, bean);
             assertThat(beanArray.getBean()).isEqualTo(bean);
         }
 
@@ -198,7 +198,7 @@ public class _06_Dependency {
                 Bean bean = new Bean();
 
                 assertThat(factorySet.type(BeanArray.class).property("beans[0]", bean).create().getBeans())
-                        .containsOnly(bean, bean);
+                        .containsExactly(bean, bean);
             }
 
             @Test
@@ -212,7 +212,7 @@ public class _06_Dependency {
                         .property("beans[0]", bean)
                         .property("beans[1]", null)
                         .create().getBeans())
-                        .containsOnly(bean, null);
+                        .containsExactly(bean, null);
             }
         }
     }
@@ -453,7 +453,7 @@ public class _06_Dependency {
                     .property("beans[0]", bean)
                     .create();
 
-            assertThat(beanArray.getBeans()).containsOnly(bean, null);
+            assertThat(beanArray.getBeans()).containsExactly(bean, null);
         }
 
         @Test

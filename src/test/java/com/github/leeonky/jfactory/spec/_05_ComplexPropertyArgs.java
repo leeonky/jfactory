@@ -267,13 +267,13 @@ class _05_ComplexPropertyArgs {
         @Test
         void support_specify_element_in_property() {
             assertThat(factorySet.type(Strings.class).property("strings[0]", "hello").create().getStrings())
-                    .containsOnly("hello");
+                    .containsExactly("hello");
         }
 
         @Test
         void should_create_default_value_type_element_when_not_specified() {
             assertThat(factorySet.type(Strings.class).property("strings[1]", "hello").create().getStrings())
-                    .containsOnly("strings#1[0]", "hello");
+                    .containsExactly("strings#1[0]", "hello");
         }
 
         @Test
@@ -310,7 +310,7 @@ class _05_ComplexPropertyArgs {
 
             BeanCollection beanCollection = builder.create();
 
-            assertThat(builder.queryAll()).containsOnly(beanCollection);
+            assertThat(builder.queryAll()).containsExactly(beanCollection);
         }
 
         @Test
@@ -330,7 +330,7 @@ class _05_ComplexPropertyArgs {
 
             assertThat(factorySet.type(BeanCollection.class)
                     .property("list[0](int100 long1000 ABean).stringValue", "hello").queryAll())
-                    .containsOnly(beanCollection);
+                    .containsExactly(beanCollection);
         }
 
         @Test
@@ -350,13 +350,13 @@ class _05_ComplexPropertyArgs {
                     .isEqualTo(bean)
             ;
 
-            assertThat(builder.queryAll()).containsOnly(beanCollection);
+            assertThat(builder.queryAll()).containsExactly(beanCollection);
         }
 
         @Test
         void should_create_default_enum_value_type_element_when_not_specified() {
             assertThat(factorySet.type(EnumArray.class).property("enums[1]", B).create().getEnums())
-                    .containsOnly(A, B);
+                    .containsExactly(A, B);
         }
     }
 

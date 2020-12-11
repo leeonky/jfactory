@@ -299,7 +299,7 @@ class _04_Spec {
             Table table = factorySet.create(Table.class);
 
             //TODO use containsSequence
-            assertThat(cached).containsSequence(table, table.getRows().get(0), table.getRows().get(0).getCells().get(0));
+            assertThat(cached).containsExactly(table, table.getRows().get(0), table.getRows().get(0).getCells().get(0));
         }
 
         //TODO one to one reverse association

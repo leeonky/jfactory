@@ -115,7 +115,7 @@ class _02_DataRepo {
 
         Bean bean = factorySet.create(Bean.class);
 
-        assertThat(saved).containsOnly(bean);
+        assertThat(saved).containsExactly(bean);
     }
 
     @Test
@@ -140,7 +140,7 @@ class _02_DataRepo {
 
         BeansWrapper beansWrapper = factorySet.type(BeansWrapper.class).property("beans.bean.stringValue", "hello").create();
 
-        assertThat(saved).containsOnly(beansWrapper.beans.bean, beansWrapper.beans, beansWrapper);
+        assertThat(saved).containsExactly(beansWrapper.beans.bean, beansWrapper.beans, beansWrapper);
     }
 
     @Getter
