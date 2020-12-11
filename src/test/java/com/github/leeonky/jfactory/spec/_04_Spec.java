@@ -59,7 +59,7 @@ class _04_Spec {
     @Setter
     public static class Row {
         private Table table;
-        private List<Cell> cels;
+        private List<Cell> cells;
         private int number;
     }
 
@@ -68,6 +68,20 @@ class _04_Spec {
     public static class Cell {
         private Row row;
         private int value;
+    }
+
+
+    @Getter
+    @Setter
+    public static class Person {
+        private ID id;
+    }
+
+    @Getter
+    @Setter
+    public static class ID {
+        private Person person;
+        private String number;
     }
 
     @Nested
@@ -277,12 +291,31 @@ class _04_Spec {
                     .property("rows[0]").asDefault()
             );
 
+            factorySet.factory(Row.class).spec(instance -> instance.spec()
+                    .property("cells").reverseAssociation("row")
+                    .property("cells[0]").asDefault()
+            );
+
             Table table = factorySet.create(Table.class);
 
             //TODO use containsSequence
-            assertThat(cached).containsSequence(table, table.getRows().get(0));
+            assertThat(cached).containsSequence(table, table.getRows().get(0), table.getRows().get(0).getCells().get(0));
         }
 
         //TODO one to one reverse association
+        @Test
+        void should_support_define_single_reverse_association_in_parent_spec() {
+            factorySet.factory(Person.class).spec(instance -> instance.spec()
+                    .property("id").reverseAssociation("person")
+            );
+
+            Person person = factorySet.type(Person.class)
+                    .property("id.number", "007")
+                    .create();
+
+            assertThat(person.getId())
+                    .hasFieldOrPropertyWithValue("number", "007")
+                    .hasFieldOrPropertyWithValue("person", person);
+        }
     }
 }

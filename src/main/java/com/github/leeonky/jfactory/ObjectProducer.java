@@ -20,6 +20,8 @@ class ObjectProducer<T> extends Producer<T> {
     private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
     private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();
     private final LinkCollection linkCollection = new LinkCollection();
+    private final ListPersistable cachedChildren = new ListPersistable();
+    private Persistable persistable;
 
     public ObjectProducer(FactorySet factorySet, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean intently) {
         super(factory.getType());
@@ -28,15 +30,22 @@ class ObjectProducer<T> extends Producer<T> {
         this.builder = builder;
         this.intently = intently;
         instance = factory.createInstance(builder.getArguments());
+        setPersistable(factorySet.getDataRepository());
         establishDefaultValueProducers();
         builder.establishSpecProducers(this, instance);
         setupReverseAssociations();
     }
 
+    public void setPersistable(Persistable persistable) {
+        this.persistable = persistable;
+    }
+
     private void setupReverseAssociations() {
         reverseAssociations.forEach((child, association) -> {
             cast(child(child), CollectionProducer.class).ifPresent(collectionProducer ->
-                    collectionProducer.setupReverseAssociations(association, instance, factory));
+                    collectionProducer.setupReverseAssociations(association, instance, factory, cachedChildren));
+            cast(child(child), ObjectProducer.class).ifPresent(objectProducer ->
+                    objectProducer.setupReverseAssociation(association, instance, factory, cachedChildren));
         });
     }
 
@@ -65,7 +74,8 @@ class ObjectProducer<T> extends Producer<T> {
     protected T produce() {
         return instance.cache(() -> factory.create(instance), obj -> {
             produceSubs(obj);
-            factorySet.getDataRepository().save(obj);
+            persistable.save(obj);
+            cachedChildren.getAll().forEach(persistable::save);
         });
     }
 
@@ -179,11 +189,10 @@ class ObjectProducer<T> extends Producer<T> {
         reverseAssociations.put(property, association);
     }
 
-    @SuppressWarnings("unchecked")
     //TODO use generic types
     //TODO add type info in instance
-    public void setupReverseAssociation(String association, RootInstance instance, ObjectFactory factory) {
-        addChild(association,
-                new UnFixedValueProducer<>(instance.reference(), factory.getType()));
+    protected <T> void setupReverseAssociation(String association, RootInstance<T> instance, ObjectFactory<T> factory, ListPersistable cachedChildren) {
+        addChild(association, new UnFixedValueProducer<>(instance.reference(), factory.getType()));
+        setPersistable(cachedChildren);
     }
 }
