@@ -115,9 +115,8 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private void forInputProperties(ObjectProducer<T> objectProducer) {
-        properties.expressions(objectFactory.getType()).forEach(exp -> {
-            objectProducer.changeChild(exp.getProperty(), exp.buildProducer(factorySet, objectProducer));
-        });
+        properties.expressions(objectFactory.getType()).forEach(exp ->
+                objectProducer.changeChild(exp.getProperty(), exp.buildProducer(factorySet, objectProducer)));
     }
 
     public DefaultBuilder<T> clone(DefaultBuilder<T> another) {

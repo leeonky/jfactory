@@ -109,6 +109,10 @@ public class PropertySpec<T> {
         return builder.args(spec.params(property.toString())).createProducer(intently);
     }
 
+    public Spec<T> reverseAssociation(String association) {
+        return spec.append((factorySet, objectProducer) -> objectProducer.appendReverseAssociation(property, association));
+    }
+
     @FunctionalInterface
     interface Fuc<P1, P2, P3, R> {
         R apply(P1 p1, P2 p2, P3 p3);

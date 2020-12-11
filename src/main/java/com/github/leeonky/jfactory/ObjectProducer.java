@@ -18,6 +18,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final RootInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
+    private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();
     private final LinkCollection linkCollection = new LinkCollection();
 
     public ObjectProducer(FactorySet factorySet, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean intently) {
@@ -29,6 +30,14 @@ class ObjectProducer<T> extends Producer<T> {
         instance = factory.createInstance(builder.getArguments());
         establishDefaultValueProducers();
         builder.establishSpecProducers(this, instance);
+        setupReverseAssociations();
+    }
+
+    private void setupReverseAssociations() {
+        reverseAssociations.forEach((child, association) -> {
+            cast(child(child), CollectionProducer.class).ifPresent(collectionProducer ->
+                    collectionProducer.setupReverseAssociations(association, instance, factory));
+        });
     }
 
     @Override
@@ -163,10 +172,18 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected Producer<T> changeFrom(ObjectProducer<T> origin) {
-        return origin.clone(builder);
+        return origin.builder.clone(builder).createProducer(origin.intently);
     }
 
-    private Producer<T> clone(DefaultBuilder<T> another) {
-        return builder.clone(another).createProducer(intently);
+    public void appendReverseAssociation(PropertyChain property, String association) {
+        reverseAssociations.put(property, association);
+    }
+
+    @SuppressWarnings("unchecked")
+    //TODO use generic types
+    //TODO add type info in instance
+    public void setupReverseAssociation(String association, RootInstance instance, ObjectFactory factory) {
+        addChild(association,
+                new UnFixedValueProducer<>(instance.reference(), factory.getType()));
     }
 }

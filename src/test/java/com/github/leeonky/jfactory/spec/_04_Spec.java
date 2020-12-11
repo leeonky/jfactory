@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.FactorySet;
+import com.github.leeonky.jfactory.MemoryDataRepository;
 import com.github.leeonky.jfactory.Spec;
 import com.github.leeonky.jfactory.Trait;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -49,13 +51,22 @@ class _04_Spec {
     @Getter
     @Setter
     public static class Table {
-        private ArrayList<Row> rows;
+        private List<Row> rows;
+        private String name;
     }
 
     @Getter
     @Setter
     public static class Row {
         private Table table;
+        private List<Cell> cels;
+        private int number;
+    }
+
+    @Getter
+    @Setter
+    public static class Cell {
+        private Row row;
         private int value;
     }
 
@@ -185,7 +196,7 @@ class _04_Spec {
         @Test
         void support_define_collection_element_spec() {
             factorySet.factory(Table.class).spec(instance ->
-                    instance.spec().property("rows[0]").asDefault(builder -> builder.property("value", 100)));
+                    instance.spec().property("rows[0]").asDefault(builder -> builder.property("number", 100)));
 
             Table table = factorySet.create(Table.class);
 
@@ -193,7 +204,7 @@ class _04_Spec {
                     .hasSize(1);
 
             assertThat(table.getRows().get(0))
-                    .hasFieldOrPropertyWithValue("value", 100);
+                    .hasFieldOrPropertyWithValue("number", 100);
         }
 
         @Test
@@ -225,5 +236,53 @@ class _04_Spec {
             assertThat(assertThrows(IllegalArgumentException.class, () -> factorySet.create(Beans.class)))
                     .hasMessageContaining("Not support property chain 'bean.intValue' in current operation");
         }
+    }
+
+    @Nested
+    class SupportReverseAssociation {
+
+        @Test
+        void should_support_define_collection_element_reverse_association_in_parent_spec() {
+            factorySet.factory(Table.class).spec(instance -> instance.spec()
+                    .property("rows").reverseAssociation("table")
+            );
+
+            Table table = factorySet.type(Table.class)
+                    .property("name", "a table")
+                    .property("rows[0].number", 1)
+                    .create();
+
+            assertThat(table)
+                    .hasFieldOrPropertyWithValue("name", "a table");
+            assertThat(table.getRows())
+                    .hasSize(1);
+            assertThat(table.getRows().get(0))
+                    .hasFieldOrPropertyWithValue("table", table)
+                    .hasFieldOrPropertyWithValue("number", 1);
+        }
+
+        @Test
+        void should_save_parent_bean_first() {
+            List<Object> cached = new ArrayList<>();
+            factorySet = new FactorySet(new MemoryDataRepository() {
+                @Override
+                public void save(Object object) {
+                    super.save(object);
+                    cached.add(object);
+                }
+            });
+
+            factorySet.factory(Table.class).spec(instance -> instance.spec()
+                    .property("rows").reverseAssociation("table")
+                    .property("rows[0]").asDefault()
+            );
+
+            Table table = factorySet.create(Table.class);
+
+            //TODO use containsSequence
+            assertThat(cached).containsSequence(table, table.getRows().get(0));
+        }
+
+        //TODO one to one reverse association
     }
 }
