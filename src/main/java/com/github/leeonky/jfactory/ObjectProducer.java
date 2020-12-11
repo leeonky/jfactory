@@ -4,12 +4,9 @@ import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
-import static com.github.leeonky.util.BeanClass.cast;
 import static com.github.leeonky.util.BeanClass.create;
-import static java.util.stream.Collectors.*;
 
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
@@ -96,10 +93,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     public ObjectProducer<T> doDependenciesAndLinks() {
         doDependencies();
-        getAllChildren().values().forEach(Producer::checkChange);
         doLinks(this, createChain(""));
-        getAllChildren().values().forEach(Producer::checkChange);
-        uniqSameSubObjectProducer();
         return this;
     }
 
@@ -107,52 +101,16 @@ class ObjectProducer<T> extends Producer<T> {
     protected void doLinks(Producer<?> root, PropertyChain current) {
         children.forEach((property, producer) -> producer.doLinks(root, current.concat(property)));
         linkCollection.processLinks(root, current);
-        beforeCheckChange();
-    }
-
-    private void uniqSameSubObjectProducer() {
-        getAllChildren().entrySet().stream()
-                .filter(e -> e.getValue() instanceof ObjectProducer)
-                .collect(Collectors.groupingBy(Map.Entry::getValue, mapping(Map.Entry::getKey, toList())))
-                .forEach((_ignore, properties) -> link(properties));
-        doLinks(this, createChain(""));
     }
 
     @Override
     protected void doDependencies() {
         children.values().forEach(Producer::doDependencies);
         dependencies.values().forEach(dependency -> dependency.process(this));
-        beforeCheckChange();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(ObjectProducer.class, factory, builder.hashCode(), uniqHashWhenChange(), uniqHashWhenIntently());
-    }
-
-    private Object uniqHashWhenIntently() {
-        return intently ? new Object() : false;
-    }
-
-    private Object uniqHashWhenChange() {
-        return isNotChange() ? true : new Object();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return cast(obj, ObjectProducer.class)
-                .map(another -> factory.equals(another.factory) && builder.equals(another.builder)
-                        && isNotChange() && another.isNotChange() && !intently && !another.intently)
-                .orElseGet(() -> super.equals(obj));
     }
 
     public void link(List<PropertyChain> properties) {
         linkCollection.link(properties);
-    }
-
-    @Override
-    public Map<PropertyChain, Producer<?>> children() {
-        return children.entrySet().stream().collect(toMap(e -> createChain(e.getKey()), Map.Entry::getValue));
     }
 
     private void establishDefaultValueProducers() {

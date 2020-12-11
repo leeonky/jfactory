@@ -3,15 +3,13 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
-import static com.github.leeonky.jfactory.PropertyChain.createChain;
 import static java.lang.Integer.valueOf;
-import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
 
 class CollectionProducer<T, C> extends Producer<C> {
@@ -59,12 +57,6 @@ class CollectionProducer<T, C> extends Producer<C> {
         int index = valueOf(property);
         fillCollectionWithDefaultValue(index);
         return children.get(index);
-    }
-
-    @Override
-    public Map<PropertyChain, Producer<?>> children() {
-        Iterator<Integer> index = Stream.iterate(0, i -> i + 1).iterator();
-        return children.stream().collect(toMap(p -> createChain(index.next().toString()), identity()));
     }
 
     @Override

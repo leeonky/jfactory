@@ -450,33 +450,6 @@ class _05_ComplexPropertyArgs {
         }
     }
 
-    //TODO to be removed
-    @Nested
-    class UniqCreation {
-
-        @Test
-        void uniq_build_in_nested_duplicated_object_creation() {
-            BeansPair beansPair = factorySet.type(BeansPair.class)
-                    .property("beans1.bean.stringValue", "hello")
-                    .property("beans2.bean.stringValue", "hello")
-                    .create();
-
-            assertThat(factorySet.type(Bean.class).queryAll()).hasSize(1);
-            assertThat(beansPair.beans1).isEqualTo(beansPair.beans2);
-        }
-
-        @Test
-        void uniq_build_in_collection_element_duplicated_object_creation() {
-            BeanArray beanArray = factorySet.type(BeanArray.class)
-                    .property("beanArray[0].stringValue", "hello")
-                    .property("beanArray[1].stringValue", "hello")
-                    .create();
-
-            assertThat(factorySet.type(Bean.class).queryAll()).hasSize(1);
-            assertThat(beanArray.beanArray[0]).isEqualTo(beanArray.beanArray[1]);
-        }
-    }
-
     @Nested
     class OverrideDefinition {
 

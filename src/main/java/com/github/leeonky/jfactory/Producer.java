@@ -3,7 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
-import java.util.*;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -14,8 +14,6 @@ import static java.util.function.Function.identity;
 abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
-    private Set<Producer<?>> cachedAllChildren;
-    private boolean notChange = true;
 
     protected Producer(BeanClass<T> type) {
         this.type = type;
@@ -67,32 +65,6 @@ abstract class Producer<T> {
     public <T> void changeChild(String property, Producer<T> producer) {
         Producer<T> origin = (Producer<T>) childOrDefault(property);
         addChild(property, origin == null ? producer : origin.changeTo(producer));
-    }
-
-    public Map<PropertyChain, Producer<?>> children() {
-        return new HashMap<>();
-    }
-
-    public Map<PropertyChain, Producer<?>> getAllChildren() {
-        Map<PropertyChain, Producer<?>> allChildren = new HashMap<>();
-        children().forEach((propertyChain, producer) -> {
-            allChildren.put(propertyChain, producer);
-            producer.getAllChildren().forEach((subChain, subProducer) ->
-                    allChildren.put(propertyChain.concat(subChain), subProducer));
-        });
-        return allChildren;
-    }
-
-    public void beforeCheckChange() {
-        cachedAllChildren = new LinkedHashSet<>(getAllChildren().values());
-    }
-
-    public void checkChange() {
-        notChange = notChange && Objects.equals(cachedAllChildren, new LinkedHashSet<>(getAllChildren().values()));
-    }
-
-    public boolean isNotChange() {
-        return notChange;
     }
 
     public BeanClass<?> getPropertyWriterType(String property) {
