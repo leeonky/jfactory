@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
 import static com.github.leeonky.util.BeanClass.cast;
+import static com.github.leeonky.util.BeanClass.create;
 import static java.util.stream.Collectors.*;
 
 class ObjectProducer<T> extends Producer<T> {
@@ -30,23 +31,15 @@ class ObjectProducer<T> extends Producer<T> {
         this.builder = builder;
         this.intently = intently;
         instance = factory.createInstance(builder.getArguments());
-        setPersistable(factorySet.getDataRepository());
+        persistable = factorySet.getDataRepository();
         establishDefaultValueProducers();
         builder.establishSpecProducers(this, instance);
         setupReverseAssociations();
     }
 
-    public void setPersistable(Persistable persistable) {
-        this.persistable = persistable;
-    }
-
     private void setupReverseAssociations() {
-        reverseAssociations.forEach((child, association) -> {
-            cast(child(child), CollectionProducer.class).ifPresent(collectionProducer ->
-                    collectionProducer.setupReverseAssociations(association, instance, factory, cachedChildren));
-            cast(child(child), ObjectProducer.class).ifPresent(objectProducer ->
-                    objectProducer.setupReverseAssociation(association, instance, factory, cachedChildren));
-        });
+        reverseAssociations.forEach((child, association) ->
+                child(child).setupAssociation(association, instance, cachedChildren));
     }
 
     @Override
@@ -189,10 +182,9 @@ class ObjectProducer<T> extends Producer<T> {
         reverseAssociations.put(property, association);
     }
 
-    //TODO use generic types
-    //TODO add type info in instance
-    protected <T> void setupReverseAssociation(String association, RootInstance<T> instance, ObjectFactory<T> factory, ListPersistable cachedChildren) {
-        addChild(association, new UnFixedValueProducer<>(instance.reference(), factory.getType()));
-        setPersistable(cachedChildren);
+    @Override
+    protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
+        addChild(association, new UnFixedValueProducer<>(instance.reference(), create(instance.spec().getType())));
+        persistable = cachedChildren;
     }
 }

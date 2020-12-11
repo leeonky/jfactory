@@ -298,11 +298,9 @@ class _04_Spec {
 
             Table table = factorySet.create(Table.class);
 
-            //TODO use containsSequence
             assertThat(cached).containsExactly(table, table.getRows().get(0), table.getRows().get(0).getCells().get(0));
         }
 
-        //TODO one to one reverse association
         @Test
         void should_support_define_single_reverse_association_in_parent_spec() {
             factorySet.factory(Person.class).spec(instance -> instance.spec()

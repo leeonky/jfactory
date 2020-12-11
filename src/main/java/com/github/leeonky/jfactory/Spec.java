@@ -14,6 +14,7 @@ import static java.util.stream.Stream.of;
 public class Spec<T> {
     private List<BiConsumer<FactorySet, ObjectProducer<T>>> operations = new ArrayList<>();
     private Instance<T> instance;
+    private Class<T> type = null;
 
     public void main() {
     }
@@ -29,13 +30,15 @@ public class Spec<T> {
 
     void apply(FactorySet factorySet, ObjectProducer<T> producer) {
         operations.forEach(o -> o.accept(factorySet, producer));
+        type = producer.getType().getType();
     }
 
     @SuppressWarnings("unchecked")
-    protected Class<T> getType() {
-        return (Class<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
-                .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"))
-                .getType();
+    public Class<T> getType() {
+        return getClass().equals(Spec.class) ? type :
+                (Class<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
+                        .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"))
+                        .getType();
     }
 
     protected String getName() {

@@ -114,4 +114,7 @@ abstract class Producer<T> {
     protected Producer<T> changeFrom(ObjectProducer<T> producer) {
         return this;
     }
+
+    protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
+    }
 }

@@ -22,7 +22,7 @@ class CollectionInstance<T> extends SubInstance<T> {
     }
 
     public CollectionInstance<T> element(int index) {
-        CollectionInstance<T> collection = new CollectionInstance<>(indexes, getProperty(), sequence, spec, arguments);
+        CollectionInstance<T> collection = new CollectionInstance<>(indexes, getProperty(), getSequence(), spec, arguments);
         collection.indexes.add(index);
         return collection;
     }

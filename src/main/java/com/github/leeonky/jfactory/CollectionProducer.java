@@ -83,9 +83,10 @@ class CollectionProducer<T, C> extends Producer<C> {
         return subDefaultValueProducerFactory.apply(property.getName());
     }
 
-    protected <T> void setupReverseAssociations(String association, RootInstance<T> instance, ObjectFactory<T> factory, ListPersistable cachedChildren) {
+    @Override
+    protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
         children.stream().filter(ObjectProducer.class::isInstance).map(ObjectProducer.class::cast).forEach(objectProducer ->
-                objectProducer.setupReverseAssociation(association, instance, factory, cachedChildren));
+                objectProducer.setupAssociation(association, instance, cachedChildren));
 
     }
 }

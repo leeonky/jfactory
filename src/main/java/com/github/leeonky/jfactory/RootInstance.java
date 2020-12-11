@@ -7,9 +7,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 class RootInstance<T> implements Instance<T> {
-    protected final int sequence;
     protected final Spec<T> spec;
     protected final DefaultArguments arguments;
+    private final int sequence;
     private final ValueCache<T> valueCache = new ValueCache<>();
 
     public RootInstance(int sequence, Spec<T> spec, DefaultArguments arguments) {
