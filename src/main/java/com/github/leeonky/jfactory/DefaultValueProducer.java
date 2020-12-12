@@ -16,4 +16,14 @@ class DefaultValueProducer<V> extends Producer<V> {
     protected V produce() {
         return value.get();
     }
+
+    @Override
+    protected Producer<V> changeFrom(Producer<V> producer) {
+        return producer.changeTo(this);
+    }
+
+    @Override
+    protected Producer<V> changeTo(DefaultValueProducer<V> newProducer) {
+        return newProducer;
+    }
 }

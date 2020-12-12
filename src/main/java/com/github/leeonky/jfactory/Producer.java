@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import static com.github.leeonky.jfactory.Linker.Reference.defaultLinkerReference;
 import static java.util.function.Function.identity;
 
-//TODO too many child access method
+//TODO too many child access method: get getOptional getOrDefault add change...
 abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
@@ -51,10 +51,6 @@ abstract class Producer<T> {
                 .orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)), identity());
     }
 
-    protected Producer<T> changeTo(Producer<T> newProducer) {
-        return newProducer;
-    }
-
     public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerFactory) {
         String lastProperty = property.tail();
         property.removeTail().access(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(nextToLast ->
@@ -83,7 +79,19 @@ abstract class Producer<T> {
         return this;
     }
 
+    protected Producer<T> changeTo(Producer<T> newProducer) {
+        return newProducer.changeFrom(this);
+    }
+
+    protected Producer<T> changeFrom(Producer<T> producer) {
+        return this;
+    }
+
     protected Producer<T> changeFrom(ObjectProducer<T> producer) {
+        return this;
+    }
+
+    protected Producer<T> changeTo(DefaultValueProducer<T> newProducer) {
         return this;
     }
 

@@ -159,6 +159,18 @@ class _04_Spec {
                     .hasFieldOrPropertyWithValue("stringValue", null)
             ;
         }
+
+        @Test
+        void default_value_should_only_override_default_value_spec() {
+            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("stringValue").value("hello")
+                    .property("stringValue").asDefaultValue(instance.getSequence())
+            );
+
+            assertThat(factorySet.create(Bean.class))
+                    .hasFieldOrPropertyWithValue("stringValue", "hello")
+            ;
+        }
     }
 
     @Nested
