@@ -22,10 +22,10 @@ class CollectionProducer<T, C> extends Producer<C> {
         super(collectionType);
         CollectionInstance<T> collection = instance.inCollection();
         BeanClass<?> elementType = collectionType.getElementType();
-        placeholderFactory = index -> new DefaultValueProducer<>(parentType,
+        placeholderFactory = index -> new DefaultValueFactoryProducer<>(parentType,
                 factoryPool.getDefaultValueBuilder(elementType), collection.element(index));
         subDefaultValueProducerFactory = index -> factoryPool.queryDefaultValueBuilder(elementType)
-                .map(builder -> new DefaultValueProducer<>(parentType, builder, collection.element(valueOf(index))));
+                .map(builder -> new DefaultValueFactoryProducer<>(parentType, builder, collection.element(valueOf(index))));
     }
 
     @Override

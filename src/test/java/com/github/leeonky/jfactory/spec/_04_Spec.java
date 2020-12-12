@@ -128,6 +128,40 @@ class _04_Spec {
     }
 
     @Nested
+    class SpecifyDefaultValue {
+
+        @Test
+        void support_specify_property_default_value() {
+            factorySet.factory(Bean.class).spec(instance ->
+                    instance.spec().property("stringValue").asDefaultValue(instance.getSequence()));
+
+            assertThat(factorySet.create(Bean.class))
+                    .hasFieldOrPropertyWithValue("stringValue", "1")
+            ;
+        }
+
+        @Test
+        void support_specify_property_default_value_supplier() {
+            factorySet.factory(Bean.class).spec(instance ->
+                    instance.spec().property("stringValue").asDefaultValue(instance::getSequence));
+
+            assertThat(factorySet.create(Bean.class))
+                    .hasFieldOrPropertyWithValue("stringValue", "1")
+            ;
+        }
+
+        @Test
+        void support_specify_property_default_value_with_null() {
+            factorySet.factory(Bean.class).spec(instance ->
+                    instance.spec().property("stringValue").asDefaultValue(null));
+
+            assertThat(factorySet.create(Bean.class))
+                    .hasFieldOrPropertyWithValue("stringValue", null)
+            ;
+        }
+    }
+
+    @Nested
     class SpecifySpec {
 
         @Test

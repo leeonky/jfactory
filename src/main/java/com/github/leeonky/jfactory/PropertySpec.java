@@ -49,6 +49,19 @@ public class PropertySpec<T> {
         return appendProducer(factorySet -> createProducer(intently, factorySet.from(specClass)));
     }
 
+    //TODO should not override other producer(only override default value producer)
+    public Spec<T> asDefaultValue(Object value) {
+        return asDefaultValue(() -> value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V> Spec<T> asDefaultValue(Supplier<V> supplier) {
+        if (supplier == null)
+            return asDefaultValue((Object) null);
+        return appendProducer((factorySet, producer, property) ->
+                new DefaultValueProducer(producer.getPropertyWriterType(property), supplier));
+    }
+
     public Spec<T> from(String... traitsAndSpec) {
         return from(false, traitsAndSpec);
     }

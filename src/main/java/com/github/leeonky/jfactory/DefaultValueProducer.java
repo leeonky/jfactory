@@ -2,20 +2,18 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-class DefaultValueProducer<T, V> extends Producer<V> {
-    private final BeanClass<T> beanType;
-    private final DefaultValueFactory<V> builder;
-    private final SubInstance<T> instance;
+import java.util.function.Supplier;
 
-    public DefaultValueProducer(BeanClass<T> beanType, DefaultValueFactory<V> builder, SubInstance<T> instance) {
-        super(BeanClass.create(builder.getType()));
-        this.beanType = beanType;
-        this.builder = builder;
-        this.instance = instance;
+class DefaultValueProducer<V> extends Producer<V> {
+    private final Supplier<V> value;
+
+    public DefaultValueProducer(BeanClass<V> type, Supplier<V> value) {
+        super(type);
+        this.value = value;
     }
 
     @Override
     protected V produce() {
-        return builder.create(beanType, instance);
+        return value.get();
     }
 }

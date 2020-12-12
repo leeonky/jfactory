@@ -79,7 +79,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private boolean isDefaultValueProducer(Map.Entry<String, Producer<?>> e) {
-        return e.getValue() instanceof DefaultValueProducer;
+        return e.getValue() instanceof DefaultValueFactoryProducer;
     }
 
     @Override
@@ -123,7 +123,7 @@ class ObjectProducer<T> extends Producer<T> {
     @Override
     public Optional<Producer> subDefaultValueProducer(PropertyWriter<?> property) {
         return factory.getFactoryPool().queryDefaultValueBuilder(property.getType())
-                .map(builder -> new DefaultValueProducer<>(getType(), builder, instance.sub(property)));
+                .map(builder -> new DefaultValueFactoryProducer<>(getType(), builder, instance.sub(property)));
     }
 
     @Override
