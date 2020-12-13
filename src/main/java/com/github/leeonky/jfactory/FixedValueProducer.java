@@ -16,7 +16,7 @@ class FixedValueProducer<T> extends Producer<T> {
     }
 
     @Override
-    protected Producer<T> changeTo(Producer<T> newProducer) {
+    public Producer<T> changeTo(Producer<T> newProducer) {
         //always return current fixed value producer
         return this;
     }

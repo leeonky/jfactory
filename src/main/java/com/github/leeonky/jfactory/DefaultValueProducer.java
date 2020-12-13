@@ -26,4 +26,9 @@ class DefaultValueProducer<V> extends Producer<V> {
     protected Producer<V> changeTo(DefaultValueProducer<V> newProducer) {
         return newProducer;
     }
+
+    @Override
+    protected Producer<V> changeFrom(ObjectProducer<V> producer) {
+        return producer;
+    }
 }

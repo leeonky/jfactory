@@ -127,7 +127,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    protected Producer<T> changeTo(Producer<T> newProducer) {
+    public Producer<T> changeTo(Producer<T> newProducer) {
         return newProducer.changeFrom(this);
     }
 

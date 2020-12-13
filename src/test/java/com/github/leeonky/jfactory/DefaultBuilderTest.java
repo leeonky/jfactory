@@ -22,7 +22,7 @@ class DefaultBuilderTest {
     }
 
     private Builder<?> builder(Class<?> type, String value, String trait) {
-        return factorySet.type(type).property("stringValue", value).trait(trait);
+        return factorySet.type(type).property("defaultString1", value).trait(trait);
     }
 
     @Getter
