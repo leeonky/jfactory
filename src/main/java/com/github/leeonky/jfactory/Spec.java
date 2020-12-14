@@ -71,4 +71,8 @@ public class Spec<T> {
     public Arguments params() {
         return instance.params();
     }
+
+    public Instance<T> instance() {
+        return instance;
+    }
 }
