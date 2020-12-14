@@ -22,7 +22,7 @@ class SingleValueExpression<P> extends Expression<P> {
     @Override
     public Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent) {
         if (intently)
-            return traitsSpec.toBuilder(factorySet, property.getWriterType()).createProducer(true);
+            return traitsSpec.toBuilder(factorySet, property.getWriterType()).createProducer();
         return new FixedValueProducer<>(property.getWriterType(), value);
     }
 

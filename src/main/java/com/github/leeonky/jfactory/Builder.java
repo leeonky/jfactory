@@ -23,7 +23,7 @@ public interface Builder<T> {
 
     Builder<T> trait(String... traits);
 
-    Producer<T> createProducer(boolean intently);
+    Producer<T> createProducer();
 
     Builder<T> arg(String key, Object value);
 

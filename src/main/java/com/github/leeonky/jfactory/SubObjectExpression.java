@@ -23,7 +23,7 @@ class SubObjectExpression<P> extends Expression<P> {
     @Override
     public Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent) {
         return query(factorySet).<Producer<?>>map(object -> new FixedValueProducer<>(property.getWriterType(), object))
-                .orElseGet(() -> toBuilder(factorySet, property.getWriterType()).createProducer(intently));
+                .orElseGet(() -> toBuilder(factorySet, property.getWriterType()).createProducer());
     }
 
     private Optional<?> query(FactorySet factorySet) {

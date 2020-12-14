@@ -25,12 +25,12 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        return createProducer(false).doDependenciesAndLinks().getValue();
+        return createProducer().doDependenciesAndLinks().getValue();
     }
 
     @Override
-    public ObjectProducer<T> createProducer(boolean intently) {
-        return new ObjectProducer<>(factorySet, objectFactory, this, intently);
+    public ObjectProducer<T> createProducer() {
+        return new ObjectProducer<>(factorySet, objectFactory, this);
     }
 
     @Override

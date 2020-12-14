@@ -12,7 +12,6 @@ class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
     private final FactorySet factorySet;
     private final DefaultBuilder<T> builder;
-    private final boolean intently;
     private final RootInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
@@ -21,12 +20,11 @@ class ObjectProducer<T> extends Producer<T> {
     private final ListPersistable cachedChildren = new ListPersistable();
     private Persistable persistable;
 
-    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean intently) {
+    public ObjectProducer(FactorySet factorySet, ObjectFactory<T> factory, DefaultBuilder<T> builder) {
         super(factory.getType());
         this.factory = factory;
         this.factorySet = factorySet;
         this.builder = builder;
-        this.intently = intently;
         instance = factory.createInstance(builder.getArguments());
         persistable = factorySet.getDataRepository();
         establishDefaultValueProducers();
@@ -133,7 +131,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected Producer<T> changeFrom(ObjectProducer<T> origin) {
-        return origin.builder.clone(builder).createProducer(origin.intently);
+        return origin.builder.clone(builder).createProducer();
     }
 
     public void appendReverseAssociation(PropertyChain property, String association) {

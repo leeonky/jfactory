@@ -118,7 +118,7 @@ public class PropertySpec<T> {
     }
 
     private <V> Producer<V> createProducer(boolean intently, Builder<V> builder) {
-        return builder.args(spec.params(property.toString())).createProducer(intently);
+        return builder.args(spec.params(property.toString())).createProducer();
     }
 
     public Spec<T> reverseAssociation(String association) {
