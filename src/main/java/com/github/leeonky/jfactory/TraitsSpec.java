@@ -43,7 +43,7 @@ class TraitsSpec {
     }
 
     public Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-        return (spec != null ? factorySet.from(spec) : factorySet.type(propertyType.getType()))
+        return (spec != null ? factorySet.spec(spec) : factorySet.type(propertyType.getType()))
                 .trait(traits);
     }
 

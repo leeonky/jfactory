@@ -33,8 +33,8 @@ public class FactorySet {
         return new DefaultBuilder<>(factoryPool.queryObjectFactory(type), this);
     }
 
-    public <T, S extends Spec<T>> Builder<T> from(Class<S> specClass) {
-        return new DefaultBuilder<>((ObjectFactory<T>) factoryFrom(specClass), this);
+    public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass) {
+        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specClass), this);
     }
 
     public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass, Consumer<S> trait) {
@@ -47,16 +47,16 @@ public class FactorySet {
         return this;
     }
 
-    public <T> Builder<T> from(String... traitsAndSpec) {
-        return new DefaultBuilder<>((ObjectFactory<T>) factoryFrom(traitsAndSpec[traitsAndSpec.length - 1]), this)
+    public <T> Builder<T> spec(String... traitsAndSpec) {
+        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(traitsAndSpec[traitsAndSpec.length - 1]), this)
                 .trait(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));
     }
 
-    public <T> Factory<T> factoryFrom(String specName) {
+    public <T> Factory<T> specFactory(String specName) {
         return factoryPool.querySpecClassFactory(specName);
     }
 
-    public <T> Factory<T> factoryFrom(Class<? extends Spec<T>> specClass) {
+    public <T> Factory<T> specFactory(Class<? extends Spec<T>> specClass) {
         register(specClass);
         return factoryPool.querySpecClassFactory(specClass);
     }
@@ -65,16 +65,16 @@ public class FactorySet {
         return type(type).create();
     }
 
-    public <T, S extends Spec<T>> T createFrom(Class<S> spec) {
-        return from(spec).create();
+    public <T, S extends Spec<T>> T createAs(Class<S> spec) {
+        return spec(spec).create();
     }
 
-    public <T, S extends Spec<T>> T createFrom(Class<S> spec, Consumer<S> trait) {
+    public <T, S extends Spec<T>> T createAs(Class<S> spec, Consumer<S> trait) {
         return spec(spec, trait).create();
     }
 
-    public <T> T create(String... traitsAndSpec) {
-        return this.<T>from(traitsAndSpec).create();
+    public <T> T createAs(String... traitsAndSpec) {
+        return this.<T>spec(traitsAndSpec).create();
     }
 
     public <T> FactorySet registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {

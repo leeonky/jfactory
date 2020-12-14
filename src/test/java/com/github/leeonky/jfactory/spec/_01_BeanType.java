@@ -180,7 +180,7 @@ class _01_BeanType {
                 factorySet.factory(Bean.class).spec(instance -> instance.spec()
                         .property("stringValue").value((Object) instance.param("p")));
 
-                assertThat(factorySet.from(ABeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                assertThat(factorySet.spec(ABeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
 
             }
@@ -204,7 +204,7 @@ class _01_BeanType {
             @Test
             void pass_arg_to_nested_spec_with_spec_class() {
                 factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                        .property("bean").from(ABean.class));
+                        .property("bean").as(ABean.class));
 
                 assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
@@ -213,7 +213,7 @@ class _01_BeanType {
             @Test
             void pass_arg_to_nested_spec_with_spec_instance() {
                 factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                        .property("bean").spec(ABean.class, spec -> {
+                        .property("bean").as(ABean.class, spec -> {
                         }));
 
                 assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
@@ -225,7 +225,7 @@ class _01_BeanType {
                 factorySet.register(ABean.class);
 
                 factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                        .property("bean").from("ABean"));
+                        .property("bean").as("ABean"));
 
                 assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
@@ -236,7 +236,7 @@ class _01_BeanType {
                 factorySet.register(ABean.class);
 
                 factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                        .property("bean").from(ABean.class, builder -> builder.property("intValue", 1)));
+                        .property("bean").asWith(ABean.class, builder -> builder.property("intValue", 1)));
 
                 assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");

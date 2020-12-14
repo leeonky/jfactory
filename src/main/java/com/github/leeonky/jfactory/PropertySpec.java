@@ -33,12 +33,12 @@ public class PropertySpec<T> {
                 new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getPropertyWriterType(property)));
     }
 
-    public <V, S extends Spec<V>> Spec<T> spec(Class<S> specClass, Consumer<S> trait) {
+    public <V, S extends Spec<V>> Spec<T> as(Class<S> specClass, Consumer<S> trait) {
         return appendProducer(factorySet -> createProducer(factorySet.spec(specClass, trait)));
     }
 
-    public <V> Spec<T> from(Class<? extends Spec<V>> specClass) {
-        return appendProducer(factorySet -> createProducer(factorySet.from(specClass)));
+    public <V> Spec<T> as(Class<? extends Spec<V>> specClass) {
+        return appendProducer(factorySet -> createProducer(factorySet.spec(specClass)));
     }
 
     public Spec<T> asDefaultValue(Object value) {
@@ -53,12 +53,12 @@ public class PropertySpec<T> {
                 new DefaultValueProducer(producer.getPropertyWriterType(property), supplier));
     }
 
-    public Spec<T> from(String... traitsAndSpec) {
-        return appendProducer(factorySet -> createProducer(factorySet.from(traitsAndSpec)));
+    public Spec<T> as(String... traitsAndSpec) {
+        return appendProducer(factorySet -> createProducer(factorySet.spec(traitsAndSpec)));
     }
 
-    public <V> Spec<T> from(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
-        return appendProducer(factorySet -> createProducer(builder.apply(factorySet.from(specClass))));
+    public <V> Spec<T> asWith(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
+        return appendProducer(factorySet -> createProducer(builder.apply(factorySet.spec(specClass))));
     }
 
     public Spec<T> asDefault() {
@@ -98,7 +98,7 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> reverseAssociation(String association) {
-        return spec.append((factorySet, objectProducer) -> objectProducer.appendReverseAssociation(property, association));
+        return spec.append((factorySet, producer) -> producer.appendReverseAssociation(property, association));
     }
 
     @FunctionalInterface

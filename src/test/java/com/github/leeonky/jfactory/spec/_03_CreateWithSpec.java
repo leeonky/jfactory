@@ -104,18 +104,18 @@ public class _03_CreateWithSpec {
 
         @Test
         void support_define_spec_in_class() {
-            assertThat(factorySet.from(ABean.class).trait("int100", "hello").create())
+            assertThat(factorySet.spec(ABean.class).trait("int100", "hello").create())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
 
-            assertThat(factorySet.createFrom(ABean.class))
+            assertThat(factorySet.createAs(ABean.class))
                     .hasFieldOrPropertyWithValue("content", "this is a bean");
         }
 
         @Test
         void support_pass_spec_arg_in_java_code() {
-            assertThat(factorySet.createFrom(ABean.class, spec -> spec.int100().strHello()))
+            assertThat(factorySet.createAs(ABean.class, spec -> spec.int100().strHello()))
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
@@ -127,28 +127,28 @@ public class _03_CreateWithSpec {
             factorySet.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> instance.spec()
                     .property("intValue").value(50));
 
-            assertThat(factorySet.createFrom(ABean.class))
+            assertThat(factorySet.createAs(ABean.class))
                     .isInstanceOf(BeanSub.class)
                     .hasFieldOrPropertyWithValue("intValue", 50);
         }
 
         @Test
         void support_build_through_spec_name() {
-            factorySet.from(ABean.class);
+            factorySet.spec(ABean.class);
 
-            assertThat((Bean) factorySet.create("hello", "ABean"))
+            assertThat((Bean) factorySet.createAs("hello", "ABean"))
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
 
         @Test
         void should_raise_error_when_definition_or_trait_not_exist() {
-            assertThrows(IllegalArgumentException.class, () -> factorySet.create("ABean"));
+            assertThrows(IllegalArgumentException.class, () -> factorySet.createAs("ABean"));
         }
 
         @Test
         void should_raise_error_when_invalid_generic_args() {
-            assertThrows(IllegalStateException.class, () -> factorySet.createFrom(InvalidGenericArgSpec.class));
+            assertThrows(IllegalStateException.class, () -> factorySet.createAs(InvalidGenericArgSpec.class));
         }
     }
 }

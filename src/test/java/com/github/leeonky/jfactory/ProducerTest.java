@@ -95,7 +95,7 @@ class ProducerTest {
 
         @Override
         public void main() {
-            property("readonly1").from(AnotherBean.class);
+            property("readonly1").as(AnotherBean.class);
         }
     }
 
@@ -103,7 +103,7 @@ class ProducerTest {
 
         @Override
         public void main() {
-            property("readonly1").from(AnotherBean.class);
+            property("readonly1").as(AnotherBean.class);
         }
     }
 

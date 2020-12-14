@@ -101,7 +101,7 @@ class _05_ComplexPropertyArgs {
     public static class ABeans extends Spec<Beans> {
         @Override
         public void main() {
-            property("bean").spec(ABean.class, ABean::int100);
+            property("bean").as(ABean.class, ABean::int100);
         }
     }
 
@@ -304,7 +304,7 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void also_support_spec_and_trait_in_element() {
-            factorySet.from(ABean.class);
+            factorySet.spec(ABean.class);
 
             BeanCollection beanCollection = factorySet.type(BeanCollection.class)
                     .property("list[0](int100 long1000 ABean).stringValue", "hello")
@@ -444,7 +444,7 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_use_pre_define_spec_when_property_not_specify_spec() {
-            assertThat(factorySet.from(ABeans.class).property("bean.stringValue", "hello").create().getBean())
+            assertThat(factorySet.spec(ABeans.class).property("bean.stringValue", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("intValue", 100);
@@ -452,9 +452,9 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_use_specified_spec_when_property_specify_spec() {
-            factorySet.from(AnotherBean.class);
+            factorySet.spec(AnotherBean.class);
 
-            assertThat(factorySet.from(ABeans.class).property("bean(int200 AnotherBean).stringValue", "hello").create().getBean())
+            assertThat(factorySet.spec(ABeans.class).property("bean(int200 AnotherBean).stringValue", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("content", "this is another bean")
                     .hasFieldOrPropertyWithValue("intValue", 200);
