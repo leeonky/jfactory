@@ -214,17 +214,6 @@ class _05_ComplexPropertyArgs {
             ;
         }
 
-        @Test
-        void should_not_merge_intently_default_creation() {
-            factorySet.factory(BeansPair.class).spec(instance -> instance.spec()
-                    .property("beans1").asDefault(true)
-                    .property("beans2").asDefault(true));
-
-            BeansPair beansPair = factorySet.create(BeansPair.class);
-
-            assertThat(beansPair.beans1).isNotEqualTo(beansPair.beans2);
-        }
-
         @Nested
         class OverrideThroughMerge {
 

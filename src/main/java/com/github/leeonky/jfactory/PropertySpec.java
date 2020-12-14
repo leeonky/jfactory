@@ -34,19 +34,11 @@ public class PropertySpec<T> {
     }
 
     public <V, S extends Spec<V>> Spec<T> spec(Class<S> specClass, Consumer<S> trait) {
-        return spec(false, specClass, trait);
-    }
-
-    public <V, S extends Spec<V>> Spec<T> spec(boolean intently, Class<S> specClass, Consumer<S> trait) {
-        return appendProducer(factorySet -> createProducer(intently, factorySet.spec(specClass, trait)));
+        return appendProducer(factorySet -> createProducer(factorySet.spec(specClass, trait)));
     }
 
     public <V> Spec<T> from(Class<? extends Spec<V>> specClass) {
-        return from(false, specClass);
-    }
-
-    public <V> Spec<T> from(boolean intently, Class<? extends Spec<V>> specClass) {
-        return appendProducer(factorySet -> createProducer(intently, factorySet.from(specClass)));
+        return appendProducer(factorySet -> createProducer(factorySet.from(specClass)));
     }
 
     public Spec<T> asDefaultValue(Object value) {
@@ -62,37 +54,21 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> from(String... traitsAndSpec) {
-        return from(false, traitsAndSpec);
-    }
-
-    public Spec<T> from(boolean intently, String... traitsAndSpec) {
-        return appendProducer(factorySet -> createProducer(intently, factorySet.from(traitsAndSpec)));
+        return appendProducer(factorySet -> createProducer(factorySet.from(traitsAndSpec)));
     }
 
     public <V> Spec<T> from(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
-        return from(false, specClass, builder);
-    }
-
-    public <V> Spec<T> from(boolean intently, Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
-        return appendProducer(factorySet -> createProducer(intently, builder.apply(factorySet.from(specClass))));
+        return appendProducer(factorySet -> createProducer(builder.apply(factorySet.from(specClass))));
     }
 
     public Spec<T> asDefault() {
-        return asDefault(false, identity());
+        return asDefault(identity());
     }
 
     public Spec<T> asDefault(Function<Builder<?>, Builder<?>> builder) {
-        return asDefault(false, builder);
-    }
-
-    public Spec<T> asDefault(boolean intently) {
-        return asDefault(intently, identity());
-    }
-
-    private Spec<T> asDefault(boolean intently, Function<Builder<?>, Builder<?>> builder) {
         return appendProducer((factorySet, producer, property) ->
                 producer.subDefaultValueProducer(producer.getType().getPropertyWriter(property))
-                        .orElseGet(() -> createProducer(intently, builder.apply(factorySet.type(
+                        .orElseGet(() -> createProducer(builder.apply(factorySet.type(
                                 producer.getPropertyWriterType(property).getType())))));
     }
 
@@ -117,7 +93,7 @@ public class PropertySpec<T> {
         return appendProducer((factorySet, producer, s) -> producerFactory.apply(factorySet));
     }
 
-    private <V> Producer<V> createProducer(boolean intently, Builder<V> builder) {
+    private <V> Producer<V> createProducer(Builder<V> builder) {
         return builder.args(spec.params(property.toString())).createProducer();
     }
 
