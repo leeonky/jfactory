@@ -20,9 +20,9 @@ class SingleValueExpression<P> extends Expression<P> {
     }
 
     @Override
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent) {
+    public Producer<?> buildProducer(JFactory JFactory, Producer<P> parent) {
         if (intently)
-            return traitsSpec.toBuilder(factorySet, property.getWriterType()).createProducer();
+            return traitsSpec.toBuilder(JFactory, property.getWriterType()).createProducer();
         return new FixedValueProducer<>(property.getWriterType(), value);
     }
 

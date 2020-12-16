@@ -13,8 +13,8 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     private final ObjectFactory<T> base;
     private final Class<? extends Spec<T>> specClass;
 
-    public SpecClassFactory(ObjectFactory<T> base, Class<? extends Spec<T>> specClass, FactoryPool factoryPool) {
-        super(BeanClass.create(BeanClass.newInstance(specClass).getType()), factoryPool);
+    public SpecClassFactory(ObjectFactory<T> base, Class<? extends Spec<T>> specClass, FactorySet factorySet) {
+        super(BeanClass.create(BeanClass.newInstance(specClass).getType()), factorySet);
         this.specClass = specClass;
         this.base = base;
         registerTraits();

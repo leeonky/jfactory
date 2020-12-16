@@ -12,14 +12,14 @@ import static java.util.Objects.hash;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
-    private final FactorySet factorySet;
+    private final JFactory JFactory;
     private final Set<String> traits = new LinkedHashSet<>();
 
     private final KeyValueCollection properties = new KeyValueCollection();
     private final DefaultArguments arguments = new DefaultArguments();
 
-    public DefaultBuilder(ObjectFactory<T> objectFactory, FactorySet factorySet) {
-        this.factorySet = factorySet;
+    public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory JFactory) {
+        this.JFactory = JFactory;
         this.objectFactory = objectFactory;
     }
 
@@ -30,7 +30,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public ObjectProducer<T> createProducer() {
-        return new ObjectProducer<>(factorySet, objectFactory, this);
+        return new ObjectProducer<>(JFactory, objectFactory, this);
     }
 
     @Override
@@ -62,7 +62,7 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
-    public Builder<T> trait(String... traits) {
+    public Builder<T> traits(String... traits) {
         DefaultBuilder<T> newBuilder = clone();
         newBuilder.traits.addAll(asList(traits));
         return newBuilder;
@@ -70,7 +70,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public DefaultBuilder<T> clone() {
-        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, factorySet);
+        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, JFactory);
         builder.properties.merge(properties);
         builder.traits.addAll(traits);
         builder.arguments.merge(arguments);
@@ -87,7 +87,7 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Collection<T> queryAll() {
         KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType());
-        return factorySet.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
+        return JFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
                 .filter(matcher::matches).collect(Collectors.toList());
     }
 
@@ -111,12 +111,12 @@ class DefaultBuilder<T> implements Builder<T> {
 
     private void forSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
         objectFactory.collectSpec(traits, instance);
-        instance.spec().apply(factorySet, objectProducer);
+        instance.spec().apply(JFactory, objectProducer);
     }
 
     private void forInputProperties(ObjectProducer<T> objectProducer) {
         properties.expressions(objectFactory.getType()).forEach(exp ->
-                objectProducer.changeChild(exp.getProperty(), exp.buildProducer(factorySet, objectProducer)));
+                objectProducer.changeChild(exp.getProperty(), exp.buildProducer(JFactory, objectProducer)));
     }
 
     public DefaultBuilder<T> clone(DefaultBuilder<T> another) {

@@ -20,7 +20,7 @@ abstract class Expression<P> {
 
     protected abstract boolean isPropertyMatch(Object propertyValue);
 
-    public abstract Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent);
+    public abstract Producer<?> buildProducer(JFactory JFactory, Producer<P> parent);
 
     protected Expression<P> merge(Expression<P> another) {
         return another;

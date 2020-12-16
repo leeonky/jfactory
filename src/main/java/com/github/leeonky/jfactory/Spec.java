@@ -12,7 +12,7 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 public class Spec<T> {
-    private List<BiConsumer<FactorySet, ObjectProducer<T>>> operations = new ArrayList<>();
+    private List<BiConsumer<JFactory, ObjectProducer<T>>> operations = new ArrayList<>();
     private Instance<T> instance;
     private Class<T> type = null;
 
@@ -23,13 +23,13 @@ public class Spec<T> {
         return new PropertySpec<>(this, createChain(property));
     }
 
-    Spec<T> append(BiConsumer<FactorySet, ObjectProducer<T>> operation) {
+    Spec<T> append(BiConsumer<JFactory, ObjectProducer<T>> operation) {
         operations.add(operation);
         return this;
     }
 
-    void apply(FactorySet factorySet, ObjectProducer<T> producer) {
-        operations.forEach(o -> o.accept(factorySet, producer));
+    void apply(JFactory JFactory, ObjectProducer<T> producer) {
+        operations.forEach(o -> o.accept(JFactory, producer));
         type = producer.getType().getType();
     }
 

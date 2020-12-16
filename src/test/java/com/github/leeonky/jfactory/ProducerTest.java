@@ -13,12 +13,12 @@ import java.util.Objects;
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
 
 class ProducerTest {
-    private final FactorySet factorySet = new FactorySet();
+    private final JFactory JFactory = new JFactory();
     private ObjectProducer<Bean> beanProducer;
 
     @BeforeEach
     void setupCollectionProducer() {
-        factorySet.factory(Bean.class).spec(instance -> instance.spec()
+        JFactory.factory(Bean.class).spec(instance -> instance.spec()
                 .property("array1[0]").asDefault()
                 .property("array2[0]").asDefault()
                 .property("dependency1").dependsOn("defaultString1", o -> o)
@@ -27,7 +27,7 @@ class ProducerTest {
                 .property("unfixed2").value("")
                 .link("link1", "link2")
         );
-        beanProducer = (ObjectProducer<Bean>) factorySet.type(Bean.class)
+        beanProducer = (ObjectProducer<Bean>) JFactory.type(Bean.class)
                 .property("inputString1", "a string")
                 .property("inputString2", "a string")
                 .property("subObj1.defaultString1", "1")

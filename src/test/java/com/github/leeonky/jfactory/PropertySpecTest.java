@@ -13,7 +13,7 @@ class PropertySpecTest {
         assertThat(propertySpec.value(() -> null)).isEqualTo(spec);
         assertThat(propertySpec.value(1)).isEqualTo(spec);
         assertThat(propertySpec.as(MySpec.class)).isEqualTo(spec);
-        assertThat(propertySpec.asWith(MySpec.class, builder -> builder.trait("trait"))).isEqualTo(spec);
+        assertThat(propertySpec.asWith(MySpec.class, builder -> builder.traits("trait"))).isEqualTo(spec);
         assertThat(propertySpec.as(MySpec.class, MySpec::someSpec)).isEqualTo(spec);
         assertThat(propertySpec.as("A", "Object")).isEqualTo(spec);
     }

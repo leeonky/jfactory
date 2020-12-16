@@ -1,4 +1,4 @@
-# Jfactory
+# JFactory
 
 [![travis-ci](https://travis-ci.org/leeonky/jfactory.svg?branch=master)](https://travis-ci.org/leeonky/jfactory)
 [![coveralls](https://img.shields.io/coveralls/github/leeonky/jfactory/master.svg)](https://coveralls.io/github/leeonky/jfactory)
@@ -11,4 +11,54 @@
 [![Code Climate issues](https://img.shields.io/codeclimate/issues/leeonky/jfactory.svg)](https://codeclimate.com/github/leeonky/jfactory/maintainability)
 [![Code Climate maintainability (percentage)](https://img.shields.io/codeclimate/maintainability-percentage/leeonky/jfactory.svg)](https://codeclimate.com/github/leeonky/jfactory/maintainability)
 
-用于为自动化测试创建具有默认属性或关联属性数据对象的测试工具库
+---
+
+用于为自动化测试准备测试数据夹具的工具库。可以指定测试数据的默认属性和关联数据。并可以预定义某些特质，然后创建具有某些特制的测试数据
+
+
+#安装
+
+通过Gradle添加依赖
+``` groovy
+    implementation 'com.github.leeonky:jfactory:0.0.1'
+```
+
+#快速开始
+创建具有默认属性值的对象，实例代码默认使用[Lombok](https://projectlombok.org/)自动生成属性访问起代码。
+```java
+@Getter
+@Setter
+public class Bean {
+    private String stringValue;
+    private int intValue;
+
+    public static void main(String[] args){
+        JFactory jFactory = new JFactory();
+
+        Bean bean = jFactory.create(Bean.class);
+        // bean.stringValue is "stringValue#1"
+
+        // bean.intValue is 1
+        Bean bean2 = jFactory.create(Bean.class);
+        // bean.stringValue is "stringValue#2"
+        // bean.intValue is 2
+    }
+}
+```
+默认情况下属性值会根据属性名和属性所在类的类型的创建次数生成一个组合值，也可以在创建过程中给定一个输入值：
+```java
+@Getter
+@Setter
+public class Bean {
+    private String stringValue;
+    private int intValue;
+
+    public static void main(String[] args){
+        JFactory jFactory = new JFactory();
+
+        Bean bean = jFactory.type(Bean.class).property("intValue", 100).create();
+        // bean.intValue is 100
+    }
+}
+
+```

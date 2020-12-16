@@ -21,7 +21,7 @@ public interface Builder<T> {
 
     Collection<T> queryAll();
 
-    Builder<T> trait(String... traits);
+    Builder<T> traits(String... traits);
 
     Producer<T> createProducer();
 

@@ -1,7 +1,7 @@
 package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.Builder;
-import com.github.leeonky.jfactory.FactorySet;
+import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
 import com.github.leeonky.jfactory.Trait;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class _05_ComplexPropertyArgs {
 
-    private FactorySet factorySet = new FactorySet();
+    private JFactory JFactory = new JFactory();
 
     public enum Enums {
         A, B
@@ -134,7 +134,7 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void support_specify_multi_properties_in_nested_property_creation_and_query() {
-            Builder<BeansWrapper> builder = factorySet.type(BeansWrapper.class)
+            Builder<BeansWrapper> builder = JFactory.type(BeansWrapper.class)
                     .property("beans.bean.content", "hello")
                     .property("beans.bean.intValue", 100);
 
@@ -150,10 +150,10 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_raise_error_when_property_has_different_spec() {
-            factorySet.register(ABean.class);
-            factorySet.register(AnotherBean.class);
+            JFactory.register(ABean.class);
+            JFactory.register(AnotherBean.class);
 
-            assertThrows(IllegalArgumentException.class, () -> factorySet.type(BeansWrapper.class)
+            assertThrows(IllegalArgumentException.class, () -> JFactory.type(BeansWrapper.class)
                     .property("beans.bean(ABean).content", "hello")
                     .property("beans.bean(AnotherBean).intValue", 100)
                     .create());
@@ -161,10 +161,10 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void support_merge_with_has_spec_and_no_spec() {
-            factorySet.register(ABean.class);
-            factorySet.register(AnotherBean.class);
+            JFactory.register(ABean.class);
+            JFactory.register(AnotherBean.class);
 
-            assertThat(factorySet.type(BeansWrapper.class)
+            assertThat(JFactory.type(BeansWrapper.class)
                     .property("beans.bean(ABean).stringValue", "hello")
                     .property("beans.bean.intValue", 100)
                     .create().getBeans().getBean())
@@ -173,7 +173,7 @@ class _05_ComplexPropertyArgs {
                     .hasFieldOrPropertyWithValue("intValue", 100)
             ;
 
-            assertThat(factorySet.type(BeansWrapper.class)
+            assertThat(JFactory.type(BeansWrapper.class)
                     .property("beans.bean.stringValue", "hello")
                     .property("beans.bean(ABean).intValue", 100)
                     .create().getBeans().getBean())
@@ -185,9 +185,9 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_raise_error_when_property_has_different_trait() {
-            factorySet.register(ABean.class);
+            JFactory.register(ABean.class);
 
-            assertThrows(IllegalArgumentException.class, () -> factorySet.type(BeansWrapper.class)
+            assertThrows(IllegalArgumentException.class, () -> JFactory.type(BeansWrapper.class)
                     .property("beans.bean(hello ABean).content", "xxx")
                     .property("beans.bean(int100 ABean).intValue", 10)
                     .create());
@@ -195,9 +195,9 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void support_merge_with_trait_and_empty_trait() {
-            factorySet.register(ABean.class);
+            JFactory.register(ABean.class);
 
-            assertThat(factorySet.type(BeansWrapper.class)
+            assertThat(JFactory.type(BeansWrapper.class)
                     .property("beans.bean(hello ABean).content", "any")
                     .property("beans.bean(ABean).intValue", 10)
                     .create().getBeans().getBean())
@@ -205,7 +205,7 @@ class _05_ComplexPropertyArgs {
                     .hasFieldOrPropertyWithValue("intValue", 10)
             ;
 
-            assertThat(factorySet.type(BeansWrapper.class)
+            assertThat(JFactory.type(BeansWrapper.class)
                     .property("beans.bean(ABean).intValue", 10)
                     .property("beans.bean(hello ABean).content", "any")
                     .create().getBeans().getBean())
@@ -219,7 +219,7 @@ class _05_ComplexPropertyArgs {
 
             @Test
             void new_property_should_override_old_property_1() {
-                BeanCollection beans = factorySet.type(BeanCollection.class)
+                BeanCollection beans = JFactory.type(BeanCollection.class)
                         .property("list[0]", null)
                         .property("list[0].intValue", 1)
                         .create();
@@ -230,7 +230,7 @@ class _05_ComplexPropertyArgs {
 
             @Test
             void new_property_should_override_old_property_2() {
-                BeanCollection beans = factorySet.type(BeanCollection.class)
+                BeanCollection beans = JFactory.type(BeanCollection.class)
                         .property("list[0].intValue", 1)
                         .property("list[0]", null)
                         .create();
@@ -240,7 +240,7 @@ class _05_ComplexPropertyArgs {
 
             @Test
             void new_property_should_override_old_property_3() {
-                BeanCollections beans = factorySet.type(BeanCollections.class)
+                BeanCollections beans = JFactory.type(BeanCollections.class)
                         .property("list[0].list[0].intValue", 1)
                         .property("list[0].list", null)
                         .create();
@@ -255,19 +255,19 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void support_specify_element_in_property() {
-            assertThat(factorySet.type(Strings.class).property("strings[0]", "hello").create().getStrings())
+            assertThat(JFactory.type(Strings.class).property("strings[0]", "hello").create().getStrings())
                     .containsExactly("hello");
         }
 
         @Test
         void should_create_default_value_type_element_when_not_specified() {
-            assertThat(factorySet.type(Strings.class).property("strings[1]", "hello").create().getStrings())
+            assertThat(JFactory.type(Strings.class).property("strings[1]", "hello").create().getStrings())
                     .containsExactly("strings#1[0]", "hello");
         }
 
         @Test
         void default_class_type_collection_element_is_null() {
-            BeanCollection beanCollection = factorySet.type(BeanCollection.class)
+            BeanCollection beanCollection = JFactory.type(BeanCollection.class)
                     .property("list[1].stringValue", "world")
                     .create();
 
@@ -276,7 +276,7 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void support_nested_element_creation_in_collection() {
-            BeanCollection beanCollection = factorySet.type(BeanCollection.class)
+            BeanCollection beanCollection = JFactory.type(BeanCollection.class)
                     .property("list[0].stringValue", "hello")
                     .property("list[0].intValue", 100)
                     .create();
@@ -291,7 +291,7 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void support_query_with_collection_element() {
-            Builder<BeanCollection> builder = factorySet.type(BeanCollection.class)
+            Builder<BeanCollection> builder = JFactory.type(BeanCollection.class)
                     .property("list[0].stringValue", "hello")
                     .property("list[0].intValue", 100)
                     .property("list[1].stringValue", "world")
@@ -304,9 +304,9 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void also_support_spec_and_trait_in_element() {
-            factorySet.spec(ABean.class);
+            JFactory.spec(ABean.class);
 
-            BeanCollection beanCollection = factorySet.type(BeanCollection.class)
+            BeanCollection beanCollection = JFactory.type(BeanCollection.class)
                     .property("list[0](int100 long1000 ABean).stringValue", "hello")
                     .create();
 
@@ -317,7 +317,7 @@ class _05_ComplexPropertyArgs {
                     .hasFieldOrPropertyWithValue("longValue", 1000L)
             ;
 
-            assertThat(factorySet.type(BeanCollection.class)
+            assertThat(JFactory.type(BeanCollection.class)
                     .property("list[0](int100 long1000 ABean).stringValue", "hello").queryAll())
                     .containsExactly(beanCollection);
         }
@@ -325,7 +325,7 @@ class _05_ComplexPropertyArgs {
         @Test
         void support_different_type_in_each_element() {
             Bean bean = new Bean();
-            Builder<BeanCollection> builder = factorySet.type(BeanCollection.class)
+            Builder<BeanCollection> builder = JFactory.type(BeanCollection.class)
                     .property("list[0].stringValue", "hello")
                     .property("list[1]", bean);
 
@@ -344,7 +344,7 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_create_default_enum_value_type_element_when_not_specified() {
-            assertThat(factorySet.type(EnumArray.class).property("enums[1]", B).create().getEnums())
+            assertThat(JFactory.type(EnumArray.class).property("enums[1]", B).create().getEnums())
                     .containsExactly(A, B);
         }
     }
@@ -354,62 +354,62 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void intently_query_should_return_empty() {
-            factorySet.type(Bean.class)
+            JFactory.type(Bean.class)
                     .property("stringValue", "hello")
                     .create();
 
-            assertThat(factorySet.type(Bean.class)
+            assertThat(JFactory.type(Bean.class)
                     .property("stringValue!", "hello")
                     .queryAll()).isEmpty();
 
-            factorySet.type(BeanCollection.class)
+            JFactory.type(BeanCollection.class)
                     .property("list[0]!.stringValue", "hello")
                     .create();
 
-            assertThat(factorySet.type(BeanCollection.class)
+            assertThat(JFactory.type(BeanCollection.class)
                     .property("list[0]!.stringValue", "hello")
                     .queryAll()).isEmpty();
         }
 
         @Test
         void create_nested_object_intently() {
-            Bean bean = factorySet.type(Bean.class)
+            Bean bean = JFactory.type(Bean.class)
                     .property("stringValue", "hello")
                     .property("intValue", 100)
                     .create();
 
-            assertThat(factorySet.type(Beans.class)
+            assertThat(JFactory.type(Beans.class)
                     .property("bean!.stringValue", "hello")
                     .create().getBean()).isNotEqualTo(bean);
 
-            assertThat(factorySet.type(BeanCollection.class)
+            assertThat(JFactory.type(BeanCollection.class)
                     .property("list[0]!.stringValue", "hello")
                     .property("list[0].intValue", 100).create().getList().get(0)).isNotEqualTo(bean);
 
-            assertThat(factorySet.type(BeanCollection.class)
+            assertThat(JFactory.type(BeanCollection.class)
                     .property("list[0].stringValue", "hello")
                     .property("list[0]!.intValue", 100).create().getList().get(0)).isNotEqualTo(bean);
         }
 
         @Test
         void support_create_object_ignore_value() {
-            factorySet.register(ABean.class);
+            JFactory.register(ABean.class);
 
-            assertThat(factorySet.type(Beans.class)
+            assertThat(JFactory.type(Beans.class)
                     .property("bean(int100 ABean)!", "")
                     .create().getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("intValue", 100)
             ;
 
-            assertThat(factorySet.type(Beans.class)
+            assertThat(JFactory.type(Beans.class)
                     .property("bean(ABean)!", "")
                     .create().getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
             ;
 
-            factorySet.factory(Bean.class).spec(instance -> instance.spec().property("content").value("content"));
-            assertThat(factorySet.type(Beans.class)
+            JFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("content"));
+            assertThat(JFactory.type(Beans.class)
                     .property("bean!", "")
                     .create().getBean())
                     .hasFieldOrPropertyWithValue("content", "content")
@@ -418,23 +418,23 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_not_uniq_creation_in_sub_creation() {
-            factorySet.type(BeanCollection.class)
+            JFactory.type(BeanCollection.class)
                     .property("list[0]!.stringValue", "hello")
                     .property("list[1]!.stringValue", "hello")
                     .create();
 
-            assertThat(factorySet.type(Bean.class)
+            assertThat(JFactory.type(Bean.class)
                     .queryAll()).hasSize(2);
         }
 
         @Test
         void should_not_uniq_creation_in_sub_creation2() {
-            factorySet.type(BeansPair.class)
+            JFactory.type(BeansPair.class)
                     .property("beans1.bean!", null)
                     .property("beans2.bean!", null)
                     .create();
 
-            assertThat(factorySet.type(Beans.class)
+            assertThat(JFactory.type(Beans.class)
                     .queryAll()).hasSize(2);
         }
     }
@@ -444,7 +444,7 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_use_pre_define_spec_when_property_not_specify_spec() {
-            assertThat(factorySet.spec(ABeans.class).property("bean.stringValue", "hello").create().getBean())
+            assertThat(JFactory.spec(ABeans.class).property("bean.stringValue", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("intValue", 100);
@@ -452,9 +452,9 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_use_specified_spec_when_property_specify_spec() {
-            factorySet.spec(AnotherBean.class);
+            JFactory.spec(AnotherBean.class);
 
-            assertThat(factorySet.spec(ABeans.class).property("bean(int200 AnotherBean).stringValue", "hello").create().getBean())
+            assertThat(JFactory.spec(ABeans.class).property("bean(int200 AnotherBean).stringValue", "hello").create().getBean())
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("content", "this is another bean")
                     .hasFieldOrPropertyWithValue("intValue", 200);
@@ -462,10 +462,10 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void use_spec_chain_in_property() {
-            factorySet.register(ABean.class);
-            factorySet.register(ABeans.class);
+            JFactory.register(ABean.class);
+            JFactory.register(ABeans.class);
 
-            BeansWrapper beansWrapper = factorySet.type(BeansWrapper.class)
+            BeansWrapper beansWrapper = JFactory.type(BeansWrapper.class)
                     .property("beans(ABeans).bean(int100 ABean).stringValue", "hello").create();
 
             assertThat(beansWrapper.getBeans().getBean())

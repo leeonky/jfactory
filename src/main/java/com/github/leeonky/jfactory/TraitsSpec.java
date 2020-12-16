@@ -42,9 +42,9 @@ class TraitsSpec {
         return spec != null && another.spec != null && !Objects.equals(spec, another.spec);
     }
 
-    public Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-        return (spec != null ? factorySet.spec(spec) : factorySet.type(propertyType.getType()))
-                .trait(traits);
+    public Builder<?> toBuilder(JFactory JFactory, BeanClass<?> propertyType) {
+        return (spec != null ? JFactory.spec(spec) : JFactory.type(propertyType.getType()))
+                .traits(traits);
     }
 
     public void merge(TraitsSpec another, String property) {

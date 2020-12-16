@@ -1,93 +1,64 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.PropertyWriter;
+import com.github.leeonky.util.BeanClass;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
-public class FactorySet {
-    private final FactoryPool factoryPool = new FactoryPool();
-    private final DataRepository dataRepository;
-    private final Set<Predicate<PropertyWriter<?>>> ignoreDefaultValues = new LinkedHashSet<>();
+class FactorySet {
+    public final TypeSequence typeSequence = new TypeSequence();
+    private final DefaultValueFactories defaultValueFactories = new DefaultValueFactories();
+    private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
+    private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
+    private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new HashMap<>();
 
-    public FactorySet() {
-        dataRepository = new MemoryDataRepository();
+    @SuppressWarnings("unchecked")
+    public <T> ObjectFactory<T> queryObjectFactory(Class<T> type) {
+        return (ObjectFactory<T>) objectFactories.computeIfAbsent(type,
+                key -> new ObjectFactory<>(BeanClass.create(key), this));
     }
 
-    public FactorySet(DataRepository dataRepository) {
-        this.dataRepository = dataRepository;
-    }
-
-    public DataRepository getDataRepository() {
-        return dataRepository;
-    }
-
-    public <T> Factory<T> factory(Class<T> type) {
-        return factoryPool.queryObjectFactory(type);
-    }
-
-    public <T> Builder<T> type(Class<T> type) {
-        return new DefaultBuilder<>(factoryPool.queryObjectFactory(type), this);
-    }
-
-    public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass) {
-        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specClass), this);
-    }
-
-    public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass, Consumer<S> trait) {
-        return new DefaultBuilder<>(factoryPool.createSpecFactory(specClass, trait), this);
+    public <T> void registerSpecClassFactory(Class<? extends Spec<T>> specClass) {
+        Spec<T> spec = BeanClass.newInstance(specClass);
+        SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
+                type -> new SpecClassFactory<>(queryObjectFactory(spec.getType()), specClass, this));
+        specClassFactoriesWithName.put(spec.getName(), specClassFactory);
     }
 
     @SuppressWarnings("unchecked")
-    public FactorySet register(Class<? extends Spec<?>> specClass) {
-        factoryPool.registerSpecClassFactory((Class) specClass);
-        return this;
+    public <T> SpecClassFactory<T> querySpecClassFactory(String specName) {
+        return (SpecClassFactory<T>) specClassFactoriesWithName.computeIfAbsent(specName, key -> {
+            throw new IllegalArgumentException("Spec `" + specName + "` not exist");
+        });
     }
 
-    public <T> Builder<T> spec(String... traitsAndSpec) {
-        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(traitsAndSpec[traitsAndSpec.length - 1]), this)
-                .trait(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));
+    @SuppressWarnings("unchecked")
+    public <T> SpecClassFactory<T> querySpecClassFactory(Class<? extends Spec<T>> specClass) {
+        return (SpecClassFactory<T>) specClassFactoriesWithType.computeIfAbsent(specClass, key -> {
+            throw new IllegalArgumentException("Spec `" + specClass.getName() + "` not exist");
+        });
     }
 
-    public <T> Factory<T> specFactory(String specName) {
-        return factoryPool.querySpecClassFactory(specName);
+    public <T> Optional<DefaultValueFactory<T>> queryDefaultValueBuilder(BeanClass<T> type) {
+        return defaultValueFactories.query(type.getType());
     }
 
-    public <T> Factory<T> specFactory(Class<? extends Spec<T>> specClass) {
-        register(specClass);
-        return factoryPool.querySpecClassFactory(specClass);
+    public <T> DefaultValueFactory<T> getDefaultValueBuilder(BeanClass<T> type) {
+        return queryDefaultValueBuilder(type).orElseGet(() -> new DefaultValueFactories.DefaultTypeFactory<>(type));
     }
 
-    public <T> T create(Class<T> type) {
-        return type(type).create();
+    public int nextSequence(Class<?> type) {
+        return typeSequence.generate(type);
     }
 
-    public <T, S extends Spec<T>> T createAs(Class<S> spec) {
-        return spec(spec).create();
+    public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {
+        S spec = BeanClass.newInstance(specClass);
+        return new SpecFactory<>(queryObjectFactory(spec.getType()), spec, this, trait);
     }
 
-    public <T, S extends Spec<T>> T createAs(Class<S> spec, Consumer<S> trait) {
-        return spec(spec, trait).create();
-    }
-
-    public <T> T createAs(String... traitsAndSpec) {
-        return this.<T>spec(traitsAndSpec).create();
-    }
-
-    public <T> FactorySet registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {
-        factoryPool.registerDefaultValueFactory(type, factory);
-        return this;
-    }
-
-    public FactorySet ignoreDefaultValue(Predicate<PropertyWriter<?>> ignoreProperty) {
-        ignoreDefaultValues.add(ignoreProperty);
-        return this;
-    }
-
-    <T> boolean shouldCreateDefaultValue(PropertyWriter<T> propertyWriter) {
-        return ignoreDefaultValues.stream().noneMatch(p -> p.test(propertyWriter));
+    public <T> void registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {
+        defaultValueFactories.register(type, factory);
     }
 }

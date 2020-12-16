@@ -9,20 +9,20 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DefaultBuilderTest {
-    private FactorySet factorySet = new FactorySet();
+    private JFactory JFactory = new JFactory();
 
     @BeforeEach
     void registerTrait() {
-        factorySet.factory(Bean.class).spec("trait1", instance -> {
+        JFactory.factory(Bean.class).spec("trait1", instance -> {
         });
 
-        factorySet.factory(Bean2.class).spec("trait1", instance -> {
+        JFactory.factory(Bean2.class).spec("trait1", instance -> {
         }).spec("trait2", instance -> {
         });
     }
 
     private Builder<?> builder(Class<?> type, String value, String trait) {
-        return factorySet.type(type).property("defaultString1", value).trait(trait);
+        return JFactory.type(type).property("defaultString1", value).traits(trait);
     }
 
     @Getter

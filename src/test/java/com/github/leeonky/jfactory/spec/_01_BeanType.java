@@ -19,22 +19,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class _01_BeanType {
-    private FactorySet factorySet = new FactorySet();
+    private JFactory JFactory = new JFactory();
 
     @Test
     void default_creation_with_default_value_producing() {
-        assertThat(factorySet.create(Bean.class))
+        assertThat(JFactory.create(Bean.class))
                 .hasFieldOrPropertyWithValue("stringValue", "stringValue#1")
         ;
 
-        assertThat(factorySet.create(Bean.class))
+        assertThat(JFactory.create(Bean.class))
                 .hasFieldOrPropertyWithValue("stringValue", "stringValue#2")
         ;
     }
 
     @Test
     void support_specify_properties_in_building() {
-        assertThat(factorySet.type(Bean.class)
+        assertThat(JFactory.type(Bean.class)
                 .property("stringValue", "hello")
                 .property("intValue", 100).create())
                 .hasFieldOrPropertyWithValue("stringValue", "hello")
@@ -43,25 +43,25 @@ class _01_BeanType {
 
     @Test
     void should_raise_error_when_property_expression_invalid() {
-        assertThrows(IllegalArgumentException.class, () -> factorySet.type(Bean.class)
+        assertThrows(IllegalArgumentException.class, () -> JFactory.type(Bean.class)
                 .property(".a", 100).create());
     }
 
     @Test
     void support_customized_constructor() {
-        factorySet.factory(BeanWithNoDefaultConstructor.class).constructor(arg -> new BeanWithNoDefaultConstructor("hello", 100));
+        JFactory.factory(BeanWithNoDefaultConstructor.class).constructor(arg -> new BeanWithNoDefaultConstructor("hello", 100));
 
-        assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).create())
+        assertThat(JFactory.type(BeanWithNoDefaultConstructor.class).create())
                 .hasFieldOrPropertyWithValue("stringValue", "hello")
                 .hasFieldOrPropertyWithValue("intValue", 100);
     }
 
     @Test
     void support_default_enum_value() {
-        FactorySet factorySet = new FactorySet();
-        assertThat(factorySet.create(EnumBean.class))
+        JFactory JFactory = new JFactory();
+        assertThat(JFactory.create(EnumBean.class))
                 .hasFieldOrPropertyWithValue("enums", A);
-        assertThat(factorySet.create(EnumBean.class))
+        assertThat(JFactory.create(EnumBean.class))
                 .hasFieldOrPropertyWithValue("enums", B);
     }
 
@@ -128,31 +128,31 @@ class _01_BeanType {
 
         @Test
         void support_specify_params() {
-            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+            JFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value((Object) instance.param("p"))
                     .property("intValue").value((Object) instance.param("i")));
 
-            assertThat(factorySet.type(Bean.class).arg("p", "hello").arg("i", 100).create())
+            assertThat(JFactory.type(Bean.class).arg("p", "hello").arg("i", 100).create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
         @Test
         void support_default_params() {
-            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+            JFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value(instance.param("p", "default")));
 
-            assertThat(factorySet.type(Bean.class).create())
+            assertThat(JFactory.type(Bean.class).create())
                     .hasFieldOrPropertyWithValue("stringValue", "default");
         }
 
         @Test
         void support_specify_params_in_map() {
-            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+            JFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value((Object) instance.param("p"))
                     .property("intValue").value((Object) instance.param("i")));
 
-            assertThat(factorySet.type(Bean.class).args(new HashMap<String, Object>() {{
+            assertThat(JFactory.type(Bean.class).args(new HashMap<String, Object>() {{
                 put("p", "hello");
                 put("i", 100);
             }}).create())
@@ -162,11 +162,11 @@ class _01_BeanType {
 
         @Test
         void support_specify_params_in_arg() {
-            factorySet.factory(Bean.class).spec(instance -> instance.spec()
+            JFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value((Object) instance.param("p"))
                     .property("intValue").value((Object) instance.param("i")));
 
-            assertThat(factorySet.type(Bean.class).args(arg("p", "hello").arg("i", 100)).create())
+            assertThat(JFactory.type(Bean.class).args(arg("p", "hello").arg("i", 100)).create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
@@ -177,78 +177,78 @@ class _01_BeanType {
 
             @Test
             void pass_arg_to_nested_spec_type() {
-                factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                JFactory.factory(Bean.class).spec(instance -> instance.spec()
                         .property("stringValue").value((Object) instance.param("p")));
 
-                assertThat(factorySet.spec(ABeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                assertThat(JFactory.spec(ABeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
 
             }
 
             @Test
             void pass_arg_to_nested_spec_type_in_2_levels() {
-                factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                JFactory.factory(Bean.class).spec(instance -> instance.spec()
                         .property("stringValue").value((Object) instance.param("p")));
 
-                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                JFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                         .property("bean").asDefault());
 
-                factorySet.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
+                JFactory.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
                         .property("beanWrapper").asDefault());
 
-                assertThat(factorySet.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello"))
+                assertThat(JFactory.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello"))
                         .create().getBeanWrapper().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
             @Test
             void pass_arg_to_nested_spec_with_spec_class() {
-                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                JFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                         .property("bean").as(ABean.class));
 
-                assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                assertThat(JFactory.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
             @Test
             void pass_arg_to_nested_spec_with_spec_instance() {
-                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                JFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                         .property("bean").as(ABean.class, spec -> {
                         }));
 
-                assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                assertThat(JFactory.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
             @Test
             void pass_arg_to_nested_spec_with_spec_name() {
-                factorySet.register(ABean.class);
+                JFactory.register(ABean.class);
 
-                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                JFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                         .property("bean").as("ABean"));
 
-                assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                assertThat(JFactory.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
             @Test
             void pass_arg_to_nested_spec_with_spec_class_and_properties() {
-                factorySet.register(ABean.class);
+                JFactory.register(ABean.class);
 
-                factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                JFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                         .property("bean").asWith(ABean.class, builder -> builder.property("intValue", 1)));
 
-                assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                assertThat(JFactory.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
             @Test
             void support_access_nested_args() {
-                factorySet.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
+                JFactory.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
                         .property("beanWrapper").value(new BeanWrapper().setBean(new Bean()
                                 .setStringValue(instance.params("beanWrapper").params("bean").param("p")))));
 
-                assertThat(factorySet.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello"))
+                assertThat(JFactory.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello"))
                         .create().getBeanWrapper().getBean())
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
@@ -262,13 +262,13 @@ class _01_BeanType {
 
                     @Test
                     void get_args_from_instance() {
-                        factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                        JFactory.factory(Bean.class).spec(instance -> instance.spec()
                                 .property("stringValue").value((Object) instance.param("p")));
 
-                        factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                        JFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                                 .property("bean").asDefault(builder -> builder.args(instance.params())));
 
-                        assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                        assertThat(JFactory.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                                 .hasFieldOrPropertyWithValue("stringValue", "hello");
                     }
                 }
@@ -278,22 +278,22 @@ class _01_BeanType {
 
                     @Test
                     void get_with_default() {
-                        factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                        JFactory.factory(Bean.class).spec(instance -> instance.spec()
                                 .property("stringValue").value(instance.spec().param("p", "default")));
 
-                        assertThat(factorySet.type(Bean.class).create())
+                        assertThat(JFactory.type(Bean.class).create())
                                 .hasFieldOrPropertyWithValue("stringValue", "default");
                     }
 
                     @Test
                     void get_all_args() {
-                        factorySet.factory(Bean.class).spec(instance -> instance.spec()
+                        JFactory.factory(Bean.class).spec(instance -> instance.spec()
                                 .property("stringValue").value((Object) instance.param("p")));
 
-                        factorySet.factory(BeanWrapper.class).spec(instance -> instance.spec()
+                        JFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                                 .property("bean").asDefault(builder -> builder.args(instance.spec().params())));
 
-                        assertThat(factorySet.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
+                        assertThat(JFactory.type(BeanWrapper.class).args("bean", arg("p", "hello")).create().getBean())
                                 .hasFieldOrPropertyWithValue("stringValue", "hello");
                     }
                 }
@@ -306,7 +306,7 @@ class _01_BeanType {
 
         @Test
         void support_define_default_value_factory_by_type() {
-            Bean bean = factorySet.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
+            Bean bean = JFactory.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
                 @Override
                 public <T> String create(BeanClass<T> beanType, SubInstance<T> instance) {
                     return "hello";
@@ -319,7 +319,7 @@ class _01_BeanType {
 
         @Test
         void support_skip_property_default_value_creation() {
-            Bean bean = factorySet.ignoreDefaultValue(propertyWriter -> "stringValue".equals(propertyWriter.getName()))
+            Bean bean = JFactory.ignoreDefaultValue(propertyWriter -> "stringValue".equals(propertyWriter.getName()))
                     .create(Bean.class);
 
             assertThat(bean)
@@ -328,7 +328,7 @@ class _01_BeanType {
 
         @Test
         void support_define_default_value_factory_by_property() {
-            Bean bean = factorySet.registerDefaultValueFactory(String.class, new DefaultValueFactories.DefaultStringFactory() {
+            Bean bean = JFactory.registerDefaultValueFactory(String.class, new DefaultValueFactories.DefaultStringFactory() {
                 @Override
                 public <T> String create(BeanClass<T> beanType, SubInstance<T> instance) {
                     if (instance.getProperty().getName().equals("stringValue"))

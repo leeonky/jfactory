@@ -21,19 +21,19 @@ class SubObjectExpression<P> extends Expression<P> {
     }
 
     @Override
-    public Producer<?> buildProducer(FactorySet factorySet, Producer<P> parent) {
-        return query(factorySet).<Producer<?>>map(object -> new FixedValueProducer<>(property.getWriterType(), object))
-                .orElseGet(() -> toBuilder(factorySet, property.getWriterType()).createProducer());
+    public Producer<?> buildProducer(JFactory JFactory, Producer<P> parent) {
+        return query(JFactory).<Producer<?>>map(object -> new FixedValueProducer<>(property.getWriterType(), object))
+                .orElseGet(() -> toBuilder(JFactory, property.getWriterType()).createProducer());
     }
 
-    private Optional<?> query(FactorySet factorySet) {
+    private Optional<?> query(JFactory JFactory) {
         if (intently)
             return Optional.empty();
-        return toBuilder(factorySet, property.getReaderType()).queryAll().stream().findFirst();
+        return toBuilder(JFactory, property.getReaderType()).queryAll().stream().findFirst();
     }
 
-    private Builder<?> toBuilder(FactorySet factorySet, BeanClass<?> propertyType) {
-        return properties.apply(traitsSpec.toBuilder(factorySet, propertyType));
+    private Builder<?> toBuilder(JFactory JFactory, BeanClass<?> propertyType) {
+        return properties.apply(traitsSpec.toBuilder(JFactory, propertyType));
     }
 
     @Override

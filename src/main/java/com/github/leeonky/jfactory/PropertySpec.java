@@ -82,14 +82,14 @@ public class PropertySpec<T> {
                         dependencies.stream().map(PropertyChain::createChain).collect(Collectors.toList())));
     }
 
-    private Spec<T> appendProducer(Fuc<FactorySet, Producer<?>, String, Producer<?>> producerFactory) {
+    private Spec<T> appendProducer(Fuc<JFactory, Producer<?>, String, Producer<?>> producerFactory) {
         if (property.isSingle() || property.isTopLevelPropertyCollection())
             return spec.append((factorySet, objectProducer) -> objectProducer.changeChild(property,
                     ((nextToLast, property) -> producerFactory.apply(factorySet, nextToLast, property))));
         throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
     }
 
-    private Spec<T> appendProducer(Function<FactorySet, Producer<?>> producerFactory) {
+    private Spec<T> appendProducer(Function<JFactory, Producer<?>> producerFactory) {
         return appendProducer((factorySet, producer, s) -> producerFactory.apply(factorySet));
     }
 

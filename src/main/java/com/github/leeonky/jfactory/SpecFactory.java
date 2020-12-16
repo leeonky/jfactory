@@ -7,8 +7,8 @@ public class SpecFactory<T, S extends Spec<T>> extends SpecClassFactory<T> {
     private final Consumer<S> trait;
 
     @SuppressWarnings("unchecked")
-    public SpecFactory(ObjectFactory<T> base, S spec, FactoryPool factoryPool, Consumer<S> trait) {
-        super(base, (Class<? extends Spec<T>>) spec.getClass(), factoryPool);
+    public SpecFactory(ObjectFactory<T> base, S spec, FactorySet factorySet, Consumer<S> trait) {
+        super(base, (Class<? extends Spec<T>>) spec.getClass(), factorySet);
         this.spec = spec;
         this.trait = trait;
     }
