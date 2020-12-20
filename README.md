@@ -13,7 +13,7 @@
 
 ---
 
-用于生成测试数据的工具库。可以预定义数据的默认属性和关联属性，还可以定义数据Trait，然后创建具有某些Trait的测试数据
+通过工厂方法创建具有某些默认属性测试数据的工具库，默认数据通过预定义数据的默认属性和关联属性实现，还可以定义数据Trait，然后创建具有某些Trait的测试数据
 
 # 安装
 
@@ -136,7 +136,7 @@ public class 女人 extends Spec<Person> {
     }
 
     @Trait
-    public Woman 老年的() {
+    public 女人 老年的() {
         property("age").value(80);
         return this;
     }
