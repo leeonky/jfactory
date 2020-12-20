@@ -42,7 +42,7 @@ Bean bean2 = jFactory.create(Bean.class);
 // bean.intValue: 2
 ```
 
-默认情况下属性值会根据属性名和属性所在类的类型的创建次数生成一个组合值，也可以在创建过程中给定一个输入值：
+默认情况下属性值会根据属性名和属性所在类型的创建次数生成一个组合值，也可以在创建过程中给定一个输入值：
 ```java
 public class Bean {
     private String stringValue;
@@ -63,7 +63,7 @@ public class Bean {
     private long nowEpochSecond;
 }
 
-jFactory.factory(Bean.class).spec(instance-> instance.spec()
+jFactory.factory(Bean.class).spec(instance -> instance.spec()
     .property(stringValue).value("Hello")
     .property(nowEpochSecond).value(() -> Instant.now().getEpochSecond())
 );
@@ -77,7 +77,7 @@ Spec的详细定义都是通过如下代码实现，并且每一项配置仅表�
 ```java
 property(stringValue).value("Hello")
 ```
-Spec定义之所以说是缺省值信息，是因为可以在最终创建对象时通过直接指定属性值的方式覆盖原先的任何Spec定义
+之所以说是缺省值信息，是因为可以在最终创建对象时通过直接指定属性值的方式覆盖原先的任何Spec定义
 ```java
 Bean bean = jFactory.type(Bean.class).propery("stringValue", "Bye").create();
 // bean.stringValue: "Bye"
@@ -93,7 +93,7 @@ public class Bean {
     }
 };
 
-jFactory.factory(Bean.class).constructor(instance-> new Bean(instance.getSequence()))
+jFactory.factory(Bean.class).constructor(instance -> new Bean(instance.getSequence()))
 jFactory.create(Bean.class);
 ```
 - 定义数据Trait
@@ -113,8 +113,8 @@ Person person = jFactory.type(Product.class)
 可以预先定义类型的一些具名Spec，然后在构造数据时组合使用：
 ```java
 jFactory.factory(Product.class)
-    .spec("成年", instance-> instance.spec().property("age").value(20))
-    .spec("男性", instance-> instance.spec().property("gender").value("MALE"))
+    .spec("成年", instance -> instance.spec().property("age").value(20))
+    .spec("男性", instance -> instance.spec().property("gender").value("MALE"))
     );
 
 Person person = jFactory.type(Product.class).traits("成年", "男性").create();
@@ -175,12 +175,12 @@ public class Bean {
 public class ABean extends Spec<Bean> {
 }
 
-jFactory.factory(Bean.class).spec(instance-> instance.spec()
-    .property(stringValue).value("Hello")
+jFactory.factory(Bean.class).spec(instance -> instance.spec()
+    .property(stringValue).value("string from base")
 );
 
 Bean bean = jFactory.createAs(ABean.class);
-// bean.stringValue: "Hello"
+// bean.stringValue: "string from base"
 ```
 
 ## 保存/查询创建过的数据
@@ -238,7 +238,7 @@ Order order = jFactory.create(Order.class);
 ```java
 jFactory.type(Order.class).property("product.name", "book").create();
 ```
-与前者不同的是，JFactory首先尝试在曾经创建过的所有对象中线性搜索有没有满足name为book的product，如果有就把那个product赋值给Order的product属性，如果没有找到就自动构建一个name为book的product，总之一定会给Order关联到一个name为book的Product。
+与前者不同的是，JFactory首先尝试在曾经创建过的所有对象中线性搜索有没有满足name为book的Product，如果有就把那个Product赋值给Order的product属性，如果没有找到就自动构建一个name为book的Product，总之一定会给Order关联到一个name为book的Product。
 
 在指定属性值时，也可以在property中指定子属性对象创建的规格和特质：
 ```java
@@ -253,9 +253,7 @@ jFactory.register(AProduct.class);
 jFactory.type(Order.class).property("product(红色的 AProduct).name", "book").create();
 ```
 注意：
-这里的Spec和Trait只能通过字符串的形式指定。在搜索已创建的对象做关联时不会比较备选对象的Spec和Trait，也就是以上代码只能保证创建出的Order的product的name属性为book。Trait写在前（可以组合写多个），Spec写在最后，中间用空格或英文逗号分割。
-
-而且Product对象在创建后也会先于Order对象保存进数据库。
+这里的Spec和Trait只能通过字符串的形式指定。在搜索已创建的对象做关联时不会比较备选对象的Spec和Trait，也就是以上代码只能保证创建出的Order的product的name属性为book。Trait和Spec要写在圆括号内，Trait写在前（可以组合写多个），Spec写在最后，中间用空格或英文逗号分割。 另外Product对象在创建后也会先于Order对象保存进数据库。
 
 
 - 强制创建子属性对象
@@ -268,7 +266,7 @@ jFactory.type(Order.class).property("product(红色的 AProduct)!.name", "book")
 
 - 引用当前对象
 
-如果想在创建对象是引用对象自己，比如：
+如果想在创建对象时引用对象自己，比如：
 ```java
 public class Bean {
     private Bean self;
@@ -297,7 +295,7 @@ public class Son {
 
 如果想创建出一个Father对象father，并且father.son.father是father，就需要在son中反向引用父对象。
 ```java
-jFactory.factory(Farther.class).spec(instance ->  instance.spec()
+jFactory.factory(Farther.class).spec(instance -> instance.spec()
     .property("son").asDefault()
     .property("son").reverseAssociation("father")
 );
@@ -317,20 +315,23 @@ public class Expression {
 为了不让测试意外失败，默认创建出的对象必须满足sum = number1 + number2。JFactory支持创建属性依赖Spec：
 
 ```java
-jFactory.factory(Expression.class).spec(instance ->  instance.spec()
+jFactory.factory(Expression.class).spec(instance -> instance.spec()
     .property("sum").dependsOn(asList("number1", "number2"), numbers -> (int)numbers[0] + (int)numbers[1])
 );
 
 Expression exp1 = jFactory.create(Expression.class);
 Expression exp2 = jFactory.type(Expression.class).property("number1", 100).create();
 Expression exp3 = jFactory.type(Expression.class).property("number1", 100).property("number2", 200).create();
+```
+但这种依赖也不会永远有效。比如：
+```java
 Expression exp4 = jFactory.type(Expression.class).property("sum", 300).create();
 ```
-但这种依赖也不会永远有效。比如以上4种创建对象情形，1，2和3的依赖是有效的。而4中实际上是强制指定了sum的值，因此依赖规则不再有效。
+这实际上是强制指定了sum的值，因此依赖规则不再有效。
 
 ## 属性连接
 
-有的业务数据的多个属性保持一致，比如：
+有的业务需要多个数据的多个属性保持一致，比如：
 
 ```java
 public class Product {
@@ -343,7 +344,7 @@ public class Order {
 }
 ```
 
-从有效订单的角度讲，应该最大程度的保证创建出的Order对象的total属性和product.price相等。JFactory支持连接属性Spec
+从有效订单的角度讲，应该最大程度的保证创建出的Order对象的total属性和product.price相等。这个特性在JFactory中可以通过连接属性Spec实现：
 
 ```java
 jFactory.factory(Order.class ).spec(instance -> instance.spec()
@@ -352,8 +353,9 @@ jFactory.factory(Order.class ).spec(instance -> instance.spec()
 );
 ```
 
-同样如果强制指定了不同的product.price和total属性，这种连接也不会永远有效。
-多个属性的连接后的最终值是多少会根据原先各个属性Spec按如下的优先级得出：
+同样如果在创建时强制指定了不同的product.price和total属性值，这种连接也会失效。
+
+多个属性连接后最终的值是多少会根据原先各个属性Spec按如下的优先级得出：
 - 创建时赋予的属性值
 - 只读值（关联已创建过对象的某个属性）
 - 属性依赖
