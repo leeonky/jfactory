@@ -19,7 +19,7 @@
 
 通过Gradle添加依赖
 ``` groovy
-    implementation 'com.github.leeonky:jfactory:0.0.1'
+    implementation 'com.github.leeonky:jfactory:0.1.0'
 ```
 
 # 快速开始
@@ -303,3 +303,61 @@ jFactory.factory(Farther.class).spec(instance ->  instance.spec()
 );
 ```
 并且建立反向引用后，父子对象在创建后保存到数据库的次序会发生改变，没有反向关联的对象会先保存子对象，有反向关联关系的情况下会先保存父对象，再保存子对象。
+
+## 属性依赖
+
+有的业务数据需要属性之间有某种依赖关系，比如：
+
+```java
+public class Expression {
+    private int number1, number2, sum;
+}
+```
+
+为了不让测试意外失败，默认创建出的对象必须满足sum = number1 + number2。JFactory支持创建属性依赖Spec：
+
+```java
+jFactory.factory(Expression.class).spec(instance ->  instance.spec()
+    .property("sum").dependsOn(asList("number1", "number2"), numbers -> (int)numbers[0] + (int)numbers[1])
+);
+
+Expression exp1 = jFactory.create(Expression.class);
+Expression exp2 = jFactory.type(Expression.class).property("number1", 100).create();
+Expression exp3 = jFactory.type(Expression.class).property("number1", 100).property("number2", 200).create();
+Expression exp4 = jFactory.type(Expression.class).property("sum", 300).create();
+```
+但这种依赖也不会永远有效。比如以上4种创建对象情形，1，2和3的依赖是有效的。而4中实际上是强制指定了sum的值，因此依赖规则不再有效。
+
+## 属性连接
+
+有的业务数据的多个属性保持一致，比如：
+
+```java
+public class Product {
+    private int price;
+}
+
+public class Order {
+    private Product product;
+    private int total;
+}
+```
+
+从有效订单的角度讲，应该最大程度的保证创建出的Order对象的total属性和product.price相等。JFactory支持连接属性Spec
+
+```java
+jFactory.factory(Order.class ).spec(instance -> instance.spec()
+    .property("product").asDefault()
+    .link("total", "product.price")
+);
+```
+
+同样如果强制指定了不同的product.price和total属性，这种连接也不会永远有效。
+多个属性的连接后的最终值是多少会根据原先各个属性Spec按如下的优先级得出：
+- 创建时赋予的属性值
+- 只读值（关联已创建过对象的某个属性）
+- 属性依赖
+- 通过value方法给定的值
+- 默认策略创建的值
+
+##### 属性依赖和连接属性都可以操作子属性，这可能会导致复杂的依赖关系甚至是循环依赖，这两个特性本身也存在部分局限，应尽量避免在多层对象中过多使用这两个特性。
