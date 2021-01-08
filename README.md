@@ -106,18 +106,18 @@ public class Person {
     private String gender;
 };
 
-Person person = jFactory.type(Product.class)
+Person person = jFactory.type(Person.class)
     .property("age", 20)
     .property("gender", "MALE").create()
 ```
 可以预先定义类型的一些具名Spec，然后在构造数据时组合使用：
 ```java
-jFactory.factory(Product.class)
+jFactory.factory(Person.class)
     .spec("成年", instance -> instance.spec().property("age").value(20))
     .spec("男性", instance -> instance.spec().property("gender").value("MALE"))
     );
 
-Person person = jFactory.type(Product.class).traits("成年", "男性").create();
+Person person = jFactory.type(Person.class).traits("成年", "男性").create();
 ```
 
 ## 用Java类定义Spec
