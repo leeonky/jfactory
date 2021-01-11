@@ -34,7 +34,7 @@ class CollectionExpression<P, E> extends Expression<P> {
         CollectionProducer<?, E> collectionProducer = cast(parent.childOrDefault(property.getName()),
                 CollectionProducer.class).orElseThrow(IllegalArgumentException::new);
         children.forEach((k, v) ->
-                collectionProducer.addChild(k.toString(), v.buildProducer(JFactory, collectionProducer)));
+                collectionProducer.setChild(k.toString(), v.buildProducer(JFactory, collectionProducer)));
         return collectionProducer;
     }
 

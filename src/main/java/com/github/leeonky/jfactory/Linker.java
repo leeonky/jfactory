@@ -37,7 +37,7 @@ class Linker<T> {
     @SuppressWarnings("unchecked")
     public Producer<T> chooseProducer() {
         List<Producer<T>> linkedProducers = linkedAbsoluteProperties.stream()
-                .map(p -> (Producer<T>) root.child(p).getLinkOrigin())
+                .map(p -> (Producer<T>) root.descendant(p).getLinkOrigin())
                 .collect(toList());
         return TYPE_PRIORITY.stream().map(type -> chooseProducer(type, linkedProducers))
                 .filter(Optional::isPresent)

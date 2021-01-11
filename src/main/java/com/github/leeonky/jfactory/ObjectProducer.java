@@ -34,11 +34,11 @@ class ObjectProducer<T> extends Producer<T> {
 
     private void setupReverseAssociations() {
         reverseAssociations.forEach((child, association) ->
-                child(child).setupAssociation(association, instance, cachedChildren));
+                descendant(child).setupAssociation(association, instance, cachedChildren));
     }
 
     @Override
-    public void addChild(String property, Producer<?> producer) {
+    public void setChild(String property, Producer<?> producer) {
         children.put(property, producer);
     }
 
@@ -53,7 +53,7 @@ class ObjectProducer<T> extends Producer<T> {
     private Producer<?> addDefaultCollectionProducer(PropertyWriter<?> property) {
         Producer<?> result = null;
         if (property.getType().isCollection())
-            addChild(property.getName(), result = new CollectionProducer<>(getType(), property.getType(),
+            setChild(property.getName(), result = new CollectionProducer<>(getType(), property.getType(),
                     instance.sub(property), factory.getFactorySet()));
         return result;
     }
@@ -115,7 +115,7 @@ class ObjectProducer<T> extends Producer<T> {
         getType().getPropertyWriters().values().stream()
                 .filter(JFactory::shouldCreateDefaultValue)
                 .forEach(propertyWriter -> subDefaultValueProducer(propertyWriter)
-                        .ifPresent(producer -> addChild(propertyWriter.getName(), producer)));
+                        .ifPresent(producer -> setChild(propertyWriter.getName(), producer)));
     }
 
     @Override
@@ -140,7 +140,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
-        addChild(association, new UnFixedValueProducer<>(instance.reference(), create(instance.spec().getType())));
+        setChild(association, new UnFixedValueProducer<>(instance.reference(), create(instance.spec().getType())));
         persistable = cachedChildren;
     }
 }

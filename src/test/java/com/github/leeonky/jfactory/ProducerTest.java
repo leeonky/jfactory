@@ -38,9 +38,9 @@ class ProducerTest {
 
     @SuppressWarnings("unchecked")
     private void assertChange(String message, String from, String to, String result) {
-        Producer producer = beanProducer.child(createChain(from));
-        new ProducerAssert(producer.changeTo(beanProducer.child(createChain(to)))).
-                isSameProducer(beanProducer.child(createChain(result)));
+        Producer producer = beanProducer.descendant(createChain(from));
+        new ProducerAssert(producer.changeTo(beanProducer.descendant(createChain(to)))).
+                isSameProducer(beanProducer.descendant(createChain(result)));
     }
 
     static class ProducerAssert extends AbstractAssert<ProducerAssert, Producer<?>> {

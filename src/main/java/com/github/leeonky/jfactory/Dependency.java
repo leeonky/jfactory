@@ -20,12 +20,12 @@ class Dependency<T> {
 
     @SuppressWarnings("unchecked")
     public void process(Producer<?> parent) {
-        parent.changeChild(property, (nextToLast, property) -> new DependencyProducer<>(
+        parent.changeDescendant(property, (nextToLast, property) -> new DependencyProducer<>(
                 (BeanClass<T>) nextToLast.getPropertyWriterType(property), suppliers(parent), rule));
     }
 
     private List<Supplier<Object>> suppliers(Producer<?> producer) {
         return dependencies.stream().map(dependency -> (Supplier<Object>) () ->
-                producer.child(dependency).getValue()).collect(Collectors.toList());
+                producer.descendant(dependency).getValue()).collect(Collectors.toList());
     }
 }

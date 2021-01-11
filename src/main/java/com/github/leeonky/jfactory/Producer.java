@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import static com.github.leeonky.jfactory.Linker.Reference.defaultLinkerReference;
 import static java.util.function.Function.identity;
 
-//TODO too many child access method: get getOptional getOrDefault add change...
 abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
@@ -35,7 +34,7 @@ abstract class Producer<T> {
     protected void doLinks(Producer<?> root, PropertyChain current) {
     }
 
-    public void addChild(String property, Producer<?> producer) {
+    public void setChild(String property, Producer<?> producer) {
     }
 
     public Optional<Producer<?>> child(String property) {
@@ -46,12 +45,12 @@ abstract class Producer<T> {
         return child(property).orElse(null);
     }
 
-    public Producer<?> child(PropertyChain property) {
+    public Producer<?> descendant(PropertyChain property) {
         return property.access(this, (producer, subProperty) -> producer.child(subProperty)
                 .orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)), identity());
     }
 
-    public void changeChild(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerFactory) {
+    public void changeDescendant(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerFactory) {
         String lastProperty = property.tail();
         property.removeTail().access(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(nextToLast ->
                 nextToLast.changeChild(lastProperty, producerFactory.apply(nextToLast, lastProperty)));
@@ -60,7 +59,7 @@ abstract class Producer<T> {
     @SuppressWarnings("unchecked")
     public <T> void changeChild(String property, Producer<T> producer) {
         Producer<T> origin = (Producer<T>) childOrDefault(property);
-        addChild(property, origin == null ? producer : origin.changeTo(producer));
+        setChild(property, origin == null ? producer : origin.changeTo(producer));
     }
 
     public BeanClass<?> getPropertyWriterType(String property) {

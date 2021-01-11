@@ -12,9 +12,9 @@ class Link {
     public void process(Producer<?> root, PropertyChain current) {
         Linker linker = syncLink(root, current);
         absoluteProperties(current).forEach(linkProperty ->
-                root.changeChild(linkProperty, (nextToLast, property) ->
+                root.changeDescendant(linkProperty, (nextToLast, property) ->
                         new LinkProducer(nextToLast.getPropertyWriterType(property), linker,
-                                root.child(linkProperty).getLinkOrigin(), linkProperty)));
+                                root.descendant(linkProperty).getLinkOrigin(), linkProperty)));
     }
 
     private Stream<PropertyChain> absoluteProperties(PropertyChain current) {
@@ -25,7 +25,7 @@ class Link {
     private <T> Linker<T> syncLink(Producer<?> root, PropertyChain current) {
         Linker<T> linker = new Linker<>(root);
         absoluteProperties(current)
-                .flatMap(property -> ((Producer<T>) root.child(property))
+                .flatMap(property -> ((Producer<T>) root.descendant(property))
                         .allLinkerReferences(root, property))
                 .distinct().forEach(linker::link);
         return linker;
