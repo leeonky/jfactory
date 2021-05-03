@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class _03_CreateWithSpec {
-    private JFactory JFactory = new JFactory();
+    private JFactory jFactory = new JFactory();
 
     @Getter
     @Setter
@@ -60,33 +60,33 @@ public class _03_CreateWithSpec {
 
         @Test
         void support_define_spec_of_type() {
-            JFactory.factory(Bean.class).spec(instance -> {
+            jFactory.factory(Bean.class).spec(instance -> {
                 instance.spec().property("stringValue").value("hello");
             });
 
-            assertThat(JFactory.type(Bean.class).create())
+            assertThat(jFactory.type(Bean.class).create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
 
         @Test
         void support_define_trait_of_type() {
-            JFactory.factory(Bean.class).spec("100", instance -> {
+            jFactory.factory(Bean.class).spec("100", instance -> {
                 instance.spec().property("intValue").value(100);
             });
 
-            assertThat(JFactory.type(Bean.class).traits("100").create())
+            assertThat(jFactory.type(Bean.class).traits("100").create())
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
         @Test
         void support_method_chain_in_spec_definition() {
-            JFactory.factory(Bean.class).spec(instance -> instance.spec()
+            jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value("hello"))
                     .spec("a bean", instance -> instance.spec()
                             .property("content").value("a bean"))
                     .constructor(instance -> new BeanSub());
 
-            assertThat(JFactory.type(Bean.class).traits("a bean").create())
+            assertThat(jFactory.type(Bean.class).traits("a bean").create())
                     .isInstanceOf(BeanSub.class)
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("content", "a bean")
@@ -95,7 +95,7 @@ public class _03_CreateWithSpec {
 
         @Test
         void raise_error_when_trait_not_exist() {
-            assertThrows(IllegalArgumentException.class, () -> JFactory.type(Bean.class).traits("not exist").create());
+            assertThrows(IllegalArgumentException.class, () -> jFactory.type(Bean.class).traits("not exist").create());
         }
     }
 
@@ -104,18 +104,18 @@ public class _03_CreateWithSpec {
 
         @Test
         void support_define_spec_in_class() {
-            assertThat(JFactory.spec(ABean.class).traits("int100", "hello").create())
+            assertThat(jFactory.spec(ABean.class).traits("int100", "hello").create())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
 
-            assertThat(JFactory.createAs(ABean.class))
+            assertThat(jFactory.createAs(ABean.class))
                     .hasFieldOrPropertyWithValue("content", "this is a bean");
         }
 
         @Test
         void support_pass_spec_arg_in_java_code() {
-            assertThat(JFactory.createAs(ABean.class, spec -> spec.int100().strHello()))
+            assertThat(jFactory.createAs(ABean.class, spec -> spec.int100().strHello()))
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello")
                     .hasFieldOrPropertyWithValue("intValue", 100);
@@ -124,31 +124,31 @@ public class _03_CreateWithSpec {
 
         @Test
         void should_call_type_base_constructor_and_main_spec() {
-            JFactory.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> instance.spec()
+            jFactory.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> instance.spec()
                     .property("intValue").value(50));
 
-            assertThat(JFactory.createAs(ABean.class))
+            assertThat(jFactory.createAs(ABean.class))
                     .isInstanceOf(BeanSub.class)
                     .hasFieldOrPropertyWithValue("intValue", 50);
         }
 
         @Test
         void support_build_through_spec_name() {
-            JFactory.spec(ABean.class);
+            jFactory.spec(ABean.class);
 
-            assertThat((Bean) JFactory.createAs("hello", "ABean"))
+            assertThat((Bean) jFactory.createAs("hello", "ABean"))
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
 
         @Test
         void should_raise_error_when_definition_or_trait_not_exist() {
-            assertThrows(IllegalArgumentException.class, () -> JFactory.createAs("ABean"));
+            assertThrows(IllegalArgumentException.class, () -> jFactory.createAs("ABean"));
         }
 
         @Test
         void should_raise_error_when_invalid_generic_args() {
-            assertThrows(IllegalStateException.class, () -> JFactory.createAs(InvalidGenericArgSpec.class));
+            assertThrows(IllegalStateException.class, () -> jFactory.createAs(InvalidGenericArgSpec.class));
         }
     }
 }
