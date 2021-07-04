@@ -12,14 +12,14 @@ import static java.util.Objects.hash;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final ObjectFactory<T> objectFactory;
-    private final JFactory JFactory;
+    private final JFactory jFactory;
     private final Set<String> traits = new LinkedHashSet<>();
 
     private final KeyValueCollection properties = new KeyValueCollection();
     private final DefaultArguments arguments = new DefaultArguments();
 
-    public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory JFactory) {
-        this.JFactory = JFactory;
+    public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory) {
+        this.jFactory = jFactory;
         this.objectFactory = objectFactory;
     }
 
@@ -30,7 +30,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public ObjectProducer<T> createProducer() {
-        return new ObjectProducer<>(JFactory, objectFactory, this);
+        return new ObjectProducer<>(jFactory, objectFactory, this);
     }
 
     @Override
@@ -70,7 +70,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public DefaultBuilder<T> clone() {
-        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, JFactory);
+        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory);
         builder.properties.merge(properties);
         builder.traits.addAll(traits);
         builder.arguments.merge(arguments);
@@ -87,7 +87,7 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Collection<T> queryAll() {
         KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType());
-        return JFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
+        return jFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
                 .filter(matcher::matches).collect(Collectors.toList());
     }
 
@@ -111,12 +111,12 @@ class DefaultBuilder<T> implements Builder<T> {
 
     private void forSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
         objectFactory.collectSpec(traits, instance);
-        instance.spec().apply(JFactory, objectProducer);
+        instance.spec().apply(jFactory, objectProducer);
     }
 
     private void forInputProperties(ObjectProducer<T> objectProducer) {
         properties.expressions(objectFactory.getType()).forEach(exp ->
-                objectProducer.changeChild(exp.getProperty(), exp.buildProducer(JFactory, objectProducer)));
+                objectProducer.changeChild(exp.getProperty(), exp.buildProducer(jFactory, objectProducer)));
     }
 
     public DefaultBuilder<T> clone(DefaultBuilder<T> another) {

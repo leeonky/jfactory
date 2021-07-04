@@ -10,7 +10,7 @@ import static com.github.leeonky.util.BeanClass.create;
 
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
-    private final JFactory JFactory;
+    private final JFactory jFactory;
     private final DefaultBuilder<T> builder;
     private final RootInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
@@ -20,13 +20,13 @@ class ObjectProducer<T> extends Producer<T> {
     private final ListPersistable cachedChildren = new ListPersistable();
     private Persistable persistable;
 
-    public ObjectProducer(JFactory JFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder) {
+    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder) {
         super(factory.getType());
         this.factory = factory;
-        this.JFactory = JFactory;
+        this.jFactory = jFactory;
         this.builder = builder;
         instance = factory.createInstance(builder.getArguments());
-        persistable = JFactory.getDataRepository();
+        persistable = jFactory.getDataRepository();
         establishDefaultValueProducers();
         builder.establishSpecProducers(this, instance);
         setupReverseAssociations();
@@ -113,7 +113,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     private void establishDefaultValueProducers() {
         getType().getPropertyWriters().values().stream()
-                .filter(JFactory::shouldCreateDefaultValue)
+                .filter(jFactory::shouldCreateDefaultValue)
                 .forEach(propertyWriter -> subDefaultValueProducer(propertyWriter)
                         .ifPresent(producer -> setChild(propertyWriter.getName(), producer)));
     }

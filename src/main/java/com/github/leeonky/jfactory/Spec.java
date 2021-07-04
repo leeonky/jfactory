@@ -28,8 +28,8 @@ public class Spec<T> {
         return this;
     }
 
-    void apply(JFactory JFactory, ObjectProducer<T> producer) {
-        operations.forEach(o -> o.accept(JFactory, producer));
+    void apply(JFactory jFactory, ObjectProducer<T> producer) {
+        operations.forEach(o -> o.accept(jFactory, producer));
         type = producer.getType().getType();
     }
 

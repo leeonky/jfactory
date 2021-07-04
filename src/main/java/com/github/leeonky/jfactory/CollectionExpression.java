@@ -30,11 +30,11 @@ class CollectionExpression<P, E> extends Expression<P> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Producer<?> buildProducer(JFactory JFactory, Producer<P> parent) {
+    public Producer<?> buildProducer(JFactory jFactory, Producer<P> parent) {
         CollectionProducer<?, E> collectionProducer = cast(parent.childOrDefault(property.getName()),
                 CollectionProducer.class).orElseThrow(IllegalArgumentException::new);
         children.forEach((k, v) ->
-                collectionProducer.setChild(k.toString(), v.buildProducer(JFactory, collectionProducer)));
+                collectionProducer.setChild(k.toString(), v.buildProducer(jFactory, collectionProducer)));
         return collectionProducer;
     }
 

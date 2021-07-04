@@ -42,8 +42,8 @@ class TraitsSpec {
         return spec != null && another.spec != null && !Objects.equals(spec, another.spec);
     }
 
-    public Builder<?> toBuilder(JFactory JFactory, BeanClass<?> propertyType) {
-        return (spec != null ? JFactory.spec(spec) : JFactory.type(propertyType.getType()))
+    public Builder<?> toBuilder(JFactory jFactory, BeanClass<?> propertyType) {
+        return (spec != null ? jFactory.spec(spec) : jFactory.type(propertyType.getType()))
                 .traits(traits);
     }
 
