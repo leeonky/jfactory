@@ -242,6 +242,17 @@ class _04_Spec {
         }
 
         @Test
+        void should_use_created_object_in_customized_builder() {
+            Bean bean = jFactory.type(Bean.class).property("intValue", 100).create();
+
+            jFactory.factory(Beans.class).spec(instance ->
+                    instance.spec().property("bean").asDefault(builder -> builder.property("intValue", 100)));
+
+            assertThat(jFactory.create(Beans.class).getBean())
+                    .isEqualTo(bean);
+        }
+
+        @Test
         void support_default_primitive_type_spec() {
             jFactory.factory(Bean.class).spec(instance ->
                     instance.spec().property("stringValue").asDefault());

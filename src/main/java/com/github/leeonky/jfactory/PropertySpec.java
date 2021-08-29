@@ -12,6 +12,7 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 
+//TODO rename api
 public class PropertySpec<T> {
     private final Spec<T> spec;
     private final PropertyChain property;
@@ -73,7 +74,7 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> dependsOn(String dependency, Function<Object, Object> rule) {
-        return dependsOn(singletonList(dependency), objs -> rule.apply(objs[0]));
+        return dependsOn(singletonList(dependency), objects -> rule.apply(objects[0]));
     }
 
     public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> rule) {
@@ -93,8 +94,13 @@ public class PropertySpec<T> {
         return appendProducer((factorySet, producer, s) -> producerFactory.apply(factorySet));
     }
 
+    @SuppressWarnings("unchecked")
     private <V> Producer<V> createProducer(Builder<V> builder) {
-        return builder.args(spec.params(property.toString())).createProducer();
+        Builder<V> builderWithArgs = builder.args(spec.params(property.toString()));
+        return builderWithArgs.queryAll().stream().findFirst()
+                .<Producer<V>>map(object ->
+                        new FixedValueProducer<>((BeanClass<V>) BeanClass.create(object.getClass()), object))
+                .orElseGet(builderWithArgs::createProducer);
     }
 
     public Spec<T> reverseAssociation(String association) {
