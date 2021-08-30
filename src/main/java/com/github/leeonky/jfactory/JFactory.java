@@ -41,9 +41,8 @@ public class JFactory {
         return new DefaultBuilder<>(factorySet.createSpecFactory(specClass, trait), this);
     }
 
-    @SuppressWarnings("unchecked")
-    public JFactory register(Class<? extends Spec<?>> specClass) {
-        factorySet.registerSpecClassFactory((Class) specClass);
+    public <T> JFactory register(Class<? extends Spec<T>> specClass) {
+        factorySet.registerSpecClassFactory(specClass);
         return this;
     }
 

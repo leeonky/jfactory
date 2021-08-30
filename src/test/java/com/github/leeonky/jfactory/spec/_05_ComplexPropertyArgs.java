@@ -150,8 +150,8 @@ class _05_ComplexPropertyArgs {
 
         @Test
         void should_raise_error_when_property_has_different_spec() {
-            jFactory.register(ABean.class);
-            jFactory.register(AnotherBean.class);
+            jFactory.register(ABean.class)
+                    .register(AnotherBean.class);
 
             assertThrows(IllegalArgumentException.class, () -> jFactory.type(BeansWrapper.class)
                     .property("beans.bean(ABean).content", "hello")
