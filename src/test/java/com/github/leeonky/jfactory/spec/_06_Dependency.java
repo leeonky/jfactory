@@ -23,10 +23,10 @@ public class _06_Dependency {
         );
         jFactory.factory(Beans.class)
                 .spec(instance -> instance.spec()
-                        .property("bean1").asDefault()
-                        .property("bean2").asDefault()
+                        .property("bean1").byFactory()
+                        .property("bean2").byFactory()
                         .property("bean2.stringValue").dependsOn("bean1.stringValue", v -> v)
-                        .property("bean3").asDefault()
+                        .property("bean3").byFactory()
                         .property("bean3.stringValue").dependsOn("bean1.stringValue", v -> v)
                 );
 
@@ -192,7 +192,7 @@ public class _06_Dependency {
             @Test
             void ignore_original_spec_when_dependency_override_spec() {
                 jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
-                        .property("beans[1]").asDefault()
+                        .property("beans[1]").byFactory()
                         .property("beans[1]").dependsOn("beans[0]", obj -> obj));
 
                 Bean bean = new Bean();
@@ -223,7 +223,7 @@ public class _06_Dependency {
         @Test
         void dependency_in_different_level() {
             jFactory.factory(BeansWrapper.class).spec(instance -> instance.spec()
-                    .property("beans").asDefault()
+                    .property("beans").byFactory()
                     .property("beans.bean1").dependsOn("bean", obj -> obj));
             Bean bean = new Bean();
 
@@ -231,7 +231,7 @@ public class _06_Dependency {
                     .hasFieldOrPropertyWithValue("bean1", bean);
 
             jFactory.factory(BeansWrapper.class).spec(instance -> instance.spec()
-                    .property("beans").asDefault(builder -> builder.property("bean1", bean))
+                    .property("beans").byFactory(builder -> builder.property("bean1", bean))
                     .property("bean").dependsOn("beans.bean1", obj -> obj));
 
             BeansWrapper actual = jFactory.type(BeansWrapper.class).create();
@@ -245,7 +245,7 @@ public class _06_Dependency {
             @Test
             void ignore_dependency_when_input_property_override_dependency() {
                 jFactory.factory(BeansWrapper.class).spec(instance -> instance.spec()
-                        .property("beans").asDefault()
+                        .property("beans").byFactory()
                         .property("beans.bean1").dependsOn("bean", obj -> obj));
                 Bean bean1 = new Bean();
                 Bean bean = new Bean();
@@ -260,7 +260,7 @@ public class _06_Dependency {
             @Test
             void ignore_dependency_when_input_property_override_host_object() {
                 jFactory.factory(BeansWrapper.class).spec(instance -> instance.spec()
-                        .property("beans").asDefault()
+                        .property("beans").byFactory()
                         .property("beans.bean1").dependsOn("bean", obj -> obj));
 
                 Bean bean = new Bean();
@@ -303,8 +303,8 @@ public class _06_Dependency {
         @Test
         void dependency_of_collection_element_property_with_default_value() {
             jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
-                    .property("beans[0]").asDefault()
-                    .property("beans[1]").asDefault()
+                    .property("beans[0]").byFactory()
+                    .property("beans[1]").byFactory()
                     .property("beans[0].stringValue").dependsOn("beans[1].stringValue", obj -> obj));
 
             BeanArray beanArray = jFactory.create(BeanArray.class);
@@ -315,8 +315,8 @@ public class _06_Dependency {
         @Test
         void dependency_of_collection_element_property_with_specified_value() {
             jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
-                    .property("beans[0]").asDefault()
-                    .property("beans[1]").asDefault()
+                    .property("beans[0]").byFactory()
+                    .property("beans[1]").byFactory()
                     .property("beans[0].stringValue").dependsOn("beans[1].stringValue", obj -> obj));
 
             BeanArray beanArray = jFactory.type(BeanArray.class).property("beans[1].stringValue", "hello").create();
@@ -332,8 +332,8 @@ public class _06_Dependency {
             @Test
             void ignore_dependency_when_input_property_override_dependency() {
                 jFactory.factory(BeansArray.class).spec(instance -> instance.spec()
-                        .property("beansArray[0]").asDefault()
-                        .property("beansArray[1]").asDefault()
+                        .property("beansArray[0]").byFactory()
+                        .property("beansArray[1]").byFactory()
                         .property("beansArray[0].bean1").dependsOn("beansArray[1].bean2", obj -> obj));
 
                 Bean bean = new Bean();
@@ -351,8 +351,8 @@ public class _06_Dependency {
             @Test
             void ignore_dependency_when_input_property_override_host_object() {
                 jFactory.factory(BeansArray.class).spec(instance -> instance.spec()
-                        .property("beansArray[0]").asDefault()
-                        .property("beansArray[1]").asDefault()
+                        .property("beansArray[0]").byFactory()
+                        .property("beansArray[1]").byFactory()
                         .property("beansArray[0].bean1").dependsOn("beansArray[1].bean2", obj -> obj));
 
                 BeansArray beansArray = jFactory.type(BeansArray.class).property("beansArray[0]", null).create();
@@ -367,11 +367,11 @@ public class _06_Dependency {
             @Test
             void parent_property_dependency_can_override_sub_property_spec() {
                 jFactory.factory(Beans.class).spec(instance -> instance.spec()
-                        .property("bean1").asDefault()
-                        .property("bean2").asDefault());
+                        .property("bean1").byFactory()
+                        .property("bean2").byFactory());
                 jFactory.factory(BeansArray.class).spec(instance -> instance.spec()
-                        .property("beansArray[0]").asDefault()
-                        .property("beansArray[1]").asDefault()
+                        .property("beansArray[0]").byFactory()
+                        .property("beansArray[1]").byFactory()
                         .property("beansArray[0].bean1.intValue").dependsOn("beansArray[1].bean2.intValue", obj -> {
                             fail("should not be called");
                             return 0;
@@ -393,7 +393,7 @@ public class _06_Dependency {
         @Test
         void dependency_in_two_object_spec_definitions() {
             jFactory.factory(BeansWrapper.class).spec(instance -> instance.spec()
-                    .property("beans").asDefault()
+                    .property("beans").byFactory()
                     .property("bean").dependsOn("beans.bean1", obj -> obj));
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
                     .property("bean1").dependsOn("bean2", obj -> obj));
@@ -415,7 +415,7 @@ public class _06_Dependency {
                     .property("content").dependsOn("stringValue", identity()));
 
             jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
-                    .property("beans[0]").asDefault());
+                    .property("beans[0]").byFactory());
 
             BeanArray beanArray = jFactory.type(BeanArray.class)
                     .property("beans[0].stringValue", "hello").create();
@@ -459,10 +459,10 @@ public class _06_Dependency {
         @Test
         void should_ignore_dependency_when_parent_object_specified_during_creation() {
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
-                    .property("bean1").asDefault());
+                    .property("bean1").byFactory());
 
             jFactory.factory(BeansWrapper.class).spec(instance -> instance.spec()
-                    .property("beans").asDefault()
+                    .property("beans").byFactory()
                     .property("beans.bean1.stringValue").dependsOn("bean", obj -> ((Bean) obj).getStringValue()));
 
             Bean bean = new Bean();
@@ -494,7 +494,7 @@ public class _06_Dependency {
         void read_property_value_from_specified_sub_object() {
             Bean bean = new Bean().setIntValue(100);
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
-                    .property("bean1").asDefault()
+                    .property("bean1").byFactory()
                     .property("bean1.intValue").dependsOn("bean2.intValue", obj -> obj));
 
             assertThat(jFactory.type(Beans.class).property("bean2", bean).create().getBean1())
@@ -507,7 +507,7 @@ public class _06_Dependency {
             jFactory.factory(Beans.class)
                     .constructor(instance -> new Beans().setBean2(new Bean().setIntValue(100)))
                     .spec(instance -> instance.spec()
-                            .property("bean1").asDefault()
+                            .property("bean1").byFactory()
                             .property("bean1.intValue").dependsOn("bean2.intValue", obj -> obj));
 
             Beans beans = jFactory.create(Beans.class);
@@ -518,7 +518,7 @@ public class _06_Dependency {
         @Test
         void should_use_type_default_value_when_has_null_in_property_chain() {
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
-                    .property("bean1").asDefault()
+                    .property("bean1").byFactory()
                     .property("bean1.intValue").dependsOn("bean2.intValue", obj -> obj));
 
             assertThat(jFactory.create(Beans.class).getBean1())
@@ -533,7 +533,7 @@ public class _06_Dependency {
                 beanArray.anotherBeans = new Bean[]{new Bean().setIntValue(100)};
                 return beanArray;
             }).spec(instance -> instance.spec()
-                    .property("beans[0]").asDefault()
+                    .property("beans[0]").byFactory()
                     .property("beans[0].intValue").dependsOn("anotherBeans[0].intValue", obj -> obj));
 
             BeanArray beanArray = jFactory.create(BeanArray.class);

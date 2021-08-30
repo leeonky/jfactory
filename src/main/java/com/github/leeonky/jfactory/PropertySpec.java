@@ -12,7 +12,6 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 
-//TODO rename api
 public class PropertySpec<T> {
     private final Spec<T> spec;
     private final PropertyChain property;
@@ -34,42 +33,38 @@ public class PropertySpec<T> {
                 new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getPropertyWriterType(property)));
     }
 
-    public <V, S extends Spec<V>> Spec<T> as(Class<S> specClass, Consumer<S> trait) {
-        return appendProducer(factorySet -> createProducer(factorySet.spec(specClass, trait)));
-    }
-
-    public <V> Spec<T> as(Class<? extends Spec<V>> specClass) {
+    public <V> Spec<T> is(Class<? extends Spec<V>> specClass) {
         return appendProducer(factorySet -> createProducer(factorySet.spec(specClass)));
     }
 
-    public Spec<T> asDefaultValue(Object value) {
-        return asDefaultValue(() -> value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <V> Spec<T> asDefaultValue(Supplier<V> supplier) {
-        if (supplier == null)
-            return asDefaultValue((Object) null);
-        return appendProducer((factorySet, producer, property) ->
-                new DefaultValueProducer(producer.getPropertyWriterType(property), supplier));
-    }
-
-    public Spec<T> as(String... traitsAndSpec) {
+    public Spec<T> is(String... traitsAndSpec) {
         return appendProducer(factorySet -> createProducer(factorySet.spec(traitsAndSpec)));
     }
 
-    public <V> Spec<T> asWith(Class<? extends Spec<V>> specClass, Function<Builder<V>, Builder<V>> builder) {
-        return appendProducer(factorySet -> createProducer(builder.apply(factorySet.spec(specClass))));
+    public <V, S extends Spec<V>> IsSpec<V, S> from(Class<S> specClass) {
+        return new IsSpec<>(specClass);
     }
 
-    public Spec<T> asDefault() {
-        return asDefault(identity());
+    public Spec<T> defaultValue(Object value) {
+        return defaultValue(() -> value);
     }
 
-    public Spec<T> asDefault(Function<Builder<?>, Builder<?>> builder) {
+    @SuppressWarnings("unchecked")
+    public <V> Spec<T> defaultValue(Supplier<V> supplier) {
+        if (supplier == null)
+            return defaultValue((Object) null);
         return appendProducer((factorySet, producer, property) ->
+                new DefaultValueProducer<>((BeanClass<V>) producer.getPropertyWriterType(property), supplier));
+    }
+
+    public Spec<T> byFactory() {
+        return byFactory(identity());
+    }
+
+    public Spec<T> byFactory(Function<Builder<?>, Builder<?>> builder) {
+        return appendProducer((jFactory, producer, property) ->
                 producer.subDefaultValueProducer(producer.getType().getPropertyWriter(property))
-                        .orElseGet(() -> createProducer(builder.apply(factorySet.type(
+                        .orElseGet(() -> createProducer(builder.apply(jFactory.type(
                                 producer.getPropertyWriterType(property).getType())))));
     }
 
@@ -91,7 +86,7 @@ public class PropertySpec<T> {
     }
 
     private Spec<T> appendProducer(Function<JFactory, Producer<?>> producerFactory) {
-        return appendProducer((factorySet, producer, s) -> producerFactory.apply(factorySet));
+        return appendProducer((jFactory, producer, s) -> producerFactory.apply(jFactory));
     }
 
     @SuppressWarnings("unchecked")
@@ -110,5 +105,21 @@ public class PropertySpec<T> {
     @FunctionalInterface
     interface Fuc<P1, P2, P3, R> {
         R apply(P1 p1, P2 p2, P3 p3);
+    }
+
+    public class IsSpec<V, S extends Spec<V>> {
+        private final Class<S> specClass;
+
+        public IsSpec(Class<S> spec) {
+            specClass = spec;
+        }
+
+        public Spec<T> which(Consumer<S> trait) {
+            return appendProducer(factorySet -> createProducer(factorySet.spec(specClass, trait)));
+        }
+
+        public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {
+            return appendProducer(factorySet -> createProducer(builder.apply(factorySet.spec(specClass))));
+        }
     }
 }

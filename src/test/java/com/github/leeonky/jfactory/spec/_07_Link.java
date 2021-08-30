@@ -91,9 +91,9 @@ class _07_Link {
         @Test
         void link_property() {
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
-                    .property("beans[0]").asDefault()
-                    .property("beans[1]").asDefault()
-                    .property("beans[2]").asDefault()
+                    .property("beans[0]").byFactory()
+                    .property("beans[1]").byFactory()
+                    .property("beans[2]").byFactory()
                     .link("beans[0].str1", "beans[1].str1", "beans[2].str1"));
 
             Beans beans = jFactory.create(Beans.class);
@@ -118,7 +118,7 @@ class _07_Link {
         void support_link_with_value_type_collection_element_and_property() {
             jFactory.factory(Strings.class).spec(instance -> instance.spec()
                     .property("value").value("hello")
-                    .property("strings[0]").asDefault()
+                    .property("strings[0]").byFactory()
                     .link("strings[0]", "value"));
 
             Strings strings = jFactory.create(Strings.class);
@@ -136,7 +136,7 @@ class _07_Link {
                     .link("str1", "str2"));
 
             jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                    .property("bean").asDefault()
+                    .property("bean").byFactory()
                     .link("str", "bean.str1"));
 
             BeanWrapper beanWrapper = jFactory.type(BeanWrapper.class).create();
@@ -151,7 +151,7 @@ class _07_Link {
         void support_nest_object_link_in_collection() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec().link("str1", "str2"));
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
-                    .property("beans[0]").asDefault());
+                    .property("beans[0]").byFactory());
 
             Beans beans = jFactory.create(Beans.class);
 
@@ -163,7 +163,7 @@ class _07_Link {
             jFactory.factory(Bean.class).spec(instance -> instance.spec().property("str1").value("hello"));
 
             jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
-                    .property("bean").asDefault()
+                    .property("bean").byFactory()
                     .link("bean.str1", "str")
                     .link("bean", "another"));
 

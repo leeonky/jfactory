@@ -133,7 +133,7 @@ class _04_Spec {
         @Test
         void support_specify_property_default_value() {
             jFactory.factory(Bean.class).spec(instance ->
-                    instance.spec().property("stringValue").asDefaultValue(instance.getSequence()));
+                    instance.spec().property("stringValue").defaultValue(instance.getSequence()));
 
             assertThat(jFactory.create(Bean.class))
                     .hasFieldOrPropertyWithValue("stringValue", "1")
@@ -143,7 +143,7 @@ class _04_Spec {
         @Test
         void support_specify_property_default_value_supplier() {
             jFactory.factory(Bean.class).spec(instance ->
-                    instance.spec().property("stringValue").asDefaultValue(instance.spec().instance()::getSequence));
+                    instance.spec().property("stringValue").defaultValue(instance::getSequence));
 
             assertThat(jFactory.create(Bean.class))
                     .hasFieldOrPropertyWithValue("stringValue", "1")
@@ -153,7 +153,7 @@ class _04_Spec {
         @Test
         void support_specify_property_default_value_with_null() {
             jFactory.factory(Bean.class).spec(instance ->
-                    instance.spec().property("stringValue").asDefaultValue(null));
+                    instance.spec().property("stringValue").defaultValue(null));
 
             assertThat(jFactory.create(Bean.class))
                     .hasFieldOrPropertyWithValue("stringValue", null)
@@ -164,7 +164,7 @@ class _04_Spec {
         void default_value_should_only_override_default_value_spec() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value("hello")
-                    .property("stringValue").asDefaultValue(instance.getSequence())
+                    .property("stringValue").defaultValue(instance.getSequence())
             );
 
             assertThat(jFactory.create(Bean.class))
@@ -179,7 +179,7 @@ class _04_Spec {
         @Test
         void support_specify_spec_class() {
             jFactory.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").as(ABean.class));
+                    instance.spec().property("bean").is(ABean.class));
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
@@ -188,8 +188,7 @@ class _04_Spec {
 
         @Test
         void support_specify_spec_instance() {
-            jFactory.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").as(ABean.class, ABean::int100));
+            jFactory.factory(Beans.class).spec(instance -> instance.spec().property("bean").from(ABean.class).which(ABean::int100));
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
@@ -201,7 +200,7 @@ class _04_Spec {
             jFactory.register(ABean.class);
 
             jFactory.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").as("int100", "ABean"));
+                    instance.spec().property("bean").is("int100", "ABean"));
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("intValue", 100)
@@ -210,8 +209,7 @@ class _04_Spec {
 
         @Test
         void support_specify_customized_builder_args() {
-            jFactory.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").asWith(ABean.class, builder -> builder.traits("int100")));
+            jFactory.factory(Beans.class).spec(instance -> instance.spec().property("bean").from((Class<? extends Spec<Bean>>) ABean.class).and(builder -> builder.traits("int100")));
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
@@ -225,7 +223,7 @@ class _04_Spec {
         @Test
         void support_create_property_with_default() {
             jFactory.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").asDefault());
+                    instance.spec().property("bean").byFactory());
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .isInstanceOf(Bean.class)
@@ -235,7 +233,7 @@ class _04_Spec {
         @Test
         void support_specify_customized_builder_args() {
             jFactory.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").asDefault(builder -> builder.property("intValue", 100)));
+                    instance.spec().property("bean").byFactory(builder -> builder.property("intValue", 100)));
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("intValue", 100);
@@ -246,7 +244,7 @@ class _04_Spec {
             Bean bean = jFactory.type(Bean.class).property("intValue", 100).create();
 
             jFactory.factory(Beans.class).spec(instance ->
-                    instance.spec().property("bean").asDefault(builder -> builder.property("intValue", 100)));
+                    instance.spec().property("bean").byFactory(builder -> builder.property("intValue", 100)));
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .isEqualTo(bean);
@@ -255,7 +253,7 @@ class _04_Spec {
         @Test
         void support_default_primitive_type_spec() {
             jFactory.factory(Bean.class).spec(instance ->
-                    instance.spec().property("stringValue").asDefault());
+                    instance.spec().property("stringValue").byFactory());
 
             assertThat(jFactory.create(Bean.class).stringValue).isEqualTo("stringValue#1");
         }
@@ -267,7 +265,7 @@ class _04_Spec {
         @Test
         void support_define_collection_element_spec() {
             jFactory.factory(Table.class).spec(instance ->
-                    instance.spec().property("rows[0]").asDefault(builder -> builder.property("number", 100)));
+                    instance.spec().property("rows[0]").byFactory(builder -> builder.property("number", 100)));
 
             Table table = jFactory.create(Table.class);
 
@@ -281,7 +279,7 @@ class _04_Spec {
         @Test
         void should_raise_error_when_collection_property_is_null() {
             jFactory.factory(Table.class).spec(instance -> instance.spec()
-                    .property("rows").asDefault());
+                    .property("rows").byFactory());
 
             assertThrows(IllegalArgumentException.class, () ->
                     jFactory.type(Table.class).property("rows[0]", null).create());
@@ -290,7 +288,7 @@ class _04_Spec {
         @Test
         void support_default_primitive_type_spec() {
             jFactory.factory(Bean.class).spec(instance ->
-                    instance.spec().property("stringValues[0]").asDefault());
+                    instance.spec().property("stringValues[0]").byFactory());
 
             assertThat(jFactory.create(Bean.class).stringValues[0]).isEqualTo("stringValues#1[0]");
         }
@@ -345,12 +343,12 @@ class _04_Spec {
 
             jFactory.factory(Table.class).spec(instance -> instance.spec()
                     .property("rows").reverseAssociation("table")
-                    .property("rows[0]").asDefault()
+                    .property("rows[0]").byFactory()
             );
 
             jFactory.factory(Row.class).spec(instance -> instance.spec()
                     .property("cells").reverseAssociation("row")
-                    .property("cells[0]").asDefault()
+                    .property("cells[0]").byFactory()
             );
 
             Table table = jFactory.create(Table.class);

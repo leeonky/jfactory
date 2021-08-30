@@ -101,7 +101,7 @@ class _05_ComplexPropertyArgs {
     public static class ABeans extends Spec<Beans> {
         @Override
         public void main() {
-            property("bean").as(ABean.class, ABean::int100);
+            property("bean").from(ABean.class).which(ABean::int100);
         }
     }
 

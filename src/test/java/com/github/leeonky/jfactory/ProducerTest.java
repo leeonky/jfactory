@@ -19,8 +19,8 @@ class ProducerTest {
     @BeforeEach
     void setupCollectionProducer() {
         JFactory.factory(Bean.class).spec(instance -> instance.spec()
-                .property("array1[0]").asDefault()
-                .property("array2[0]").asDefault()
+                .property("array1[0]").byFactory()
+                .property("array2[0]").byFactory()
                 .property("dependency1").dependsOn("defaultString1", o -> o)
                 .property("dependency2").dependsOn("defaultString2", o -> o)
                 .property("unfixed1").value("")
@@ -95,7 +95,7 @@ class ProducerTest {
 
         @Override
         public void main() {
-            property("readonly1").as(AnotherBean.class);
+            property("readonly1").is(AnotherBean.class);
         }
     }
 
@@ -103,7 +103,7 @@ class ProducerTest {
 
         @Override
         public void main() {
-            property("readonly1").as(AnotherBean.class);
+            property("readonly1").is(AnotherBean.class);
         }
     }
 

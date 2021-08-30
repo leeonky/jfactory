@@ -227,7 +227,7 @@ Order order = jFactory.type(Order.class).property("product", product).create();
 JFactroy提供了简便创建关联对象的方法可以在一个create调用中创建出具有级联关系的Order实例：
 ```java
 jFactory.factory(Order.class).spec(instance -> instance.spec()
-        .property("product").asDefault());
+        .property("product").byFactroy());
 
 Order order = jFactory.create(Order.class);
 //order.product is a default sub created object
@@ -296,7 +296,7 @@ public class Son {
 如果想创建出一个Father对象father，并且father.son.father是father，就需要在son中反向引用父对象。
 ```java
 jFactory.factory(Farther.class).spec(instance -> instance.spec()
-    .property("son").asDefault()
+    .property("son").byFactroy()
     .property("son").reverseAssociation("father")
 );
 ```
@@ -348,7 +348,7 @@ public class Order {
 
 ```java
 jFactory.factory(Order.class ).spec(instance -> instance.spec()
-    .property("product").asDefault()
+    .property("product").byFactroy()
     .link("total", "product.price")
 );
 ```

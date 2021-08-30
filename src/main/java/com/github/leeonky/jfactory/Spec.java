@@ -47,7 +47,7 @@ public class Spec<T> {
 
     public Spec<T> link(String property, String... others) {
         List<PropertyChain> linkProperties = concat(of(property), of(others)).map(PropertyChain::createChain).collect(toList());
-        append((factorySet, objectProducer) -> objectProducer.link(linkProperties));
+        append((jFactory, objectProducer) -> objectProducer.link(linkProperties));
         return this;
     }
 
