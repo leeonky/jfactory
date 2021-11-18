@@ -41,7 +41,7 @@ public class JFactory {
         return new DefaultBuilder<>(factorySet.createSpecFactory(specClass, trait), this);
     }
 
-    public <T> JFactory register(Class<? extends Spec<T>> specClass) {
+    public JFactory register(Class<? extends Spec<?>> specClass) {
         factorySet.registerSpecClassFactory(specClass);
         return this;
     }

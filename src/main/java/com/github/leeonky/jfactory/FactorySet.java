@@ -20,10 +20,11 @@ class FactorySet {
                 key -> new ObjectFactory<>(BeanClass.create(key), this));
     }
 
-    public <T> void registerSpecClassFactory(Class<? extends Spec<T>> specClass) {
-        Spec<T> spec = BeanClass.newInstance(specClass);
+    @SuppressWarnings("unchecked")
+    public void registerSpecClassFactory(Class<? extends Spec<?>> specClass) {
+        Spec<?> spec = BeanClass.newInstance(specClass);
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
-                type -> new SpecClassFactory<>(queryObjectFactory(spec.getType()), specClass, this));
+                type -> new SpecClassFactory(queryObjectFactory(spec.getType()), specClass, this));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
     }
 
