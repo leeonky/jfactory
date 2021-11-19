@@ -47,8 +47,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.leeonky:bean-util:0.2.10'
-
+    compile 'com.github.leeonky:bean-util:0.2.11'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.3'
     testImplementation 'org.assertj:assertj-core:3.15.0'
     testImplementation 'org.projectlombok:lombok:1.18.12'
