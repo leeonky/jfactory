@@ -30,9 +30,12 @@ jobs:
       env:
         - VERSION_SCOPE=''
       script:
+        - export PUB_VERSION=$(VERSION_SCOPE='' ./gradlew currentVersion -q)
+        - echo "Check version[${PUB_VERSION}] and tag"
+        - bash -c '! (git tag | grep "^${PUB_VERSION}$")'
         - echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
         - export PUB_VERSION=$(./gradlew currentVersion -q)
-        - ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" build publishToNexus -x check -x pitest && git config --global user.email "travis@travis-ci.org" && git config --global user.name "Travis CI" && git tag ${PUB_VERSION} -a -m 'CI Release' && git push -q "https://${GH_TOKEN}@github.com/leeonky/$(basename $(pwd)).git" --tags
+        - ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" build publishToNexus -x pitest && git config --global user.email "travis@travis-ci.org" && git config --global user.name "Travis CI" && git tag ${PUB_VERSION} -a -m 'CI Release' && git push -q "https://${GH_TOKEN}@github.com/leeonky/$(basename $(pwd)).git" --tags
 
 stages:
   - name: test
