@@ -13,6 +13,7 @@ import java.util.List;
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static com.github.leeonky.jfactory.Builder.table;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DefaultBuilderTest {
     private JFactory jFactory = new JFactory();
@@ -35,7 +36,7 @@ class DefaultBuilderTest {
     @Setter
     @Accessors(chain = true)
     public static class Item {
-        private String value;
+        private String value, value2;
     }
 
     @Getter
@@ -121,6 +122,30 @@ class DefaultBuilderTest {
             expectTable("| value |\n" +
                     "| hello |")
                     .should("value: ['hello']");
+        }
+
+        @Test
+        void table_2_x_1() {
+            expectTable("| value |\n" +
+                    "| hello |\n" +
+                    "| world |")
+                    .should("value: ['hello' 'world']");
+        }
+
+        @Test
+        void table_2_x_2() {
+            expectTable("| value | value2 |\n" +
+                    "| hello | Tom |\n" +
+                    "| world | Jerry |")
+                    .should("value: ['hello' 'world']")
+                    .should("value2: ['Tom' 'Jerry']");
+        }
+
+        @Test
+        void invalid_table_too_many_cells() {
+            assertThat(assertThrows(IllegalArgumentException.class, () ->
+                    builder.propertyValue("list", table("| value |\n" +
+                            "| hello | world |")))).hasMessage("Invalid table at row: 0, different size of cells and headers.");
         }
 
         private DALAssert expectTable(String table) {
