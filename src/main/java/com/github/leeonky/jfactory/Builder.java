@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface Builder<T> {
+    static PropertyValue table(String table) {
+        return new PropertyValue(table);
+    }
+
     T create();
 
     default Builder<T> property(String property, Object value) {
@@ -32,4 +36,6 @@ public interface Builder<T> {
     Builder<T> args(Map<String, ?> args);
 
     Builder<T> args(String property, Map<String, Object> args);
+
+    Builder<T> propertyValue(String property, PropertyValue value);
 }

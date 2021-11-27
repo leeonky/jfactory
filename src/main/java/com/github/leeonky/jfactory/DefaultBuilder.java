@@ -62,6 +62,11 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public Builder<T> propertyValue(String property, PropertyValue value) {
+        return value.assignTo(property, this);
+    }
+
+    @Override
     public Builder<T> traits(String... traits) {
         DefaultBuilder<T> newBuilder = clone();
         newBuilder.traits.addAll(asList(traits));

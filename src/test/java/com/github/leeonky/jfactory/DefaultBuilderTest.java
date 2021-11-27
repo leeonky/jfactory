@@ -1,34 +1,48 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.dal.extension.assertj.DALAssert;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
+import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.jfactory.Builder.table;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DefaultBuilderTest {
-    private JFactory JFactory = new JFactory();
+    private JFactory jFactory = new JFactory();
 
     @BeforeEach
     void registerTrait() {
-        JFactory.factory(Bean.class).spec("trait1", instance -> {
+        jFactory.factory(Bean.class).spec("trait1", instance -> {
         });
 
-        JFactory.factory(Bean2.class).spec("trait1", instance -> {
+        jFactory.factory(Bean2.class).spec("trait1", instance -> {
         }).spec("trait2", instance -> {
         });
     }
 
     private Builder<?> builder(Class<?> type, String value, String trait) {
-        return JFactory.type(type).property("defaultString1", value).traits(trait);
+        return jFactory.type(type).property("defaultString1", value).traits(trait);
+    }
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class Item {
+        private String value;
     }
 
     @Getter
     @Setter
     public static class Bean {
         private String stringValue;
+        private List<Item> list;
     }
 
     @Getter
@@ -90,6 +104,27 @@ class DefaultBuilderTest {
         void should_not_equal_for_different_trait() {
             assertThat(builder(Bean.class, "string", "trait1"))
                     .isNotEqualTo(builder(Bean.class, "string", "trait2"));
+        }
+    }
+
+    @Nested
+    class Table {
+        private final Builder<Bean> builder = jFactory.type(Bean.class);
+
+        @Test
+        void table_with_only_header_equals_empty_property() {
+            expectTable("| value |").match("[]");
+        }
+
+        @Test
+        void table_1_x_1() {
+            expectTable("| value |\n" +
+                    "| hello |")
+                    .should("value: ['hello']");
+        }
+
+        private DALAssert expectTable(String table) {
+            return expect(builder.propertyValue("list", table(table)).create().getList());
         }
     }
 }
