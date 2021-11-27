@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
-import static com.github.leeonky.jfactory.Builder.table;
+import static com.github.leeonky.jfactory.PropertyValue.table;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
