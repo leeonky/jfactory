@@ -32,7 +32,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.2.6' + System.env.VERSION_SCOPE
+version = '0.2.7' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
