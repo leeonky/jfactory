@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
 import java.util.Arrays;
@@ -88,5 +89,10 @@ public class JFactory {
 
     <T> boolean shouldCreateDefaultValue(PropertyWriter<T> propertyWriter) {
         return ignoreDefaultValues.stream().noneMatch(p -> p.test(propertyWriter));
+    }
+
+    public <T> Builder<T> type(TypeReference<T> type) {
+        BeanClass<T> beanClass = type.getType();
+        return type(beanClass.getType());
     }
 }
