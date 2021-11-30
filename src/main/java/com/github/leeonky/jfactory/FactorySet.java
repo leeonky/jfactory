@@ -10,21 +10,20 @@ import java.util.function.Consumer;
 class FactorySet {
     public final TypeSequence typeSequence = new TypeSequence();
     private final DefaultValueFactories defaultValueFactories = new DefaultValueFactories();
-    private final Map<Class<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
+    private final Map<BeanClass<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
     private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public <T> ObjectFactory<T> queryObjectFactory(Class<T> type) {
+    public <T> ObjectFactory<T> queryObjectFactory(BeanClass<T> type) {
         return (ObjectFactory<T>) objectFactories.computeIfAbsent(type,
-                key -> new ObjectFactory<>(BeanClass.create(key), this));
+                key -> new ObjectFactory<>(key, this));
     }
 
-    @SuppressWarnings("unchecked")
-    public void registerSpecClassFactory(Class<? extends Spec<?>> specClass) {
-        Spec<?> spec = BeanClass.newInstance(specClass);
+    public <T> void registerSpecClassFactory(Class<? extends Spec<T>> specClass) {
+        Spec<T> spec = BeanClass.newInstance(specClass);
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
-                type -> new SpecClassFactory(queryObjectFactory(spec.getType()), specClass, this));
+                type -> new SpecClassFactory<>(queryObjectFactory(BeanClass.create(spec.getType())), specClass, this));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
     }
 
@@ -56,7 +55,7 @@ class FactorySet {
 
     public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {
         S spec = BeanClass.newInstance(specClass);
-        return new SpecFactory<>(queryObjectFactory(spec.getType()), spec, this, trait);
+        return new SpecFactory<>(queryObjectFactory(BeanClass.create(spec.getType())), spec, this, trait);
     }
 
     public <T> void registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {

@@ -27,11 +27,23 @@ public class JFactory {
     }
 
     public <T> Factory<T> factory(Class<T> type) {
+        return factory(BeanClass.create(type));
+    }
+
+    public <T> Factory<T> factory(BeanClass<T> type) {
         return factorySet.queryObjectFactory(type);
     }
 
     public <T> Builder<T> type(Class<T> type) {
+        return type(BeanClass.create(type));
+    }
+
+    public <T> Builder<T> type(BeanClass<T> type) {
         return new DefaultBuilder<>(factorySet.queryObjectFactory(type), this);
+    }
+
+    public <T> Builder<T> type(TypeReference<T> type) {
+        return type(type.getType());
     }
 
     public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass) {
@@ -42,7 +54,7 @@ public class JFactory {
         return new DefaultBuilder<>(factorySet.createSpecFactory(specClass, trait), this);
     }
 
-    public JFactory register(Class<? extends Spec<?>> specClass) {
+    public <T, S extends Spec<T>> JFactory register(Class<S> specClass) {
         factorySet.registerSpecClassFactory(specClass);
         return this;
     }
@@ -56,7 +68,7 @@ public class JFactory {
         return factorySet.querySpecClassFactory(specName);
     }
 
-    public <T> Factory<T> specFactory(Class<? extends Spec<T>> specClass) {
+    public <T, S extends Spec<T>> Factory<T> specFactory(Class<S> specClass) {
         register(specClass);
         return factorySet.querySpecClassFactory(specClass);
     }
@@ -89,10 +101,5 @@ public class JFactory {
 
     <T> boolean shouldCreateDefaultValue(PropertyWriter<T> propertyWriter) {
         return ignoreDefaultValues.stream().noneMatch(p -> p.test(propertyWriter));
-    }
-
-    public <T> Builder<T> type(TypeReference<T> type) {
-        BeanClass<T> beanClass = type.getType();
-        return type(beanClass.getType());
     }
 }
