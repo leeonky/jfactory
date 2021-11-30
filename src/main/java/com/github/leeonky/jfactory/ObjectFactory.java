@@ -2,24 +2,27 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 class ObjectFactory<T> implements Factory<T> {
     private final BeanClass<T> type;
     private final FactorySet factorySet;
-    private Function<Instance<T>, T> constructor = instance -> getType().newInstance();
+    private final Map<String, Consumer<Instance<T>>> traits = new HashMap<>();
+    private Function<Instance<T>, T> constructor = this::defaultConstruct;
     private Consumer<Instance<T>> spec = (instance) -> {
     };
-    private Map<String, Consumer<Instance<T>>> traits = new HashMap<>();
 
     public ObjectFactory(BeanClass<T> type, FactorySet factorySet) {
         this.type = type;
         this.factorySet = factorySet;
+    }
+
+    @SuppressWarnings("unchecked")
+    private T defaultConstruct(Instance<T> instance) {
+        return getType().isCollection() ? (T) getType().createCollection(Collections.emptyList())
+                : getType().newInstance();
     }
 
     protected Spec<T> createSpec() {

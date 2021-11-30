@@ -43,7 +43,7 @@ public class _08_TypeReference {
             assertThat(strings).isEmpty();
         }
 
-        //        @Test
+        @Test
         void support_create_empty_array() {
             String[] strings = jFactory.type(String[].class).create();
 
