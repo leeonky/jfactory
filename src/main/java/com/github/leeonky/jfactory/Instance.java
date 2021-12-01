@@ -16,4 +16,8 @@ public interface Instance<T> {
     Arguments params(String property);
 
     Arguments params();
+
+    default int collectionSize() {
+        return 0;
+    }
 }

@@ -11,6 +11,7 @@ class RootInstance<T> implements Instance<T> {
     protected final DefaultArguments arguments;
     private final int sequence;
     private final ValueCache<T> valueCache = new ValueCache<>();
+    private int collectionSize = 0;
 
     public RootInstance(int sequence, Spec<T> spec, DefaultArguments arguments) {
         this.sequence = sequence;
@@ -59,5 +60,15 @@ class RootInstance<T> implements Instance<T> {
 
     T cache(Supplier<T> supplier, Consumer<T> operation) {
         return valueCache.cache(supplier, operation);
+    }
+
+    public RootInstance<T> setCollectionSize(int collectionSize) {
+        this.collectionSize = collectionSize;
+        return this;
+    }
+
+    @Override
+    public int collectionSize() {
+        return collectionSize;
     }
 }

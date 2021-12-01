@@ -17,6 +17,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     private final KeyValueCollection properties = new KeyValueCollection();
     private final DefaultArguments arguments = new DefaultArguments();
+    private int collectionSize = 0;
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory) {
         this.jFactory = jFactory;
@@ -80,8 +81,17 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> newBuilder = clone();
-        properties.forEach(newBuilder.properties::append);
+        properties.forEach((key, value) -> newBuilder.properties.append(processCollection(key, newBuilder), value));
         return newBuilder;
+    }
+
+    private String processCollection(String key, DefaultBuilder<T> newBuilder) {
+        if (key.startsWith("[")) {
+            String[] indexAndSub = key.substring(1).split("]", 2);
+            newBuilder.collectionSize = Math.max(newBuilder.collectionSize, Integer.parseInt(indexAndSub[0]) + 1);
+            return indexAndSub[0] + indexAndSub[1];
+        }
+        return key;
     }
 
     @Override
@@ -104,9 +114,10 @@ class DefaultBuilder<T> implements Builder<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public void establishSpecProducers(ObjectProducer<T> objectProducer, Instance<T> instance) {
+    public void establishSpecProducers(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
         forSpec(objectProducer, instance);
         forInputProperties(objectProducer);
+        instance.setCollectionSize(collectionSize);
     }
 
     private void forSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
@@ -125,6 +136,7 @@ class DefaultBuilder<T> implements Builder<T> {
         DefaultBuilder<T> newBuilder = clone();
         newBuilder.properties.merge(another.properties);
         newBuilder.traits.addAll(another.traits);
+        newBuilder.collectionSize = collectionSize;
         return newBuilder;
     }
 

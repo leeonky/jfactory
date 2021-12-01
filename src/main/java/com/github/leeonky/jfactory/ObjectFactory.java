@@ -21,7 +21,8 @@ class ObjectFactory<T> implements Factory<T> {
 
     @SuppressWarnings("unchecked")
     private T defaultConstruct(Instance<T> instance) {
-        return getType().isCollection() ? (T) getType().createCollection(Collections.emptyList())
+        return getType().isCollection()
+                ? (T) getType().createCollection(Collections.nCopies(instance.collectionSize(), null))
                 : getType().newInstance();
     }
 
