@@ -1,6 +1,8 @@
 package com.github.leeonky.jfactory.spec;
 
+import com.github.leeonky.jfactory.Builder;
 import com.github.leeonky.jfactory.JFactory;
+import com.github.leeonky.jfactory.PropertyValue;
 import com.github.leeonky.jfactory.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class _08_TypeReference {
@@ -89,9 +92,17 @@ public class _08_TypeReference {
                         .isInstanceOf(String.class);
             }
 
-        }
 
-//        Support Table
+            @Test
+            void build_list_with_property_value() {
+                expect(jFactory.type(Bean[].class).properties(new PropertyValue() {
+                    @Override
+                    public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
+                        return builder.property("[0].value", "hello");
+                    }
+                }).create()).match("| value |\n| 'hello' |");
+            }
+        }
     }
 
 //    @Nested

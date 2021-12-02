@@ -37,4 +37,8 @@ public interface Builder<T> {
     default Builder<T> propertyValue(String property, PropertyValue value) {
         return value.setToBuilder(property, this);
     }
+
+    default Builder<T> properties(PropertyValue value) {
+        return value.setToBuilder("", this);
+    }
 }
