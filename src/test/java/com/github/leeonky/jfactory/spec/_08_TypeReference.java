@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.jfactory.PropertyValue.empty;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class _08_TypeReference {
@@ -101,6 +102,11 @@ public class _08_TypeReference {
                         return builder.property("[0].value", "hello");
                     }
                 }).create()).match("| value |\n| 'hello' |");
+            }
+
+            @Test
+            void build_empty_list() {
+                expect(jFactory.type(Bean[].class).properties(empty()).create()).match("[]");
             }
         }
     }
