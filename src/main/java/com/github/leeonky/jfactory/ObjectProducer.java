@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
 import static com.github.leeonky.util.BeanClass.create;
+import static java.util.stream.IntStream.range;
 
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
@@ -29,7 +30,18 @@ class ObjectProducer<T> extends Producer<T> {
         persistable = jFactory.getDataRepository();
         establishDefaultValueProducers();
         builder.establishSpecProducers(this, instance);
+        establishElementDefaultValueProducers();
         setupReverseAssociations();
+    }
+
+    private void establishElementDefaultValueProducers() {
+        range(0, instance.collectionSize()).mapToObj(String::valueOf).filter(index -> children.get(index) == null)
+                .map(index -> getType().getPropertyWriter(index)).forEach((PropertyWriter<T> propertyWriter) ->
+                setChild(propertyWriter.getName(), subDefaultValueProducer(propertyWriter).orElseGet(() ->
+                        new DefaultValueFactoryProducer<>(factory.getType(),
+                                factory.getFactorySet().getDefaultValueBuilder(propertyWriter.getType()),
+                                instance.sub(propertyWriter)
+                        ))));
     }
 
     private void setupReverseAssociations() {
@@ -112,8 +124,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private void establishDefaultValueProducers() {
-        getType().getPropertyWriters().values().stream()
-                .filter(jFactory::shouldCreateDefaultValue)
+        getType().getPropertyWriters().values().stream().filter(jFactory::shouldCreateDefaultValue)
                 .forEach(propertyWriter -> subDefaultValueProducer(propertyWriter)
                         .ifPresent(producer -> setChild(propertyWriter.getName(), producer)));
     }

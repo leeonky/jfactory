@@ -62,9 +62,8 @@ class RootInstance<T> implements Instance<T> {
         return valueCache.cache(supplier, operation);
     }
 
-    public RootInstance<T> setCollectionSize(int collectionSize) {
+    public void setCollectionSize(int collectionSize) {
         this.collectionSize = collectionSize;
-        return this;
     }
 
     @Override

@@ -76,18 +76,22 @@ public class _08_TypeReference {
                 assertThat(jFactory.type(Bean[].class).property("[0]", bean).create()).containsExactly(bean);
             }
 
-//            @Test
-//            void build_with_one_default_element_and_one_input_property() {
-//                Bean defaultBean = new Bean();
-//                jFactory.factory(Bean.class).constructor(instance -> defaultBean);
-//
-//                Bean inputBean = new Bean();
-//                assertThat(jFactory.type(Bean[].class).property("[1]", inputBean).create())
-//                        .containsExactly(defaultBean, inputBean);
-//            }
+            @Test
+            void build_with_one_default_bean_element() {
+                Bean inputBean = new Bean();
+                assertThat(jFactory.type(Bean[].class).property("[1]", inputBean).create())
+                        .containsExactly(null, inputBean);
+            }
 
-// one default , one given
+            @Test
+            void build_with_one_default_value_element() {
+                assertThat(jFactory.type(String[].class).property("[1]", "hello").create()[0])
+                        .isInstanceOf(String.class);
+            }
+
         }
+
+//        Support Table
     }
 
 //    @Nested
