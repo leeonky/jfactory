@@ -102,4 +102,8 @@ public class JFactory {
     <T> boolean shouldCreateDefaultValue(PropertyWriter<T> propertyWriter) {
         return ignoreDefaultValues.stream().noneMatch(p -> p.test(propertyWriter));
     }
+
+    public <T> Builder<T> spec(SpecReference<T> specType) {
+        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specType.getSpec()), this);
+    }
 }
