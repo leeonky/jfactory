@@ -11,6 +11,8 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.hash;
 
 class DefaultBuilder<T> implements Builder<T> {
+    //    TODO refactor
+    final Factory<T> elementFactory;
     private final ObjectFactory<T> objectFactory;
     private final JFactory jFactory;
     private final Set<String> traits = new LinkedHashSet<>();
@@ -20,8 +22,13 @@ class DefaultBuilder<T> implements Builder<T> {
     private int collectionSize = 0;
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory) {
+        this(objectFactory, jFactory, null);
+    }
+
+    public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory, Factory<T> elementFactory) {
         this.jFactory = jFactory;
         this.objectFactory = objectFactory;
+        this.elementFactory = elementFactory;
     }
 
     @Override
@@ -71,7 +78,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public DefaultBuilder<T> clone() {
-        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory);
+        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory, elementFactory);
         builder.properties.merge(properties);
         builder.traits.addAll(traits);
         builder.arguments.merge(arguments);

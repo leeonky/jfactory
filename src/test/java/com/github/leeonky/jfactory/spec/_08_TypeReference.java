@@ -134,6 +134,33 @@ public class _08_TypeReference {
             }
         }
 
+        @Nested
+        class BuildWithElementProperty {
+
+            @Test
+            void support_create_empty_array_list_from_given_collection_type() {
+                ArrayList<Bean> beans = jFactory.spec(new SpecReference<ArrayList<Bean>>(BeanSpec.class) {
+                }).create();
+
+                assertThat(beans).isEmpty();
+            }
+
+            @Test
+            void support_create_empty_hash_set_from_given_collection_type() {
+                HashSet<Bean> beans = jFactory.spec(new SpecReference<HashSet<Bean>>(BeanSpec.class) {
+                }).create();
+
+                assertThat(beans).isEmpty();
+            }
+
+            @Test
+            void support_create_empty_array() {
+                Bean[] beans = jFactory.spec(new SpecReference<Bean[]>(BeanSpec.class) {
+                }).create();
+
+                assertThat(beans).isEmpty();
+            }
+        }
 //
 //// with element
 //// one default , one given
