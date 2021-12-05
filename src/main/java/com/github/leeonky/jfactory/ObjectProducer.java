@@ -34,15 +34,13 @@ class ObjectProducer<T> extends Producer<T> {
         setupReverseAssociations();
     }
 
-    //TODO refactor move to builder
     private void establishElementDefaultValueProducers() {
         range(0, instance.collectionSize()).mapToObj(String::valueOf).filter(index -> children.get(index) == null)
                 .map(index -> getType().getPropertyWriter(index)).forEach((PropertyWriter<T> propertyWriter) ->
-                setChild(propertyWriter.getName(), subDefaultValueProducer(propertyWriter).orElseGet(() -> {
-                    return new DefaultValueFactoryProducer<>(factory.getType(),
-                            factory.getFactorySet().getDefaultValueBuilder(propertyWriter.getType()),
-                            instance.sub(propertyWriter));
-                })));
+                setChild(propertyWriter.getName(), new DefaultValueFactoryProducer<>(factory.getType(),
+                        factory.getFactorySet().getDefaultValueBuilder(propertyWriter.getType()),
+                        instance.sub(propertyWriter))
+                ));
     }
 
     private void setupReverseAssociations() {

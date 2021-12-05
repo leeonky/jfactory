@@ -39,7 +39,6 @@ public class JFactory {
     }
 
     public <T> Builder<T> type(BeanClass<T> type) {
-//        TODO refactor
         return new DefaultBuilder<>(factorySet.queryObjectFactory(type), this);
     }
 
@@ -102,14 +101,5 @@ public class JFactory {
 
     <T> boolean shouldCreateDefaultValue(PropertyWriter<T> propertyWriter) {
         return ignoreDefaultValues.stream().noneMatch(p -> p.test(propertyWriter));
-    }
-
-    @SuppressWarnings("unchecekd")
-    public <T> Builder<T> spec(SpecReference<T> specType) {
-//        TODO refactor
-        BeanClass<T> type = specType.getType();
-        ObjectFactory<T> specFactory = (ObjectFactory<T>) specFactory((Class) specType.getSpec());
-        return type.isCollection() ? new DefaultBuilder<>(factorySet.queryObjectFactory(type), this, specFactory)
-                : new DefaultBuilder<>(specFactory, this);
     }
 }
