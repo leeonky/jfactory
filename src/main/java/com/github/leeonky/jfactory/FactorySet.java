@@ -20,7 +20,7 @@ class FactorySet {
                 key -> new ObjectFactory<>(key, this));
     }
 
-    public <T> void registerSpecClassFactory(Class<? extends Spec<T>> specClass) {
+    public <T, S extends Spec<T>> void registerSpecClassFactory(Class<S> specClass) {
         Spec<T> spec = BeanClass.newInstance(specClass);
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
                 type -> new SpecClassFactory<>(queryObjectFactory(BeanClass.create(spec.getType())), specClass, this));
