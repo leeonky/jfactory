@@ -23,10 +23,6 @@ public class JFactory {
         this.dataRepository = dataRepository;
     }
 
-    public static AliasSet alias(String alias, String target) {
-        return new AliasSet(alias, target);
-    }
-
     public DataRepository getDataRepository() {
         return dataRepository;
     }
@@ -108,8 +104,7 @@ public class JFactory {
         return ignoreDefaultValues.stream().noneMatch(p -> p.test(propertyWriter));
     }
 
-    public JFactory propertyAlias(Class<?> type, AliasSet aliasSet) {
-        aliasSetStore.append(type, aliasSet);
-        return this;
+    public AliasSetStore.AliasSet aliasOf(Class<?> type) {
+        return aliasSetStore.createSet(BeanClass.create(type));
     }
 }
