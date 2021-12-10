@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class JFactory {
+    final AliasSetStore aliasSetStore = new AliasSetStore();
     private final FactorySet factorySet = new FactorySet();
     private final DataRepository dataRepository;
     private final Set<Predicate<PropertyWriter<?>>> ignoreDefaultValues = new LinkedHashSet<>();
@@ -20,6 +21,10 @@ public class JFactory {
 
     public JFactory(DataRepository dataRepository) {
         this.dataRepository = dataRepository;
+    }
+
+    public static AliasSet alias(String alias, String target) {
+        return new AliasSet(alias, target);
     }
 
     public DataRepository getDataRepository() {
@@ -101,5 +106,10 @@ public class JFactory {
 
     <T> boolean shouldCreateDefaultValue(PropertyWriter<T> propertyWriter) {
         return ignoreDefaultValues.stream().noneMatch(p -> p.test(propertyWriter));
+    }
+
+    public JFactory propertyAlias(Class<?> type, AliasSet aliasSet) {
+        aliasSetStore.append(type, aliasSet);
+        return this;
     }
 }

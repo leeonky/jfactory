@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Integer.parseInt;
+
 class KeyValue {
     private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
     private static final String PATTERN_COLLECTION_INDEX = "(\\[(\\d+)])?";
@@ -39,7 +41,7 @@ class KeyValue {
     }
 
     private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index) {
-        return new CollectionExpression<>(property, Integer.valueOf(index),
+        return new CollectionExpression<>(property, parseInt(index),
                 createSubExpression(matcher, property.getWriter().getType().getProperty(index)));
     }
 
@@ -81,6 +83,10 @@ class KeyValue {
         return BeanClass.cast(another, KeyValue.class)
                 .map(keyValue -> Objects.equals(key, keyValue.key) && Objects.equals(value, keyValue.value))
                 .orElseGet(() -> super.equals(another));
+    }
+
+    public Object getValue() {
+        return value;
     }
 }
 

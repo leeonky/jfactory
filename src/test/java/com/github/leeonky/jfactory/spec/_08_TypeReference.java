@@ -29,6 +29,7 @@ public class _08_TypeReference {
 
     @Nested
     class SingleClass {
+
         @Test
         void support_create_java_value_by_type_reference() {
             String string = jFactory.type(new TypeReference<String>() {
@@ -98,7 +99,6 @@ public class _08_TypeReference {
                 assertThat(jFactory.type(String[].class).property("[1]", "hello").create()[0])
                         .isInstanceOf(String.class);
             }
-
 
             @Test
             void build_list_with_property_value() {

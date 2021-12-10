@@ -115,6 +115,7 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     public void establishSpecProducers(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
+//        TODO rename
         forSpec(objectProducer, instance);
         forInputProperties(objectProducer);
         instance.setCollectionSize(collectionSize);
@@ -126,8 +127,8 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private void forInputProperties(ObjectProducer<T> objectProducer) {
-        properties.expressions(objectFactory.getType()).forEach(exp ->
-                objectProducer.changeChild(exp.getProperty(), exp.buildProducer(jFactory, objectProducer)));
+        properties.replaceAlias(objectFactory.getType(), jFactory.aliasSetStore).expressions(objectFactory.getType())
+                .forEach(exp -> objectProducer.changeChild(exp.getProperty(), exp.buildProducer(jFactory, objectProducer)));
     }
 
     public DefaultBuilder<T> clone(DefaultBuilder<T> another) {
