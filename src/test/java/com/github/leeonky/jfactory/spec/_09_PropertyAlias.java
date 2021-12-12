@@ -1,10 +1,14 @@
 package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.JFactory;
+import com.github.leeonky.jfactory.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 
@@ -44,12 +48,32 @@ public class _09_PropertyAlias {
                 .match("{anotherBean.value: 'hello'}");
     }
 
+    @Test
+    void alias_in_collection() {
+        jFactory.aliasOf(Bean.class).alias("aliasOfValue", "value");
+
+        List<Bean> beans = jFactory.type(new TypeReference<ArrayList<Bean>>() {
+        }).property("[0].aliasOfValue", "hello").create();
+
+        expect(beans).should("value: ['hello']");
+    }
+
+    @Test
+    void alias_of_collection() {
+        jFactory.aliasOf(Bean.class).alias("aliasOfBeans", "beans");
+
+        Bean bean = jFactory.type(Bean.class).property("aliasOfBeans[0].value", "hello").create();
+
+        expect(bean).should("beans.value: ['hello']");
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)
     public static class Bean {
         private String value;
         private AnotherBean anotherBean;
+        private List<Bean> beans;
     }
 
     @Getter
@@ -59,9 +83,7 @@ public class _09_PropertyAlias {
         private String value;
     }
 
-// TODO alias is property chain
-// TODO start with index 0.alias
-// TODO collection index alias[0].alias
-// TODO alias chain
+// TODO recursive alias
 // TODO define alias in spec class
+// TODO alias with index parameter
 }
