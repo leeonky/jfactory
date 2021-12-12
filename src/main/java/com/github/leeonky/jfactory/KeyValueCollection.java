@@ -62,12 +62,6 @@ public class KeyValueCollection {
         return new Matcher<>(type);
     }
 
-    public KeyValueCollection replaceAlias(BeanClass<?> type, AliasSetStore aliasSetStore) {
-        KeyValueCollection result = new KeyValueCollection();
-        keyValues.forEach((s, keyValue) -> result.append(aliasSetStore.evaluate(type, s), keyValue.getValue()));
-        return result;
-    }
-
     public class Matcher<T> {
         private final Collection<Expression<T>> expressions;
 

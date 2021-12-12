@@ -81,7 +81,8 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> newBuilder = clone();
-        properties.forEach((key, value) -> newBuilder.properties.append(processCollection(key, newBuilder), value));
+        properties.forEach((key, value) -> newBuilder.properties.append(processCollection(
+                jFactory.aliasSetStore.evaluate(objectFactory.getType(), key), newBuilder), value));
         return newBuilder;
     }
 
@@ -127,7 +128,7 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private void forInputProperties(ObjectProducer<T> objectProducer) {
-        properties.replaceAlias(objectFactory.getType(), jFactory.aliasSetStore).expressions(objectFactory.getType())
+        properties.expressions(objectFactory.getType())
                 .forEach(exp -> objectProducer.changeChild(exp.getProperty(), exp.buildProducer(jFactory, objectProducer)));
     }
 

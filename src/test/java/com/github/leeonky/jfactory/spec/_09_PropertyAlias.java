@@ -34,14 +34,15 @@ public class _09_PropertyAlias {
         expect((jFactory.type(Bean.class).property("anotherBeanValue", "hello").create())).match("{anotherBean.value: 'hello'}");
     }
 
-//    @Test
-//    void alias_chain() {
-//        jFactory.propertyAlias(Bean.class, alias("aliasOfAnotherBean", "anotherBean"));
-//                .propertyAlias(AnotherBean.class, alias("aliasOfValue", "value"));
+    @Test
+    void alias_chain() {
+        jFactory.aliasOf(Bean.class).alias("aliasOfAnotherBean", "anotherBean");
+        jFactory.aliasOf(AnotherBean.class).alias("aliasOfValue", "value");
 
-//        expect((jFactory.type(Bean.class).property("aliasOfAnotherBean.aliasOfValue", "hello").create()))
-//                .match("{anotherBean.value: 'hello'}");
-//    }
+        Bean hello = jFactory.type(Bean.class).property("aliasOfAnotherBean.aliasOfValue", "hello").create();
+        expect(hello)
+                .match("{anotherBean.value: 'hello'}");
+    }
 
     @Getter
     @Setter
@@ -59,6 +60,8 @@ public class _09_PropertyAlias {
     }
 
 // TODO alias is property chain
+// TODO start with index 0.alias
+// TODO collection index alias[0].alias
 // TODO alias chain
 // TODO define alias in spec class
 }

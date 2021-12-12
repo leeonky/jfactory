@@ -10,7 +10,7 @@ import static java.util.Optional.of;
 import static java.util.stream.IntStream.range;
 
 class PropertyChain {
-    public final List<Object> property;
+    private final List<Object> property;
 
     private PropertyChain(String property) {
         this.property = Arrays.stream(property.split("[\\[\\].]"))
@@ -18,7 +18,7 @@ class PropertyChain {
                 .map(this::tryToNumber).collect(Collectors.toList());
     }
 
-    private PropertyChain(List<Object> propertyChain) {
+    public PropertyChain(List<Object> propertyChain) {
         property = new ArrayList<>(propertyChain);
     }
 
@@ -61,7 +61,7 @@ class PropertyChain {
             if (c instanceof Integer)
                 return String.format("[%d]", c);
             return c.toString();
-        }).collect(Collectors.joining(".")).replace(".[", "[");
+        }).collect(Collectors.joining(".")).replace(".[", "[").replace("].!", "]!").replace("].(", "](");
     }
 
     public <T> T access(Producer<?> producer, BiFunction<Producer<?>, String, Producer<?>> accessor,
@@ -101,5 +101,13 @@ class PropertyChain {
         return propertyChain.property.size() <= property.size()
                 && range(0, propertyChain.property.size())
                 .allMatch(i -> Objects.equals(propertyChain.property.get(i), property.get(i)));
+    }
+
+    public Object head() {
+        return property.get(0);
+    }
+
+    public PropertyChain removeHead() {
+        return new PropertyChain(property.stream().skip(1).collect(Collectors.toList()));
     }
 }
