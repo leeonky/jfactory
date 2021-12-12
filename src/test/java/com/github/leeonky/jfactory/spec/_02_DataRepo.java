@@ -143,6 +143,29 @@ class _02_DataRepo {
         assertThat(saved).containsExactly(beansWrapper.beans.bean, beansWrapper.beans, beansWrapper);
     }
 
+    @Test
+    void should_not_match_when_queried_object_has_a_collection_property_which_size_less_then_property_collection_index() {
+        jFactory.type(Beans.class).property("beans", new ArrayList<>()).create();
+
+        assertThat(jFactory.type(Beans.class).property("beans[0].intValue", 1).queryAll()).isEmpty();
+    }
+
+    @Test
+    void should_not_match_when_queried_object_has_a_collection_property_which_is_null() {
+        jFactory.type(Beans.class).property("beans", null).create();
+
+        assertThat(jFactory.type(Beans.class).property("beans[0].intValue", 1).queryAll()).isEmpty();
+    }
+
+    @Test
+    void may_be_matched_when_queried_object_has_a_collection_property_which_size_more_then_property_collection_index() {
+        Beans beans = jFactory.type(Beans.class)
+                .property("beans[0].intValue", 1)
+                .property("beans[1].intValue", 2).create();
+
+        assertThat(jFactory.type(Beans.class).property("beans[0].intValue", 1).queryAll()).containsExactly(beans);
+    }
+
     @Getter
     @Setter
     public static class Bean {
@@ -154,6 +177,7 @@ class _02_DataRepo {
     @Setter
     public static class Beans {
         private Bean bean;
+        private List<Bean> beans;
     }
 
     @Getter

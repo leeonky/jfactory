@@ -20,8 +20,11 @@ class CollectionExpression<P, E> extends Expression<P> {
 
     @Override
     protected boolean isPropertyMatch(Object collection) {
+        if (collection == null)
+            return false;
         List<Object> elements = arrayCollectionToStream(collection).collect(Collectors.toList());
-        return children.entrySet().stream().allMatch(e -> isMatch(e.getValue(), elements.get(e.getKey())));
+        return elements.size() > children.keySet().stream().reduce(Integer::max).orElse(0) &&
+                children.entrySet().stream().allMatch(e -> isMatch(e.getValue(), elements.get(e.getKey())));
     }
 
     private boolean isMatch(Expression<E> expression, Object value) {
