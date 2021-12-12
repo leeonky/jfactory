@@ -16,28 +16,19 @@ public class AliasSetStore {
 
     private PropertyChain evaluate(BeanClass<?> type, PropertyChain chain) {
         AliasSet aliasSet = aliasSetMap.get(type);
-        return aliasSet != null ? aliasSet.evaluate(chain) : chain;
+        return aliasSet != null ? aliasSet.evaluateHead(chain) : chain;
     }
 
     public AliasSet createSet(BeanClass<?> type) {
-        return aliasSetMap.computeIfAbsent(type, AliasSet::new);
+        return aliasSetMap.computeIfAbsent(type, key -> new AliasSet());
     }
 
-    public class AliasSet {
-        private final BeanClass<?> type;
+    public static class AliasSet {
         private final Map<String, String> aliases = new HashMap<>();
 
-        public AliasSet(BeanClass<?> type) {
-            this.type = type;
-        }
-
-        public PropertyChain evaluate(PropertyChain chain) {
-            Object head = chain.head();
-            PropertyChain headChain = aliases.containsKey(head) ? PropertyChain.createChain(aliases.get(head))
-                    : new PropertyChain(singletonList(head));
-            return chain.isSingle() ? headChain : headChain.concat(AliasSetStore.this.evaluate(
-                    type.getPropertyChainReader(headChain.toString()).getType(), chain.removeHead()));
-//                TODO should use property chain writer
+        public PropertyChain evaluateHead(PropertyChain chain) {
+            return (aliases.containsKey(chain.head()) ? evaluateHead(PropertyChain.createChain(aliases.get(chain.head())))
+                    : new PropertyChain(singletonList(chain.head()))).concat(chain.removeHead());
         }
 
         public AliasSet alias(String alias, String target) {

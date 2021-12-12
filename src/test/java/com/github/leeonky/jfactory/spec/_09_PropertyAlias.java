@@ -33,9 +33,9 @@ public class _09_PropertyAlias {
 
     @Test
     void alias_of_property_chain() {
-        jFactory.aliasOf(Bean.class).alias("anotherBeanValue", "anotherBean.value");
+        jFactory.aliasOf(BeanContainer.class).alias("beanAnotherBeanValue", "bean.anotherBean.value");
 
-        expect((jFactory.type(Bean.class).property("anotherBeanValue", "hello").create())).match("{anotherBean.value: 'hello'}");
+        expect((jFactory.type(BeanContainer.class).property("beanAnotherBeanValue", "hello").create())).match("{bean.anotherBean.value: 'hello'}");
     }
 
     @Test
@@ -60,11 +60,27 @@ public class _09_PropertyAlias {
 
     @Test
     void alias_of_collection() {
-        jFactory.aliasOf(Bean.class).alias("aliasOfBeans", "beans");
+        jFactory.aliasOf(BeanContainer.class).alias("aliasOfBeans", "beans");
 
-        Bean bean = jFactory.type(Bean.class).property("aliasOfBeans[0].value", "hello").create();
+        BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("aliasOfBeans[0].value", "hello").create();
 
-        expect(bean).should("beans.value: ['hello']");
+        expect(beanContainer).should("beans.value: ['hello']");
+    }
+
+    @Test
+    void recursive_alias() {
+        jFactory.aliasOf(Bean.class).alias("aliasOfAnotherBeanValue", "anotherBeanValue");
+        jFactory.aliasOf(Bean.class).alias("anotherBeanValue", "anotherBean.value");
+
+        expect((jFactory.type(Bean.class).property("aliasOfAnotherBeanValue", "hello").create())).match("{anotherBean.value: 'hello'}");
+    }
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class BeanContainer {
+        private Bean bean;
+        private List<Bean> beans;
     }
 
     @Getter
@@ -73,7 +89,6 @@ public class _09_PropertyAlias {
     public static class Bean {
         private String value;
         private AnotherBean anotherBean;
-        private List<Bean> beans;
     }
 
     @Getter
@@ -83,7 +98,6 @@ public class _09_PropertyAlias {
         private String value;
     }
 
-// TODO recursive alias
-// TODO define alias in spec class
 // TODO alias with index parameter
+// TODO define alias in spec class
 }
