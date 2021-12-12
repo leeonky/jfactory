@@ -11,14 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class _09_PropertyAlias {
     private final JFactory jFactory = new JFactory();
 
     @Test
     void support_define_and_use_property_alias_in_top_level() {
-        jFactory.aliasOf(Bean.class).alias("aliasOfValue", "value");
-
         jFactory.aliasOf(Bean.class).alias("aliasOfValue", "value");
 
         expect((jFactory.type(Bean.class).property("aliasOfValue", "hello").create())).match("{value: 'hello'}");
@@ -84,6 +83,16 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans.value: ['hello']");
     }
 
+    @Test
+    void intently_creation_with_alias() {
+        jFactory.aliasOf(Bean.class).alias("aliasOfAnotherBean", "anotherBean");
+
+        jFactory.type(Bean.class).property("aliasOfAnotherBean!.value", "hello").create();
+        jFactory.type(Bean.class).property("aliasOfAnotherBean!.value", "hello").create();
+
+        assertThat(jFactory.type(AnotherBean.class).queryAll()).hasSize(2);
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)
@@ -107,7 +116,5 @@ public class _09_PropertyAlias {
         private String value;
     }
 
-// TODO alias with index parameter
-// TODO alias with !
 // TODO define alias in spec class
 }

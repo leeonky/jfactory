@@ -11,6 +11,7 @@ public class AliasSetStore {
     final Map<BeanClass<?>, AliasSet> aliasSetMap = new HashMap<>();
 
     public String evaluate(BeanClass<?> type, String propertyChain) {
+
         return evaluate(type, PropertyChain.createChain(propertyChain)).toString();
     }
 
@@ -26,15 +27,22 @@ public class AliasSetStore {
     public static class AliasSet {
         private final Map<String, String> aliases = new HashMap<>();
 
+        //        TODO refactor
         public PropertyChain evaluateHead(PropertyChain chain) {
             Object head = chain.head();
             PropertyChain left = chain.removeHead();
-            if (aliases.containsKey(head)) {
-                String property = aliases.get(head);
+            String headString = head.toString();
+            boolean intently = headString.endsWith("!");
+            if (intently)
+                headString = headString.substring(0, headString.length() - 1);
+            if (aliases.containsKey(headString)) {
+                String property = aliases.get(headString);
                 if (property.contains("$")) {
                     property = property.replaceFirst("\\$", left.head().toString());
                     left = left.removeHead();
                 }
+                if (intently)
+                    property = property + "!";
                 return evaluateHead(PropertyChain.createChain(property)).concat(left);
             }
             return new PropertyChain(singletonList(head)).concat(left);
