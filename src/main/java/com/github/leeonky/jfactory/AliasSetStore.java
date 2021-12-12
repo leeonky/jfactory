@@ -27,8 +27,17 @@ public class AliasSetStore {
         private final Map<String, String> aliases = new HashMap<>();
 
         public PropertyChain evaluateHead(PropertyChain chain) {
-            return (aliases.containsKey(chain.head()) ? evaluateHead(PropertyChain.createChain(aliases.get(chain.head())))
-                    : new PropertyChain(singletonList(chain.head()))).concat(chain.removeHead());
+            Object head = chain.head();
+            PropertyChain left = chain.removeHead();
+            if (aliases.containsKey(head)) {
+                String property = aliases.get(head);
+                if (property.contains("$")) {
+                    property = property.replaceFirst("\\$", left.head().toString());
+                    left = left.removeHead();
+                }
+                return evaluateHead(PropertyChain.createChain(property)).concat(left);
+            }
+            return new PropertyChain(singletonList(head)).concat(left);
         }
 
         public AliasSet alias(String alias, String target) {

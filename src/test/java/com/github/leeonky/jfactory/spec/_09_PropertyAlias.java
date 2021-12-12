@@ -75,6 +75,15 @@ public class _09_PropertyAlias {
         expect((jFactory.type(Bean.class).property("aliasOfAnotherBeanValue", "hello").create())).match("{anotherBean.value: 'hello'}");
     }
 
+    @Test
+    void index_arg_in_alias() {
+        jFactory.aliasOf(BeanContainer.class).alias("beansValue", "beans[$].value");
+
+        BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("beansValue[0]", "hello").create();
+
+        expect(beanContainer).should("beans.value: ['hello']");
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)
@@ -99,5 +108,6 @@ public class _09_PropertyAlias {
     }
 
 // TODO alias with index parameter
+// TODO alias with !
 // TODO define alias in spec class
 }
