@@ -56,6 +56,12 @@ public class JFactory {
     }
 
     public <T, S extends Spec<T>> JFactory register(Class<S> specClass) {
+        PropertyAliases propertyAliases = specClass.getAnnotation(PropertyAliases.class);
+        if (propertyAliases != null && propertyAliases.value().length > 0) {
+            AliasSetStore.AliasSet aliasSet = aliasOf(BeanClass.create(specClass).newInstance().getType());
+            for (PropertyAlias propertyAlias : propertyAliases.value())
+                aliasSet.alias(propertyAlias.alias(), propertyAlias.property());
+        }
         factorySet.registerSpecClassFactory(specClass);
         return this;
     }

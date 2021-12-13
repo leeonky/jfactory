@@ -1,7 +1,6 @@
 package com.github.leeonky.jfactory.spec;
 
-import com.github.leeonky.jfactory.JFactory;
-import com.github.leeonky.jfactory.TypeReference;
+import com.github.leeonky.jfactory.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -93,6 +92,13 @@ public class _09_PropertyAlias {
         assertThat(jFactory.type(AnotherBean.class).queryAll()).hasSize(2);
     }
 
+    @Test
+    void support_define_alias_on_spec() {
+        jFactory.register(ABean.class);
+
+        expect(jFactory.type(Bean.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)
@@ -116,5 +122,9 @@ public class _09_PropertyAlias {
         private String value;
     }
 
-//TODO define alias in spec class
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value")
+    )
+    public static class ABean extends Spec<Bean> {
+    }
 }
