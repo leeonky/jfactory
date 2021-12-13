@@ -102,6 +102,14 @@ public class PropertySpec<T> {
         return spec.append((factorySet, producer) -> producer.appendReverseAssociation(property, association));
     }
 
+    @SuppressWarnings("unchecked")
+    public Spec<T> ignore() {
+        return appendProducer((factorySet, producer, property) -> {
+            BeanClass<Object> type = (BeanClass<Object>) producer.getPropertyWriterType(property);
+            return new DefaultValueProducer<>(type, type::createDefault);
+        });
+    }
+
     @FunctionalInterface
     interface Fuc<P1, P2, P3, R> {
         R apply(P1 p1, P2 p2, P3 p3);

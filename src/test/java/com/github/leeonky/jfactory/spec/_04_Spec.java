@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -369,6 +370,17 @@ class _04_Spec {
             assertThat(person.getId())
                     .hasFieldOrPropertyWithValue("number", "007")
                     .hasFieldOrPropertyWithValue("person", person);
+        }
+    }
+
+    @Nested
+    class Others {
+
+        @Test
+        void skip_property_in_spec() {
+            jFactory.factory(Bean.class).spec(instance ->
+                    instance.spec().property("content").ignore());
+            expect(jFactory.create(Bean.class)).should("content: null");
         }
     }
 }
