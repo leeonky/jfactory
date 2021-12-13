@@ -28,13 +28,13 @@ class ObjectProducer<T> extends Producer<T> {
         this.builder = builder;
         instance = factory.createInstance(builder.getArguments());
         persistable = jFactory.getDataRepository();
-        establishDefaultValueProducers();
-        builder.establishSpecProducers(this, instance);
-        establishElementDefaultValueProducers();
+        createDefaultValueProducers();
+        builder.processSpecAndInputProperty(this, instance);
+        createElementDefaultValueProducers();
         setupReverseAssociations();
     }
 
-    private void establishElementDefaultValueProducers() {
+    private void createElementDefaultValueProducers() {
         range(0, instance.collectionSize()).mapToObj(String::valueOf).filter(index -> children.get(index) == null)
                 .map(index -> getType().getPropertyWriter(index)).forEach((PropertyWriter<T> propertyWriter) ->
                 setChild(propertyWriter.getName(), new DefaultValueFactoryProducer<>(factory.getType(),
@@ -122,7 +122,7 @@ class ObjectProducer<T> extends Producer<T> {
         linkCollection.link(properties);
     }
 
-    private void establishDefaultValueProducers() {
+    private void createDefaultValueProducers() {
         getType().getPropertyWriters().values().stream().filter(jFactory::shouldCreateDefaultValue)
                 .forEach(propertyWriter -> subDefaultValueProducer(propertyWriter)
                         .ifPresent(producer -> setChild(propertyWriter.getName(), producer)));

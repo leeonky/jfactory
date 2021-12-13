@@ -115,19 +115,18 @@ class DefaultBuilder<T> implements Builder<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public void establishSpecProducers(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
-//        TODO rename
-        forSpec(objectProducer, instance);
-        forInputProperties(objectProducer);
+    public void processSpecAndInputProperty(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
+        collectSpec(objectProducer, instance);
+        processInputProperty(objectProducer);
         instance.setCollectionSize(collectionSize);
     }
 
-    private void forSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
+    private void collectSpec(ObjectProducer<T> objectProducer, Instance<T> instance) {
         objectFactory.collectSpec(traits, instance);
         instance.spec().apply(jFactory, objectProducer);
     }
 
-    private void forInputProperties(ObjectProducer<T> objectProducer) {
+    private void processInputProperty(ObjectProducer<T> objectProducer) {
         properties.expressions(objectFactory.getType())
                 .forEach(exp -> objectProducer.changeChild(exp.getProperty(), exp.buildProducer(jFactory, objectProducer)));
     }

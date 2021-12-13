@@ -9,7 +9,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.IntStream.range;
 
-//TODO bug if has [0]!.a
+//TODO alias should not use this class
 class PropertyChain {
     private final List<Object> property;
 
