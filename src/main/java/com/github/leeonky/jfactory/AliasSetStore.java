@@ -10,14 +10,14 @@ import static java.util.Collections.singletonList;
 public class AliasSetStore {
     final Map<BeanClass<?>, AliasSet> aliasSetMap = new HashMap<>();
 
-    public String evaluate(BeanClass<?> type, String propertyChain) {
+    public String evaluate(BeanClass<?> type, String propertyChain, boolean collectionProperties) {
 
-        return evaluate(type, PropertyChain.createChain(propertyChain)).toString();
+        return evaluate(type, PropertyChain.createChain(propertyChain), collectionProperties).toString();
     }
 
-    private PropertyChain evaluate(BeanClass<?> type, PropertyChain chain) {
+    private PropertyChain evaluate(BeanClass<?> type, PropertyChain chain, boolean collectionProperties) {
         AliasSet aliasSet = aliasSetMap.get(type);
-        return aliasSet != null ? aliasSet.evaluateHead(chain) : chain;
+        return aliasSet != null ? aliasSet.evaluateHead(chain, collectionProperties) : chain;
     }
 
     public AliasSet createSet(BeanClass<?> type) {
@@ -28,7 +28,7 @@ public class AliasSetStore {
         private final Map<String, String> aliases = new HashMap<>();
 
         //        TODO refactor
-        public PropertyChain evaluateHead(PropertyChain chain) {
+        public PropertyChain evaluateHead(PropertyChain chain, boolean collectionProperties) {
             Object head = chain.head();
             PropertyChain left = chain.removeHead();
             String headString = head.toString();
@@ -37,13 +37,13 @@ public class AliasSetStore {
                 headString = headString.substring(0, headString.length() - 1);
             if (aliases.containsKey(headString)) {
                 String property = aliases.get(headString);
-                if (property.contains("$")) {
+                if (property.contains("$") && !(property.contains("[$]") && collectionProperties)) {
                     property = property.replaceFirst("\\$", left.head().toString());
                     left = left.removeHead();
                 }
                 if (intently)
                     property = property + "!";
-                return evaluateHead(PropertyChain.createChain(property)).concat(left);
+                return evaluateHead(PropertyChain.createChain(property), collectionProperties).concat(left);
             }
             return new PropertyChain(singletonList(head)).concat(left);
         }

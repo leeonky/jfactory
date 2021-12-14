@@ -14,8 +14,10 @@ class PropertyChain {
     private final List<Object> property;
 
     private PropertyChain(String property) {
-        this.property = Arrays.stream(property.split("[\\[\\].]"))
+//        TODO refactor
+        this.property = Arrays.stream(property.replaceAll("\\[\\$]", "###").split("[\\[\\].]"))
                 .filter(s -> !s.isEmpty())
+                .map(s -> s.replaceAll("###", "[\\$]"))
                 .map(this::tryToNumber).collect(Collectors.toList());
     }
 

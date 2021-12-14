@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class _09_PropertyAlias {
@@ -97,6 +98,16 @@ public class _09_PropertyAlias {
         jFactory.register(ABean.class);
 
         expect(jFactory.type(Bean.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
+    }
+
+    @Test
+    void uses_collection_alias_with_collection_args() {
+        jFactory.aliasOf(BeanContainer.class).alias("beansValue", "beans[$].value");
+
+        BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("beansValue", asList("hello", "world"))
+                .create();
+
+        expect(beanContainer).should("beans.value: ['hello' 'world']");
     }
 
     @Getter
