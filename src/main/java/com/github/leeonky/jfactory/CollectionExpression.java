@@ -57,4 +57,11 @@ class CollectionExpression<P, E> extends Expression<P> {
     private Expression<E> mergeOrAssign(Integer index, Expression<E> expression) {
         return children.containsKey(index) ? expression.merge(children.get(index)) : expression;
     }
+
+    @Override
+    protected Expression<P> setIntently(boolean intently) {
+        if (intently)
+            children.values().forEach(c -> c.setIntently(true));
+        return super.setIntently(intently);
+    }
 }

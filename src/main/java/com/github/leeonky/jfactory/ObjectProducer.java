@@ -153,4 +153,8 @@ class ObjectProducer<T> extends Producer<T> {
         setChild(association, new UnFixedValueProducer<>(instance.reference(), create(instance.spec().getType())));
         persistable = cachedChildren;
     }
+
+    public boolean isReverseAssociation(String property) {
+        return reverseAssociations.containsKey(PropertyChain.createChain(property));
+    }
 }

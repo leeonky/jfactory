@@ -371,6 +371,29 @@ class _04_Spec {
                     .hasFieldOrPropertyWithValue("number", "007")
                     .hasFieldOrPropertyWithValue("person", person);
         }
+
+        @Test
+        void should_always_create_sub_object_when_use_reverse_association() {
+            jFactory.factory(Person.class).spec(instance -> instance.spec()
+                    .property("id").reverseAssociation("person")
+            );
+            jFactory.type(Person.class).property("id.number", "007").create();
+            jFactory.type(Person.class).property("id.number", "007").create();
+
+            assertThat(jFactory.type(ID.class).queryAll()).hasSize(2);
+        }
+
+        @Test
+        void should_always_create_sub_object_when_use_reverse_association_for_collection_property() {
+            jFactory.factory(Table.class).spec(instance -> instance.spec()
+                    .property("rows").reverseAssociation("table")
+            );
+
+            jFactory.type(Table.class).property("rows[0].number", 1).create();
+            jFactory.type(Table.class).property("rows[0].number", 1).property("rows[1].number", 1).create();
+
+            assertThat(jFactory.type(Row.class).queryAll()).hasSize(3);
+        }
     }
 
     @Nested

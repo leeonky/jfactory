@@ -138,9 +138,13 @@ class DefaultBuilder<T> implements Builder<T> {
         instance.spec().apply(jFactory, objectProducer);
     }
 
-    private void processInputProperty(ObjectProducer<T> objectProducer) {
-        properties.expressions(objectFactory.getType())
-                .forEach(exp -> objectProducer.changeChild(exp.getProperty(), exp.buildProducer(jFactory, objectProducer)));
+    private void processInputProperty(ObjectProducer<T> producer) {
+        properties.expressions(objectFactory.getType()).forEach(exp -> producer.changeChild(exp.getProperty(),
+                intentlyCreateWhenReverseAssociation(producer, exp).buildProducer(jFactory, producer)));
+    }
+
+    private Expression<T> intentlyCreateWhenReverseAssociation(ObjectProducer<T> producer, Expression<T> exp) {
+        return producer.isReverseAssociation(exp.getProperty()) ? exp.setIntently(true) : exp;
     }
 
     public DefaultBuilder<T> clone(DefaultBuilder<T> another) {
