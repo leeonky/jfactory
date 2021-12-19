@@ -102,12 +102,8 @@ public class PropertySpec<T> {
         return spec.append((factorySet, producer) -> producer.appendReverseAssociation(property, association));
     }
 
-    @SuppressWarnings("unchecked")
     public Spec<T> ignore() {
-        return appendProducer((factorySet, producer, property) -> {
-            BeanClass<Object> type = (BeanClass<Object>) producer.getPropertyWriterType(property);
-            return new DefaultValueProducer<>(type, type::createDefault);
-        });
+        return spec.append((jFactory, objectProducer) -> objectProducer.ignoreProperty(property.toString()));
     }
 
     @FunctionalInterface

@@ -4,6 +4,7 @@ import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
 import static com.github.leeonky.util.BeanClass.create;
@@ -19,6 +20,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();
     private final LinkCollection linkCollection = new LinkCollection();
     private final ListPersistable cachedChildren = new ListPersistable();
+    private final Set<String> ignorePropertiesInSpec = new HashSet<>();
     private Persistable persistable;
 
     public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder) {
@@ -156,5 +158,15 @@ class ObjectProducer<T> extends Producer<T> {
 
     public boolean isReverseAssociation(String property) {
         return reverseAssociations.containsKey(PropertyChain.createChain(property));
+    }
+
+    public void ignoreProperty(String property) {
+        ignorePropertiesInSpec.add(property);
+    }
+
+    public void processSpecIgnoreProperties() {
+        children.entrySet().stream().filter(e -> e.getValue() instanceof DefaultValueProducer
+                && ignorePropertiesInSpec.contains(e.getKey())).map(Map.Entry::getKey).collect(Collectors.toList())
+                .forEach(children::remove);
     }
 }

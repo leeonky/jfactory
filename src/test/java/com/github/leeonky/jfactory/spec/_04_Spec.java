@@ -29,6 +29,24 @@ class _04_Spec {
         private Bean self;
     }
 
+    public static class IgnoreProperty {
+        private boolean setterCalled = false;
+        private String value;
+
+        public boolean isSetterCalled() {
+            return setterCalled;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            setterCalled = true;
+            this.value = value;
+        }
+    }
+
     @Getter
     @Setter
     public static class Beans {
@@ -401,9 +419,9 @@ class _04_Spec {
 
         @Test
         void skip_property_in_spec() {
-            jFactory.factory(Bean.class).spec(instance ->
-                    instance.spec().property("content").ignore());
-            expect(jFactory.create(Bean.class)).should("content: null");
+            jFactory.factory(IgnoreProperty.class).spec(instance ->
+                    instance.spec().property("value").ignore());
+            expect(jFactory.create(IgnoreProperty.class)).should("setterCalled: false");
         }
     }
 }
