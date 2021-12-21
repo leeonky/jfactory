@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
-import static java.util.function.Function.identity;
 
 public class PropertySpec<T> {
     private final Spec<T> spec;
@@ -34,11 +33,11 @@ public class PropertySpec<T> {
     }
 
     public <V> Spec<T> is(Class<? extends Spec<V>> specClass) {
-        return appendProducer(factorySet -> createProducer(factorySet.spec(specClass)));
+        return appendProducer(factorySet -> createCreateProducer(factorySet.spec(specClass)));
     }
 
     public Spec<T> is(String... traitsAndSpec) {
-        return appendProducer(factorySet -> createProducer(factorySet.spec(traitsAndSpec)));
+        return appendProducer(factorySet -> createCreateProducer(factorySet.spec(traitsAndSpec)));
     }
 
     public <V, S extends Spec<V>> IsSpec<V, S> from(Class<S> specClass) {
@@ -58,13 +57,15 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> byFactory() {
-        return byFactory(identity());
+        return appendProducer((jFactory, producer, property) ->
+                producer.subDefaultValueProducer(producer.getType().getPropertyWriter(property)).orElseGet(() ->
+                        createCreateProducer(jFactory.type(producer.getPropertyWriterType(property).getType()))));
     }
 
     public Spec<T> byFactory(Function<Builder<?>, Builder<?>> builder) {
         return appendProducer((jFactory, producer, property) ->
                 producer.subDefaultValueProducer(producer.getType().getPropertyWriter(property))
-                        .orElseGet(() -> createProducer(builder.apply(jFactory.type(
+                        .orElseGet(() -> createQueryOrCreateProducer(builder.apply(jFactory.type(
                                 producer.getPropertyWriterType(property).getType())))));
     }
 
@@ -90,12 +91,15 @@ public class PropertySpec<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private <V> Producer<V> createProducer(Builder<V> builder) {
+    private <V> Producer<V> createQueryOrCreateProducer(Builder<V> builder) {
         Builder<V> builderWithArgs = builder.args(spec.params(property.toString()));
-        return builderWithArgs.queryAll().stream().findFirst()
-                .<Producer<V>>map(object ->
-                        new FixedValueProducer<>((BeanClass<V>) BeanClass.create(object.getClass()), object))
+        return builderWithArgs.queryAll().stream().findFirst().<Producer<V>>map(object ->
+                new FixedValueProducer<>((BeanClass<V>) BeanClass.create(object.getClass()), object))
                 .orElseGet(builderWithArgs::createProducer);
+    }
+
+    private <V> Producer<V> createCreateProducer(Builder<V> builder) {
+        return builder.args(spec.params(property.toString())).createProducer();
     }
 
     public Spec<T> reverseAssociation(String association) {
@@ -119,11 +123,11 @@ public class PropertySpec<T> {
         }
 
         public Spec<T> which(Consumer<S> trait) {
-            return appendProducer(factorySet -> createProducer(factorySet.spec(specClass, trait)));
+            return appendProducer(factorySet -> createQueryOrCreateProducer(factorySet.spec(specClass, trait)));
         }
 
         public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {
-            return appendProducer(factorySet -> createProducer(builder.apply(factorySet.spec(specClass))));
+            return appendProducer(factorySet -> createQueryOrCreateProducer(builder.apply(factorySet.spec(specClass))));
         }
     }
 }

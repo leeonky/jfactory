@@ -196,12 +196,15 @@ class _04_Spec {
     class SpecifySpec {
 
         @Test
-        void support_specify_spec_class() {
+        void support_specify_spec_class_method_is_will_always_create_object() {
+            Bean aBean = jFactory.createAs(ABean.class);
+
             jFactory.factory(Beans.class).spec(instance ->
                     instance.spec().property("bean").is(ABean.class));
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
+                    .isNotSameAs(aBean)
             ;
         }
 
@@ -215,7 +218,9 @@ class _04_Spec {
         }
 
         @Test
-        void support_specify_spec_name() {
+        void support_specify_spec_name_method_is_will_always_create_object() {
+            jFactory.createAs(ABean.class);
+
             jFactory.register(ABean.class);
 
             jFactory.factory(Beans.class).spec(instance ->
@@ -240,12 +245,15 @@ class _04_Spec {
     class DefaultTypeBuild {
 
         @Test
-        void support_create_property_with_default() {
+        void support_create_property_with_default_no_args_by_factory_will_always_create_object() {
+            Bean bean = jFactory.create(Bean.class);
+
             jFactory.factory(Beans.class).spec(instance ->
                     instance.spec().property("bean").byFactory());
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .isInstanceOf(Bean.class)
+                    .isNotSameAs(bean)
             ;
         }
 
