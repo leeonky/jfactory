@@ -218,6 +218,16 @@ class _04_Spec {
         }
 
         @Test
+        void should_use_any_exist_object_in_specify_spec_instance_when_which_clause_is_empty() {
+            Bean bean = jFactory.create(Bean.class);
+
+            jFactory.factory(Beans.class).spec(instance -> instance.spec().property("bean").from(ABean.class).which(x -> {
+            }));
+
+            assertThat(jFactory.create(Beans.class).getBean()).isSameAs(bean);
+        }
+
+        @Test
         void support_specify_spec_name_method_is_will_always_create_object() {
             jFactory.createAs(ABean.class);
 
@@ -238,6 +248,17 @@ class _04_Spec {
             assertThat(jFactory.create(Beans.class).getBean())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
                     .hasFieldOrPropertyWithValue("intValue", 100);
+        }
+
+        @Test
+        void should_use_exist_object_when_use_empty_builder_in_and_clause() {
+            Bean bean = jFactory.create(Bean.class);
+
+            jFactory.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean").from((Class<? extends Spec<Bean>>) ABean.class).and(builder -> builder));
+
+            assertThat(jFactory.create(Beans.class).getBean())
+                    .isSameAs(bean);
         }
     }
 
@@ -283,6 +304,17 @@ class _04_Spec {
                     instance.spec().property("stringValue").byFactory());
 
             assertThat(jFactory.create(Bean.class).stringValue).isEqualTo("stringValue#1");
+        }
+
+        @Test
+        void should_use_any_exist_object_when_no_properties_in_by_factory_builder() {
+            Bean bean = jFactory.create(Bean.class);
+
+            jFactory.factory(Beans.class).spec(instance ->
+                    instance.spec().property("bean").byFactory(builder -> builder));
+
+            assertThat(jFactory.create(Beans.class).getBean())
+                    .isSameAs(bean);
         }
     }
 
