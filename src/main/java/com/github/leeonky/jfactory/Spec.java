@@ -3,8 +3,11 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.createChain;
 import static java.util.stream.Collectors.toList;
@@ -12,7 +15,9 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 public class Spec<T> {
-    private List<BiConsumer<JFactory, ObjectProducer<T>>> operations = new ArrayList<>();
+    private final List<BiConsumer<JFactory, ObjectProducer<T>>> operations = new ArrayList<>();
+    private final Set<PropertySpec<T>.IsSpec<?, ? extends Spec<?>>> invalidIsSpecs = new LinkedHashSet<>();
+
     private Instance<T> instance;
     private Class<T> type = null;
 
@@ -31,6 +36,13 @@ public class Spec<T> {
     void apply(JFactory jFactory, ObjectProducer<T> producer) {
         operations.forEach(o -> o.accept(jFactory, producer));
         type = producer.getType().getType();
+        if (!invalidIsSpecs.isEmpty())
+            throw new InvalidSpecException("Invalid property spec:\n\t"
+                    + invalidIsSpecs.stream().map(PropertySpec.IsSpec::getPosition).collect(Collectors.joining("\n\t"))
+                    + "\nShould finish method chain with `and` or `which`:\n"
+                    + "\tproperty().from().which()\n"
+                    + "\tproperty().from().and()\n"
+                    + "Or use property().is() to create object with only spec directly.");
     }
 
     @SuppressWarnings("unchecked")
@@ -74,5 +86,15 @@ public class Spec<T> {
 
     public Instance<T> instance() {
         return instance;
+    }
+
+    <V, S extends Spec<V>> PropertySpec<T>.IsSpec<V, S> newIsSpec(Class<S> specClass, PropertySpec<T> propertySpec) {
+        PropertySpec<T>.IsSpec<V, S> isSpec = propertySpec.new IsSpec<V, S>(specClass);
+        invalidIsSpecs.add(isSpec);
+        return isSpec;
+    }
+
+    void consume(PropertySpec<T>.IsSpec<?, ? extends Spec<?>> isSpec) {
+        invalidIsSpecs.remove(isSpec);
     }
 }

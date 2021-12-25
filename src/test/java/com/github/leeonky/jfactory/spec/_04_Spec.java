@@ -1,9 +1,6 @@
 package com.github.leeonky.jfactory.spec;
 
-import com.github.leeonky.jfactory.JFactory;
-import com.github.leeonky.jfactory.MemoryDataRepository;
-import com.github.leeonky.jfactory.Spec;
-import com.github.leeonky.jfactory.Trait;
+import com.github.leeonky.jfactory.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Nested;
@@ -259,6 +256,20 @@ class _04_Spec {
 
             assertThat(jFactory.create(Beans.class).getBean())
                     .isSameAs(bean);
+        }
+
+        @Test
+        void should_raise_error_when_invalid_call() {
+            jFactory.factory(Beans.class).spec(instance -> instance.spec()
+                    .property("bean").from(ABean.class));
+
+            assertThat(assertThrows(InvalidSpecException.class, () -> jFactory.create(Beans.class)))
+                    .hasMessageContaining("Invalid property spec:")
+                    .hasMessageContaining("_04_Spec.java:264")
+                    .hasMessageContaining("Should finish method chain with `and` or `which`:")
+                    .hasMessageContaining("property().from().which()")
+                    .hasMessageContaining("property().from().and()")
+                    .hasMessageContaining("Or use property().is() to create object with only spec directly.");
         }
     }
 

@@ -41,7 +41,7 @@ public class PropertySpec<T> {
     }
 
     public <V, S extends Spec<V>> IsSpec<V, S> from(Class<S> specClass) {
-        return new IsSpec<>(specClass);
+        return spec.newIsSpec(specClass, this);
     }
 
     public Spec<T> defaultValue(Object value) {
@@ -117,17 +117,26 @@ public class PropertySpec<T> {
 
     public class IsSpec<V, S extends Spec<V>> {
         private final Class<S> specClass;
+        private final String position;
 
         public IsSpec(Class<S> spec) {
+            StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[4];
+            position = stackTraceElement.getFileName() + ":" + stackTraceElement.getLineNumber();
             specClass = spec;
         }
 
         public Spec<T> which(Consumer<S> trait) {
+            spec.consume(this);
             return appendProducer(factorySet -> createQueryOrCreateProducer(factorySet.spec(specClass, trait)));
         }
 
         public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {
+            spec.consume(this);
             return appendProducer(factorySet -> createQueryOrCreateProducer(builder.apply(factorySet.spec(specClass))));
+        }
+
+        public String getPosition() {
+            return position;
         }
     }
 }
