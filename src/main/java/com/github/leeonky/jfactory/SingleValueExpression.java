@@ -33,5 +33,4 @@ class SingleValueExpression<P> extends Expression<P> {
             convertedValue = property.getWriterType().createCollection(arrayCollectionToStream(value).collect(toList()));
         return new FixedValueProducer<>(property.getWriterType(), convertedValue);
     }
-
 }

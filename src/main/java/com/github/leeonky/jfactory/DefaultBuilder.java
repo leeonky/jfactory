@@ -3,7 +3,6 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.cast;
@@ -82,25 +81,31 @@ class DefaultBuilder<T> implements Builder<T> {
     public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> newBuilder = clone();
         properties.forEach((key, value) -> {
-            boolean aliasWithCollectionProperties = value != null && BeanClass.createFrom(value).isCollection();
-            String property = processCollection(jFactory.aliasSetStore.evaluate(objectFactory.getType(), key,
-                    aliasWithCollectionProperties), newBuilder);
-            if (aliasWithCollectionProperties) {
+            String property = replaceStartsWithIndexBracket(
+                    jFactory.aliasSetStore.evaluate(objectFactory.getType(), key, isCollection(value)), newBuilder);
+            if (isCollection(value)) {
                 List<Object> objects = BeanClass.arrayCollectionToStream(value).collect(Collectors.toList());
                 if (objects.isEmpty() || !property.contains("$"))
-                    newBuilder.properties.append(property, objects);
-                else {
-                    AtomicInteger index = new AtomicInteger(0);
-                    objects.forEach(e -> newBuilder.properties.append(
-                            property.replaceFirst("\\$", String.valueOf(index.getAndIncrement())), e));
-                }
+                    newBuilder.properties.append(trimIndexAlias(property), objects);
+                else for (int i = 0; i < objects.size(); i++)
+                    newBuilder.properties.append(property.replaceFirst("\\$", String.valueOf(i)), objects.get(i));
             } else
                 newBuilder.properties.append(property, value);
         });
         return newBuilder;
     }
 
-    private String processCollection(String key, DefaultBuilder<T> newBuilder) {
+    private String trimIndexAlias(String property) {
+        if (property.contains("[$]"))
+            return property.substring(0, property.indexOf("[$]"));
+        return property;
+    }
+
+    private boolean isCollection(Object value) {
+        return value != null && BeanClass.createFrom(value).isCollection();
+    }
+
+    private String replaceStartsWithIndexBracket(String key, DefaultBuilder<T> newBuilder) {
         if (key.startsWith("[")) {
             String[] indexAndSub = key.substring(1).split("]", 2);
             newBuilder.collectionSize = Math.max(newBuilder.collectionSize, Integer.parseInt(indexAndSub[0]) + 1);

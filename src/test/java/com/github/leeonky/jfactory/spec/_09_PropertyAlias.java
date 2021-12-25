@@ -11,6 +11,7 @@ import java.util.List;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class _09_PropertyAlias {
@@ -110,9 +111,20 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans.value: ['hello' 'world']");
     }
 
-    //    TODO
     @Test
-    void support_empty_list_in_property_with_alias() {
+    void empty_list_property_with_collection_alias() {
+        jFactory.aliasOf(BeanContainer.class).alias("aliasOfBeans", "beans[$]");
+        BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("aliasOfBeans", emptyList()).create();
+
+        expect(beanContainer).should("beans: []");
+    }
+
+    @Test
+    void empty_list_property_with_collection_alias_and_sub_properties() {
+        jFactory.aliasOf(BeanContainer.class).alias("aliasOfBeansValues", "beans[$].value");
+        BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("aliasOfBeansValues", emptyList()).create();
+
+        expect(beanContainer).should("beans: []");
     }
 
     @Getter
