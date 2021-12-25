@@ -110,6 +110,11 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans.value: ['hello' 'world']");
     }
 
+    //    TODO
+    @Test
+    void support_empty_list_in_property_with_alias() {
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)

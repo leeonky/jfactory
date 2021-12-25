@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -265,7 +267,7 @@ class _04_Spec {
 
             assertThat(assertThrows(InvalidSpecException.class, () -> jFactory.create(Beans.class)))
                     .hasMessageContaining("Invalid property spec:")
-                    .hasMessageContaining("_04_Spec.java:264")
+                    .hasMessageContaining("_04_Spec.java:266")
                     .hasMessageContaining("Should finish method chain with `and` or `which`:")
                     .hasMessageContaining("property().from().which()")
                     .hasMessageContaining("property().from().and()")
@@ -361,6 +363,18 @@ class _04_Spec {
                     instance.spec().property("stringValues[0]").byFactory());
 
             assertThat(jFactory.create(Bean.class).stringValues[0]).isEqualTo("stringValues#1[0]");
+        }
+
+        @Test
+        void support_empty_list_in_property() {
+            assertThat(jFactory.type(Bean.class).property("stringValues", emptyList()).create().getStringValues())
+                    .isEmpty();
+        }
+
+        @Test
+        void support_use_list_in_property() {
+            assertThat(jFactory.type(Bean.class).property("stringValues", asList("a", "b")).create().getStringValues())
+                    .containsExactly("a", "b");
         }
     }
 

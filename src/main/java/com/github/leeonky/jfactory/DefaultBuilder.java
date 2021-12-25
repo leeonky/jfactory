@@ -2,10 +2,7 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -89,9 +86,14 @@ class DefaultBuilder<T> implements Builder<T> {
             String property = processCollection(jFactory.aliasSetStore.evaluate(objectFactory.getType(), key,
                     aliasWithCollectionProperties), newBuilder);
             if (aliasWithCollectionProperties) {
-                AtomicInteger index = new AtomicInteger(0);
-                BeanClass.arrayCollectionToStream(value).forEach(e -> newBuilder.properties.append(
-                        property.replaceFirst("\\$", String.valueOf(index.getAndIncrement())), e));
+                List<Object> objects = BeanClass.arrayCollectionToStream(value).collect(Collectors.toList());
+                if (objects.isEmpty() || !property.contains("$"))
+                    newBuilder.properties.append(property, objects);
+                else {
+                    AtomicInteger index = new AtomicInteger(0);
+                    objects.forEach(e -> newBuilder.properties.append(
+                            property.replaceFirst("\\$", String.valueOf(index.getAndIncrement())), e));
+                }
             } else
                 newBuilder.properties.append(property, value);
         });
