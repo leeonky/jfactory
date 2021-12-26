@@ -102,6 +102,15 @@ class _04_Spec {
         private String number;
     }
 
+    @Global
+    public static class BeanGlobal1 extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            property("stringValue").value("base 1");
+        }
+    }
+
     @Nested
     class SpecifyValue {
 
@@ -262,12 +271,13 @@ class _04_Spec {
 
         @Test
         void should_raise_error_when_invalid_call() {
+            int currentLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
                     .property("bean").from(ABean.class));
 
             assertThat(assertThrows(InvalidSpecException.class, () -> jFactory.create(Beans.class)))
                     .hasMessageContaining("Invalid property spec:")
-                    .hasMessageContaining("_04_Spec.java:266")
+                    .hasMessageContaining("_04_Spec.java:" + (currentLine + 2))
                     .hasMessageContaining("Should finish method chain with `and` or `which`:")
                     .hasMessageContaining("property().from().which()")
                     .hasMessageContaining("property().from().and()")
@@ -487,6 +497,21 @@ class _04_Spec {
             jFactory.factory(IgnoreProperty.class).spec(instance ->
                     instance.spec().property("value").ignore());
             expect(jFactory.create(IgnoreProperty.class)).should("setterCalled: false");
+        }
+    }
+
+    @Nested
+    class SpecAsBaseType {
+
+        @Test
+        void use_spec_as_base_type_and_use_origin_factory_as_base_base() {
+            jFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("base"));
+            jFactory.register(BeanGlobal1.class);
+
+            expect(jFactory.create(Bean.class)).match("{" +
+                    "content: 'base'\n" +
+                    "stringValue: 'base 1'\n" +
+                    "}");
         }
     }
 }
