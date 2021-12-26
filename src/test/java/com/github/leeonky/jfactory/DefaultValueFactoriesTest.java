@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import java.time.*;
 import java.util.Date;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -138,6 +139,11 @@ class DefaultValueFactoriesTest {
 
     private PropertyWriter<?> stubPropertyWriter(String property) {
         return new PropertyWriter<Object>() {
+            @Override
+            public BiConsumer<Object, Object> setter() {
+                return null;
+            }
+
             @Override
             public void setValue(Object bean, Object value) {
             }
