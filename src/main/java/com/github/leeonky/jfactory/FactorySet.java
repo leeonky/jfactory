@@ -22,11 +22,16 @@ class FactorySet {
 
     public <T, S extends Spec<T>> void registerSpecClassFactory(Class<S> specClass) {
         Spec<T> spec = BeanClass.newInstance(specClass);
+        BeanClass<T> beanClass = BeanClass.create(spec.getType());
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
-                type -> new SpecClassFactory<>(queryObjectFactory(BeanClass.create(spec.getType())), specClass, this));
+                type -> new SpecClassFactory<>(queryObjectFactory(beanClass).getBase(), specClass, this));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
         if (specClass.getAnnotation(Global.class) != null)
-            objectFactories.put(BeanClass.create(spec.getType()), specClassFactory);
+            objectFactories.put(beanClass, specClassFactory);
+    }
+
+    public void removeGlobalSpec(BeanClass<?> type) {
+        objectFactories.computeIfPresent(type, (key, factory) -> factory.getBase());
     }
 
     @SuppressWarnings("unchecked")

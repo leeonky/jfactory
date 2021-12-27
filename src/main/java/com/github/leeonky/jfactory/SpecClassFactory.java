@@ -51,4 +51,9 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     protected void collectClassSpec(Instance<T> instance) {
         instance.spec().main();
     }
+
+    @Override
+    public ObjectFactory<T> getBase() {
+        return base;
+    }
 }

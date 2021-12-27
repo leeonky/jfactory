@@ -111,6 +111,15 @@ class _04_Spec {
         }
     }
 
+    @Global
+    public static class BeanGlobal2 extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            property("intValue").value(1000);
+        }
+    }
+
     @Nested
     class SpecifyValue {
 
@@ -504,13 +513,38 @@ class _04_Spec {
     class SpecAsBaseType {
 
         @Test
-        void use_spec_as_base_type_and_use_origin_factory_as_base_base() {
+        void use_spec_as_global_spec_and_use_origin_factory_as_base_base() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("base"));
             jFactory.register(BeanGlobal1.class);
 
             expect(jFactory.create(Bean.class)).match("{" +
                     "content: 'base'\n" +
                     "stringValue: 'base 1'\n" +
+                    "}");
+        }
+
+        @Test
+        void replace_global_spec() {
+            jFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("base"));
+            jFactory.register(BeanGlobal1.class);
+            jFactory.register(BeanGlobal2.class);
+
+            expect(jFactory.create(Bean.class)).match("{" +
+                    "content: 'base'\n" +
+                    "stringValue: /stringValue.*/\n" +
+                    "intValue: 1000\n" +
+                    "}");
+        }
+
+        @Test
+        void remove_global_spec_and_origin_type_factory_should_be_enabled() {
+            jFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("base"));
+            jFactory.register(BeanGlobal1.class);
+            jFactory.removeGlobalSpec(Bean.class);
+
+            expect(jFactory.create(Bean.class)).match("{" +
+                    "content: 'base'\n" +
+                    "stringValue: /stringValue.*/\n" +
                     "}");
         }
     }

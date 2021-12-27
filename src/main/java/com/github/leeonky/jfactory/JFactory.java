@@ -113,4 +113,9 @@ public class JFactory {
     public AliasSetStore.AliasSet aliasOf(Class<?> type) {
         return aliasSetStore.createSet(BeanClass.create(type));
     }
+
+    public JFactory removeGlobalSpec(Class<?> type) {
+        factorySet.removeGlobalSpec(BeanClass.create(type));
+        return this;
+    }
 }

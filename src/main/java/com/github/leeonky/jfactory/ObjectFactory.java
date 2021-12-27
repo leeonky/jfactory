@@ -71,4 +71,8 @@ class ObjectFactory<T> implements Factory<T> {
     public FactorySet getFactorySet() {
         return factorySet;
     }
+
+    public ObjectFactory<T> getBase() {
+        return this;
+    }
 }
