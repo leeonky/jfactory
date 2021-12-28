@@ -120,8 +120,7 @@ public class PropertySpec<T> {
         private final String position;
 
         public IsSpec(Class<S> spec) {
-            StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[4];
-            position = stackTraceElement.getFileName() + ":" + stackTraceElement.getLineNumber();
+            position = Thread.currentThread().getStackTrace()[4].toString();
             specClass = spec;
         }
 
