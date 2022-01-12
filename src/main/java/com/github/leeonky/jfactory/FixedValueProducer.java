@@ -5,9 +5,9 @@ import com.github.leeonky.util.BeanClass;
 class FixedValueProducer<T> extends Producer<T> {
     private final T value;
 
-    public FixedValueProducer(BeanClass<T> type, T value) {
+    public FixedValueProducer(BeanClass<T> type, Object value) {
         super(type);
-        this.value = value;
+        this.value = BeanClass.getConverter().convert(type.getType(), value);
     }
 
     @Override

@@ -90,6 +90,16 @@ public class _06_Dependency {
         }
 
         @Test
+        void depends_on_property_with_different_type() {
+            jFactory.factory(Bean.class).spec(instance -> instance.spec()
+                    .property("content").dependsOn("stringValue", o -> (String) o));
+
+            Bean bean = jFactory.type(Bean.class).property("stringValue", 1).create();
+
+            assertThat(bean.content).isEqualTo("1");
+        }
+
+        @Test
         void depends_on_property_list() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("content").dependsOn(asList("intValue", "stringValue"), args -> args[0].toString() + args[1]));
