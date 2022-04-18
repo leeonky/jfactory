@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.jfactory.PropertyValue.empty;
 import static org.assertj.core.api.Assertions.assertThat;
 

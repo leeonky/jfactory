@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.dal.Assertions.expect;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +55,7 @@ public class _09_PropertyAlias {
         List<Bean> beans = jFactory.type(new TypeReference<ArrayList<Bean>>() {
         }).property("[0].aliasOfValue", "hello").create();
 
-        expect(beans).should("value: ['hello']");
+        expect(beans).should("value[]: ['hello']");
     }
 
     @Test
@@ -64,7 +64,7 @@ public class _09_PropertyAlias {
 
         BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("aliasOfBeans[0].value", "hello").create();
 
-        expect(beanContainer).should("beans.value: ['hello']");
+        expect(beanContainer).should("beans.value[]: ['hello']");
     }
 
     @Test
@@ -81,7 +81,7 @@ public class _09_PropertyAlias {
 
         BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("beansValue[0]", "hello").create();
 
-        expect(beanContainer).should("beans.value: ['hello']");
+        expect(beanContainer).should("beans.value[]: ['hello']");
     }
 
     @Test
@@ -108,7 +108,7 @@ public class _09_PropertyAlias {
         BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("beansValue", asList("hello", "world"))
                 .create();
 
-        expect(beanContainer).should("beans.value: ['hello' 'world']");
+        expect(beanContainer).should("beans.value[]: ['hello' 'world']");
     }
 
     @Test

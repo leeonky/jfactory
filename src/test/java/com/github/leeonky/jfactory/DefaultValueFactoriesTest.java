@@ -172,6 +172,11 @@ class DefaultValueFactoriesTest {
             public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
                 return null;
             }
+
+            @Override
+            public boolean isBeanProperty() {
+                return true;
+            }
         };
     }
 
