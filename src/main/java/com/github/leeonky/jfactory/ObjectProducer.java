@@ -143,7 +143,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected Producer<T> changeFrom(ObjectProducer<T> origin) {
-        return origin.builder.margeFrom(builder).createProducer();
+        return origin.builder.marge(builder).createProducer();
     }
 
     public void appendReverseAssociation(PropertyChain property, String association) {

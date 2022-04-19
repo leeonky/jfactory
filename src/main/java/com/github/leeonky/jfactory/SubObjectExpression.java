@@ -43,7 +43,7 @@ class SubObjectExpression<P> extends Expression<P> {
 
     @Override
     protected Expression<P> mergeFrom(SubObjectExpression<P> origin) {
-        properties.mergeFrom(origin.properties);
+        properties.insertAll(origin.properties);
         traitsSpec.merge(origin.traitsSpec, property.toString());
         setIntently(intently || origin.intently);
         return this;

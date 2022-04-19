@@ -13,8 +13,7 @@ public class KeyValueCollection {
 
     private final Map<String, KeyValue> keyValues = new LinkedHashMap<>();
 
-    //    TODO refactor
-    public void mergeFrom(KeyValueCollection another) {
+    public void insertAll(KeyValueCollection another) {
         LinkedHashMap<String, KeyValue> merged = new LinkedHashMap<String, KeyValue>() {{
             putAll(another.keyValues);
             putAll(keyValues);
