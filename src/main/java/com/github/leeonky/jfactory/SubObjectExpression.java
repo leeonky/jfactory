@@ -37,15 +37,15 @@ class SubObjectExpression<P> extends Expression<P> {
     }
 
     @Override
-    public Expression<P> merge(Expression<P> another) {
-        return another.mergeBy(this);
+    public Expression<P> mergeTo(Expression<P> newExpression) {
+        return newExpression.mergeFrom(this);
     }
 
     @Override
-    protected Expression<P> mergeBy(SubObjectExpression<P> another) {
-        properties.merge(another.properties);
-        traitsSpec.merge(another.traitsSpec, property.toString());
-        setIntently(intently || another.intently);
+    protected Expression<P> mergeFrom(SubObjectExpression<P> origin) {
+        properties.mergeFrom(origin.properties);
+        traitsSpec.merge(origin.traitsSpec, property.toString());
+        setIntently(intently || origin.intently);
         return this;
     }
 }

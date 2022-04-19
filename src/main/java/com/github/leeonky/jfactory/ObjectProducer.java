@@ -39,10 +39,10 @@ class ObjectProducer<T> extends Producer<T> {
     private void createElementDefaultValueProducers() {
         range(0, instance.collectionSize()).mapToObj(String::valueOf).filter(index -> children.get(index) == null)
                 .map(index -> getType().getPropertyWriter(index)).forEach((PropertyWriter<T> propertyWriter) ->
-                setChild(propertyWriter.getName(), new DefaultValueFactoryProducer<>(factory.getType(),
-                        factory.getFactorySet().getDefaultValueBuilder(propertyWriter.getType()),
-                        instance.sub(propertyWriter))
-                ));
+                        setChild(propertyWriter.getName(), new DefaultValueFactoryProducer<>(factory.getType(),
+                                factory.getFactorySet().getDefaultValueBuilder(propertyWriter.getType()),
+                                instance.sub(propertyWriter))
+                        ));
     }
 
     private void setupReverseAssociations() {
@@ -143,7 +143,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected Producer<T> changeFrom(ObjectProducer<T> origin) {
-        return origin.builder.clone(builder).createProducer();
+        return origin.builder.margeFrom(builder).createProducer();
     }
 
     public void appendReverseAssociation(PropertyChain property, String association) {
@@ -166,7 +166,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     public void processSpecIgnoreProperties() {
         children.entrySet().stream().filter(e -> e.getValue() instanceof DefaultValueProducer
-                && ignorePropertiesInSpec.contains(e.getKey())).map(Map.Entry::getKey).collect(Collectors.toList())
+                        && ignorePropertiesInSpec.contains(e.getKey())).map(Map.Entry::getKey).collect(Collectors.toList())
                 .forEach(children::remove);
     }
 }

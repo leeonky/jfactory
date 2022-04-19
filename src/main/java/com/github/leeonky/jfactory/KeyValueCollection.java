@@ -13,9 +13,17 @@ public class KeyValueCollection {
 
     private final Map<String, KeyValue> keyValues = new LinkedHashMap<>();
 
-    public void merge(KeyValueCollection another) {
-        another.keyValues.putAll(keyValues);
+    //    TODO refactor
+    public void mergeFrom(KeyValueCollection another) {
+        LinkedHashMap<String, KeyValue> merged = new LinkedHashMap<String, KeyValue>() {{
+            putAll(another.keyValues);
+            putAll(keyValues);
+        }};
         keyValues.clear();
+        keyValues.putAll(merged);
+    }
+
+    public void appendAll(KeyValueCollection another) {
         keyValues.putAll(another.keyValues);
     }
 
@@ -28,7 +36,7 @@ public class KeyValueCollection {
     <T> Collection<Expression<T>> expressions(BeanClass<T> type) {
         return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type))
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
-                .map(expressions -> expressions.stream().reduce(Expression::merge).get())
+                .map(expressions -> expressions.stream().reduce(Expression::mergeTo).get())
                 .collect(Collectors.toList());
     }
 

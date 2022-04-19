@@ -15,7 +15,7 @@ class ExpressionTest {
             SingleValueExpression<Object> expression1 = new SingleValueExpression<>(null, null, null);
             SingleValueExpression<Object> expression2 = new SingleValueExpression<>(null, null, null);
 
-            assertThat(expression1.merge(expression2)).isEqualTo(expression2);
+            assertThat(expression1.mergeTo(expression2)).isEqualTo(expression2);
         }
     }
 }

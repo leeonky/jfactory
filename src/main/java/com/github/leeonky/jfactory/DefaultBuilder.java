@@ -71,7 +71,7 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public DefaultBuilder<T> clone() {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory);
-        builder.properties.merge(properties);
+        builder.properties.mergeFrom(properties);
         builder.traits.addAll(traits);
         builder.arguments.merge(arguments);
         return builder;
@@ -155,11 +155,11 @@ class DefaultBuilder<T> implements Builder<T> {
         return producer.isReverseAssociation(exp.getProperty()) ? exp.setIntently(true) : exp;
     }
 
-    public DefaultBuilder<T> clone(DefaultBuilder<T> another) {
+    public DefaultBuilder<T> margeFrom(DefaultBuilder<T> another) {
         if (another.objectFactory instanceof SpecClassFactory)
             return another;
         DefaultBuilder<T> newBuilder = clone();
-        newBuilder.properties.merge(another.properties);
+        newBuilder.properties.appendAll(another.properties);
         newBuilder.traits.addAll(another.traits);
         newBuilder.collectionSize = collectionSize;
         return newBuilder;

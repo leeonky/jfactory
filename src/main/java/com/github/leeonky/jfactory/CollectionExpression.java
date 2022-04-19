@@ -42,20 +42,20 @@ class CollectionExpression<P, E> extends Expression<P> {
     }
 
     @Override
-    public Expression<P> merge(Expression<P> another) {
-        return another.mergeBy(this);
+    public Expression<P> mergeTo(Expression<P> newExpression) {
+        return newExpression.mergeFrom(this);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Expression<P> mergeBy(CollectionExpression<P, ?> another) {
-        another.children.forEach((index, expression) ->
-                children.put(index, mergeOrAssign(index, (Expression<E>) expression)));
+    protected Expression<P> mergeFrom(CollectionExpression<P, ?> origin) {
+        origin.children.forEach((index, expression) ->
+                children.put(index, mergeFromOrAssign(index, (Expression<E>) expression)));
         return this;
     }
 
-    private Expression<E> mergeOrAssign(Integer index, Expression<E> expression) {
-        return children.containsKey(index) ? expression.merge(children.get(index)) : expression;
+    private Expression<E> mergeFromOrAssign(Integer index, Expression<E> expression) {
+        return children.containsKey(index) ? expression.mergeTo(children.get(index)) : expression;
     }
 
     @Override

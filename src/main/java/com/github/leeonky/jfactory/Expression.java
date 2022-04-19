@@ -22,15 +22,15 @@ abstract class Expression<P> {
 
     public abstract Producer<?> buildProducer(JFactory jFactory, Producer<P> parent);
 
-    protected Expression<P> merge(Expression<P> another) {
-        return another;
+    protected Expression<P> mergeTo(Expression<P> newExpression) {
+        return newExpression;
     }
 
-    protected Expression<P> mergeBy(SubObjectExpression<P> another) {
+    protected Expression<P> mergeFrom(SubObjectExpression<P> origin) {
         return this;
     }
 
-    protected Expression<P> mergeBy(CollectionExpression<P, ?> another) {
+    protected Expression<P> mergeFrom(CollectionExpression<P, ?> origin) {
         return this;
     }
 
