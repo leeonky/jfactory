@@ -28,16 +28,16 @@ public class PropertySpec<T> {
     public <V> Spec<T> value(Supplier<V> value) {
         if (value == null)
             return value(() -> null);
-        return appendProducer((factorySet, producer, property) ->
+        return appendProducer((jFactory, producer, property) ->
                 new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getPropertyWriterType(property)));
     }
 
     public <V> Spec<T> is(Class<? extends Spec<V>> specClass) {
-        return appendProducer(factorySet -> createCreateProducer(factorySet.spec(specClass)));
+        return appendProducer(jFactory -> createCreateProducer(jFactory.spec(specClass)));
     }
 
     public Spec<T> is(String... traitsAndSpec) {
-        return appendProducer(factorySet -> createCreateProducer(factorySet.spec(traitsAndSpec)));
+        return appendProducer(jFactory -> createCreateProducer(jFactory.spec(traitsAndSpec)));
     }
 
     public <V, S extends Spec<V>> IsSpec<V, S> from(Class<S> specClass) {
@@ -52,7 +52,7 @@ public class PropertySpec<T> {
     public <V> Spec<T> defaultValue(Supplier<V> supplier) {
         if (supplier == null)
             return defaultValue((Object) null);
-        return appendProducer((factorySet, producer, property) ->
+        return appendProducer((jFactory, producer, property) ->
                 new DefaultValueProducer<>((BeanClass<V>) producer.getPropertyWriterType(property), supplier));
     }
 
@@ -74,15 +74,15 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> rule) {
-        return spec.append((factorySet, objectProducer) ->
+        return spec.append((jFactory, objectProducer) ->
                 objectProducer.addDependency(property, rule,
                         dependencies.stream().map(PropertyChain::createChain).collect(Collectors.toList())));
     }
 
     private Spec<T> appendProducer(Fuc<JFactory, Producer<?>, String, Producer<?>> producerFactory) {
         if (property.isSingle() || property.isTopLevelPropertyCollection())
-            return spec.append((factorySet, objectProducer) -> objectProducer.changeDescendant(property,
-                    ((nextToLast, property) -> producerFactory.apply(factorySet, nextToLast, property))));
+            return spec.append((jFactory, objectProducer) -> objectProducer.changeDescendant(property,
+                    ((nextToLast, property) -> producerFactory.apply(jFactory, nextToLast, property))));
         throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
     }
 
@@ -94,7 +94,7 @@ public class PropertySpec<T> {
     private <V> Producer<V> createQueryOrCreateProducer(Builder<V> builder) {
         Builder<V> builderWithArgs = builder.args(spec.params(property.toString()));
         return builderWithArgs.queryAll().stream().findFirst().<Producer<V>>map(object ->
-                new FixedValueProducer<>((BeanClass<V>) BeanClass.create(object.getClass()), object))
+                        new FixedValueProducer<>((BeanClass<V>) BeanClass.create(object.getClass()), object))
                 .orElseGet(builderWithArgs::createProducer);
     }
 
@@ -103,7 +103,7 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> reverseAssociation(String association) {
-        return spec.append((factorySet, producer) -> producer.appendReverseAssociation(property, association));
+        return spec.append((jFactory, producer) -> producer.appendReverseAssociation(property, association));
     }
 
     public Spec<T> ignore() {
@@ -126,12 +126,12 @@ public class PropertySpec<T> {
 
         public Spec<T> which(Consumer<S> trait) {
             spec.consume(this);
-            return appendProducer(factorySet -> createQueryOrCreateProducer(factorySet.spec(specClass, trait)));
+            return appendProducer(jFactory -> createQueryOrCreateProducer(jFactory.spec(specClass, trait)));
         }
 
         public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {
             spec.consume(this);
-            return appendProducer(factorySet -> createQueryOrCreateProducer(builder.apply(factorySet.spec(specClass))));
+            return appendProducer(jFactory -> createQueryOrCreateProducer(builder.apply(jFactory.spec(specClass))));
         }
 
         public String getPosition() {

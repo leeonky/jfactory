@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PropertyShouldOverridePropertyInSpec {
     private final JFactory jFactory = new JFactory() {{
@@ -25,6 +26,33 @@ public class PropertyShouldOverridePropertyInSpec {
 
         ProductPriceBook productPriceBook = jFactory.type(ProductPriceBook.class).property("priceBook.code", "ebay").create();
         expect(productPriceBook).should("priceBook.code: 'ebay'");
+    }
+
+    //TODO bug
+//    @Test
+    void should_merge_property_in_spec_and_input_when_property_inside_spec_is_a_query() {
+        jFactory.type(PriceBook.class).property("code", "amazon").create();
+        PriceBook priceBook = jFactory.type(PriceBook.class).property("code", "amazon").property("name", "book").create();
+
+        jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
+                .byFactory(builder -> builder.property("code", "amazon")));
+
+        ProductPriceBook book1 = jFactory.type(ProductPriceBook.class).property("priceBook.name", "book").create();
+
+        assertThat(book1).isSameAs(priceBook);
+    }
+
+    //TODO bug
+//    @Test
+    void should_merge_property_in_spec_and_input_when_property_inside_spec_is_a_query2() {
+        jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
+                .byFactory(builder -> builder.property("code", "amazon")));
+
+        ProductPriceBook book1 = jFactory.type(ProductPriceBook.class).property("priceBook.name", "book1").create();
+        ProductPriceBook book2 = jFactory.type(ProductPriceBook.class).property("priceBook.name", "book2").create();
+
+        expect(book1.priceBook).should(": {code: amazon name: book1}");
+        expect(book2.priceBook).should(": {code: amazon name: book2}");
     }
 
     @Getter

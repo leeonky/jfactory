@@ -155,8 +155,11 @@ class DefaultBuilder<T> implements Builder<T> {
         return producer.isReverseAssociation(exp.getProperty()) ? exp.setIntently(true) : exp;
     }
 
+    //    TODO cannot merge with different spec class
+//    TODO should use a spec class in origin or another
     public DefaultBuilder<T> marge(DefaultBuilder<T> another) {
         if (another.objectFactory instanceof SpecClassFactory)
+//    TODO ?? need a test
             return another;
         DefaultBuilder<T> newBuilder = clone();
         newBuilder.properties.appendAll(another.properties);

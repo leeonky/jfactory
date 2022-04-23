@@ -32,7 +32,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.3.10' + System.env.VERSION_SCOPE
+version = '0.3.11' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -47,13 +47,13 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.leeonky:bean-util:0.2.17'
+    compile 'com.github.leeonky:bean-util:0.3.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.3'
     testImplementation 'org.assertj:assertj-core:3.15.0'
     testImplementation 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.3'
-    testImplementation("com.github.leeonky:DAL-java:0.2.0-beta")
+    testImplementation("com.github.leeonky:DAL-java:0.2.0-beta.2")
 
     pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }
