@@ -22,8 +22,9 @@ class SubObjectExpression<P> extends Expression<P> {
 
     @Override
     public Producer<?> buildProducer(JFactory jFactory, Producer<P> parent) {
-        return query(jFactory).<Producer<?>>map(object -> new FixedValueProducer<>(property.getWriterType(), object))
-                .orElseGet(() -> toBuilder(jFactory, property.getWriterType()).createProducer());
+        Builder<?> builder = toBuilder(jFactory, property.getWriterType());
+        return query(jFactory).<Producer<?>>map(object -> new BuilderValueProducer<>(property.getWriterType(), builder))
+                .orElseGet(builder::createProducer);
     }
 
     private Optional<?> query(JFactory jFactory) {

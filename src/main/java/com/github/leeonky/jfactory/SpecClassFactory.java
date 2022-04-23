@@ -56,4 +56,8 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     public ObjectFactory<T> getBase() {
         return base;
     }
+
+    public Class<? extends Spec<T>> getSpecClass() {
+        return specClass;
+    }
 }

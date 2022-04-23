@@ -28,10 +28,10 @@ public class PropertyShouldOverridePropertyInSpec {
         expect(productPriceBook).should("priceBook.code: 'ebay'");
     }
 
-    //TODO bug
-//    @Test
-    void should_merge_property_in_spec_and_input_when_property_inside_spec_is_a_query() {
+    @Test
+    void should_merge_property_in_spec_and_input_when_property_inside_spec_is_a_query_build_and_use_merged_property_to_query() {
         jFactory.type(PriceBook.class).property("code", "amazon").create();
+        jFactory.type(PriceBook.class).property("name", "book").create();
         PriceBook priceBook = jFactory.type(PriceBook.class).property("code", "amazon").property("name", "book").create();
 
         jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
@@ -39,12 +39,11 @@ public class PropertyShouldOverridePropertyInSpec {
 
         ProductPriceBook book1 = jFactory.type(ProductPriceBook.class).property("priceBook.name", "book").create();
 
-        assertThat(book1).isSameAs(priceBook);
+        assertThat(book1.priceBook).isSameAs(priceBook);
     }
 
-    //TODO bug
-//    @Test
-    void should_merge_property_in_spec_and_input_when_property_inside_spec_is_a_query2() {
+    @Test
+    void should_merge_property_in_spec_and_input_when_property_inside_spec_is_a_query_and_create_with_merged_property() {
         jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
                 .byFactory(builder -> builder.property("code", "amazon")));
 

@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +9,8 @@ import java.util.Map;
 public interface Builder<T> {
 
     T create();
+
+    BeanClass<T> getType();
 
     default Builder<T> property(String property, Object value) {
         return properties(new HashMap<String, Object>() {{

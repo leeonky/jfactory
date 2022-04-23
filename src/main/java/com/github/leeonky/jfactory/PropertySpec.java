@@ -94,7 +94,7 @@ public class PropertySpec<T> {
     private <V> Producer<V> createQueryOrCreateProducer(Builder<V> builder) {
         Builder<V> builderWithArgs = builder.args(spec.params(property.toString()));
         return builderWithArgs.queryAll().stream().findFirst().<Producer<V>>map(object ->
-                        new FixedValueProducer<>((BeanClass<V>) BeanClass.create(object.getClass()), object))
+                        new BuilderValueProducer<>((BeanClass<V>) BeanClass.create(object.getClass()), builderWithArgs))
                 .orElseGet(builderWithArgs::createProducer);
     }
 

@@ -34,6 +34,13 @@ class ObjectProducer<T> extends Producer<T> {
         builder.processSpecAndInputProperty(this, instance);
         createElementDefaultValueProducers();
         setupReverseAssociations();
+        resolveBuilderProducers();
+    }
+
+    protected void resolveBuilderProducers() {
+        List<Map.Entry<String, Producer<?>>> buildValueProducers = children.entrySet().stream()
+                .filter(entry -> entry.getValue() instanceof BuilderValueProducer).collect(Collectors.toList());
+        buildValueProducers.forEach(e -> setChild(e.getKey(), ((BuilderValueProducer) e.getValue()).getProducer()));
     }
 
     private void createElementDefaultValueProducers() {

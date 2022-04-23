@@ -29,6 +29,11 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public BeanClass<T> getType() {
+        return objectFactory.getType();
+    }
+
+    @Override
     public ObjectProducer<T> createProducer() {
         return new ObjectProducer<>(jFactory, objectFactory, this);
     }
@@ -81,8 +86,14 @@ class DefaultBuilder<T> implements Builder<T> {
     public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> newBuilder = clone();
         properties.forEach((key, value) -> {
-            String property = replaceStartsWithIndexBracket(
-                    jFactory.aliasSetStore.evaluate(objectFactory.getType(), key, isCollection(value)), newBuilder);
+            String property;
+            if (objectFactory instanceof SpecClassFactory) {
+                SpecClassFactory<T> specClassFactory = (SpecClassFactory<T>) objectFactory;
+                property = replaceStartsWithIndexBracket(
+                        jFactory.aliasSetStore.evaluateViaSpec(specClassFactory, key, isCollection(value)), newBuilder);
+            } else
+                property = replaceStartsWithIndexBracket(
+                        jFactory.aliasSetStore.evaluate(objectFactory.getType(), key, isCollection(value)), newBuilder);
             if (isCollection(value)) {
                 List<Object> objects = BeanClass.arrayCollectionToStream(value).collect(Collectors.toList());
                 if (objects.isEmpty() || !property.contains("$"))
