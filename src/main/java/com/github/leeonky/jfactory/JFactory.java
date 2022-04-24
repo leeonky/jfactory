@@ -3,9 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -56,14 +54,24 @@ public class JFactory {
     }
 
     public <T, S extends Spec<T>> JFactory register(Class<S> specClass) {
-        PropertyAliases propertyAliases = specClass.getAnnotation(PropertyAliases.class);
-        if (propertyAliases != null && propertyAliases.value().length > 0) {
-            AliasSetStore.AliasSet aliasSet = aliasOf(BeanClass.create(specClass).newInstance().getType());
-            for (PropertyAlias propertyAlias : propertyAliases.value())
-                aliasSet.alias(propertyAlias.alias(), propertyAlias.property());
-        }
+        getPropertyAliasesInSpec(specClass).stream().filter(Objects::nonNull).forEach(propertyAliases -> {
+            if (propertyAliases.value().length > 0) {
+                AliasSetStore.AliasSet aliasSet = aliasOfSpec(specClass);
+                for (PropertyAlias propertyAlias : propertyAliases.value())
+                    aliasSet.alias(propertyAlias.alias(), propertyAlias.property());
+            }
+        });
         factorySet.registerSpecClassFactory(specClass);
         return this;
+    }
+
+    private List<PropertyAliases> getPropertyAliasesInSpec(Class<?> specClass) {
+        return new ArrayList<PropertyAliases>() {{
+            add(specClass.getAnnotation(PropertyAliases.class));
+            Class<?> superclass = specClass.getSuperclass();
+            if (!superclass.equals(Object.class))
+                addAll(getPropertyAliasesInSpec(superclass));
+        }};
     }
 
     public <T> Builder<T> spec(String... traitsAndSpec) {
@@ -112,6 +120,10 @@ public class JFactory {
 
     public AliasSetStore.AliasSet aliasOf(Class<?> type) {
         return aliasSetStore.createSet(BeanClass.create(type));
+    }
+
+    public <T, S extends Spec<T>> AliasSetStore.AliasSet aliasOfSpec(Class<S> specClass) {
+        return aliasSetStore.createAliasSet(specClass);
     }
 
     public JFactory removeGlobalSpec(Class<?> type) {

@@ -8,20 +8,32 @@ import java.util.Map;
 import static java.util.Collections.singletonList;
 
 public class AliasSetStore {
-    final Map<BeanClass<?>, AliasSet> aliasSetMap = new HashMap<>();
+    private final Map<BeanClass<?>, AliasSet> aliasSetMap = new HashMap<>();
+    private final Map<Class<?>, AliasSet> specAliasSetMap = new HashMap<>();
 
     public String evaluate(BeanClass<?> type, String propertyChain, boolean collectionProperties) {
-
-        return evaluate(type, PropertyChain.createChain(propertyChain), collectionProperties).toString();
+        AliasSet aliasSet = aliasSetMap.get(type);
+        PropertyChain chain = PropertyChain.createChain(propertyChain);
+        return (aliasSet != null ? aliasSet.evaluateHead(chain, collectionProperties) : chain).toString();
     }
 
-    private PropertyChain evaluate(BeanClass<?> type, PropertyChain chain, boolean collectionProperties) {
-        AliasSet aliasSet = aliasSetMap.get(type);
-        return aliasSet != null ? aliasSet.evaluateHead(chain, collectionProperties) : chain;
+    public <T> String evaluateViaSpec(SpecClassFactory<T> specClassFactory, String propertyChain, boolean collectionProperties) {
+        PropertyChain chain = PropertyChain.createChain(propertyChain);
+        AliasSet aliasSet = specAliasSetMap.get(specClassFactory.getSpecClass());
+        if (aliasSet != null) {
+            String evaluated = aliasSet.evaluateHead(chain, collectionProperties).toString();
+            if (!evaluated.equals(propertyChain))
+                return evaluated;
+        }
+        return evaluate(specClassFactory.getType(), propertyChain, collectionProperties);
     }
 
     public AliasSet createSet(BeanClass<?> type) {
         return aliasSetMap.computeIfAbsent(type, key -> new AliasSet());
+    }
+
+    public <T, S extends Spec<T>> AliasSet createAliasSet(Class<S> specClass) {
+        return specAliasSetMap.computeIfAbsent(specClass, key -> new AliasSet());
     }
 
     public static class AliasSet {

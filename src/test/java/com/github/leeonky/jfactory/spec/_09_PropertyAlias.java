@@ -1,9 +1,11 @@
 package com.github.leeonky.jfactory.spec;
 
 import com.github.leeonky.jfactory.*;
+import com.github.leeonky.util.NoSuchPropertyException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import static com.github.leeonky.dal.Assertions.expect;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class _09_PropertyAlias {
     private final JFactory jFactory = new JFactory();
@@ -95,13 +98,6 @@ public class _09_PropertyAlias {
     }
 
     @Test
-    void support_define_alias_on_spec() {
-        jFactory.register(ABean.class);
-
-        expect(jFactory.type(Bean.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
-    }
-
-    @Test
     void uses_collection_alias_with_collection_args() {
         jFactory.aliasOf(BeanContainer.class).alias("beansValue", "beans[$].value");
 
@@ -153,6 +149,56 @@ public class _09_PropertyAlias {
     @PropertyAliases(
             @PropertyAlias(alias = "aliasOfValue", property = "value")
     )
-    public static class ABean extends Spec<Bean> {
+    public static class AliasBeanSpec extends Spec<Bean> {
+    }
+
+    public static class NoAliasBeanSpec extends Spec<Bean> {
+    }
+
+    public static class AliasInSuperSpec extends AliasBeanSpec {
+    }
+
+    @Nested
+    class SpecAlias {
+
+        @Test
+        void support_define_alias_on_spec() {
+            jFactory.register(AliasBeanSpec.class);
+
+            expect(jFactory.spec(AliasBeanSpec.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
+        }
+
+        @Test
+        void alias_on_spec_is_not_global() {
+            jFactory.register(AliasBeanSpec.class);
+
+            assertThatThrownBy(() -> jFactory.type(Bean.class).property("aliasOfValue", "hello").create())
+                    .isInstanceOf(NoSuchPropertyException.class);
+        }
+
+        @Test
+        void should_fall_back_to_type_alias_when_no_spec_alias() {
+            jFactory.aliasOf(Bean.class).alias("typeAliasOfValue", "value");
+
+            jFactory.register(NoAliasBeanSpec.class);
+
+            expect(jFactory.spec(NoAliasBeanSpec.class).property("typeAliasOfValue", "hello").create()).should("value: 'hello'");
+        }
+
+        @Test
+        void should_fall_back_to_type_alias_when_no_matches_spec_on_alias() {
+            jFactory.aliasOf(Bean.class).alias("typeAliasOfValue", "value");
+
+            jFactory.register(AliasBeanSpec.class);
+
+            expect(jFactory.spec(AliasBeanSpec.class).property("typeAliasOfValue", "hello").create()).should("value: 'hello'");
+        }
+
+        @Test
+        void alias_spec_in_super_alias() {
+            jFactory.register(AliasInSuperSpec.class);
+
+            expect(jFactory.spec(AliasInSuperSpec.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
+        }
     }
 }
