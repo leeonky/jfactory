@@ -5,34 +5,29 @@ import com.github.leeonky.util.BeanClass;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.github.leeonky.jfactory.PropertyChain.createChain;
 import static java.util.Collections.singletonList;
 
 public class AliasSetStore {
     private final Map<BeanClass<?>, AliasSet> aliasSetMap = new HashMap<>();
     private final Map<Class<?>, AliasSet> specAliasSetMap = new HashMap<>();
 
-    public String evaluate(BeanClass<?> type, String propertyChain, boolean collectionProperties) {
-        AliasSet aliasSet = aliasSetMap.get(type);
-        PropertyChain chain = PropertyChain.createChain(propertyChain);
-        return (aliasSet != null ? aliasSet.evaluateHead(chain, collectionProperties) : chain).toString();
-    }
-
-    public <T> String evaluateViaSpec(SpecClassFactory<T> specClassFactory, String propertyChain, boolean collectionProperties) {
-        PropertyChain chain = PropertyChain.createChain(propertyChain);
-        AliasSet aliasSet = specAliasSetMap.get(specClassFactory.getSpecClass());
-        if (aliasSet != null) {
-            String evaluated = aliasSet.evaluateHead(chain, collectionProperties).toString();
+    public <T> String resolve(ObjectFactory<T> objectFactory, String propertyChain, boolean collectionProperties) {
+        if (objectFactory instanceof SpecClassFactory) {
+            String evaluated = specAliasSet(((SpecClassFactory<T>) objectFactory).getSpecClass())
+                    .resolve(createChain(propertyChain), collectionProperties).toString();
             if (!evaluated.equals(propertyChain))
                 return evaluated;
+            return resolve(objectFactory.getBase(), propertyChain, collectionProperties);
         }
-        return evaluate(specClassFactory.getType(), propertyChain, collectionProperties);
+        return aliasSet(objectFactory.getType()).resolve(createChain(propertyChain), collectionProperties).toString();
     }
 
-    public AliasSet createSet(BeanClass<?> type) {
+    public AliasSet aliasSet(BeanClass<?> type) {
         return aliasSetMap.computeIfAbsent(type, key -> new AliasSet());
     }
 
-    public <T, S extends Spec<T>> AliasSet createAliasSet(Class<S> specClass) {
+    public <T, S extends Spec<T>> AliasSet specAliasSet(Class<S> specClass) {
         return specAliasSetMap.computeIfAbsent(specClass, key -> new AliasSet());
     }
 
@@ -40,7 +35,7 @@ public class AliasSetStore {
         private final Map<String, String> aliases = new HashMap<>();
 
         //        TODO refactor
-        public PropertyChain evaluateHead(PropertyChain chain, boolean collectionProperties) {
+        public PropertyChain resolve(PropertyChain chain, boolean collectionProperties) {
             Object head = chain.head();
             PropertyChain left = chain.removeHead();
             String headString = head.toString();
@@ -55,7 +50,7 @@ public class AliasSetStore {
                 }
                 if (intently)
                     property = property + "!";
-                return evaluateHead(PropertyChain.createChain(property), collectionProperties).concat(left);
+                return resolve(createChain(property), collectionProperties).concat(left);
             }
             return new PropertyChain(singletonList(head)).concat(left);
         }

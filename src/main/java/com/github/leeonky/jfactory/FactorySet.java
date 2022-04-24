@@ -24,7 +24,7 @@ class FactorySet {
         Spec<T> spec = BeanClass.newInstance(specClass);
         BeanClass<T> beanClass = BeanClass.create(spec.getType());
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
-                type -> new SpecClassFactory<>(queryObjectFactory(beanClass).getBase(), specClass, this));
+                type -> new SpecClassFactory<>(queryObjectFactory(beanClass), specClass, this));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
         if (specClass.getAnnotation(Global.class) != null)
             objectFactories.put(beanClass, specClassFactory);

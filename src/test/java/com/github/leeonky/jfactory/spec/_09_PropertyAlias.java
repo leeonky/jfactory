@@ -158,6 +158,10 @@ public class _09_PropertyAlias {
     public static class AliasInSuperSpec extends AliasBeanSpec {
     }
 
+    @Global
+    public static class GlobalSpecAlias extends AliasBeanSpec {
+    }
+
     @Nested
     class SpecAlias {
 
@@ -199,6 +203,22 @@ public class _09_PropertyAlias {
             jFactory.register(AliasInSuperSpec.class);
 
             expect(jFactory.spec(AliasInSuperSpec.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
+        }
+
+        @Test
+        void alias_on_global_spec_should_type_global_alias() {
+            jFactory.register(GlobalSpecAlias.class);
+
+            expect(jFactory.type(Bean.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
+        }
+
+        @Test
+        void fallback_to_alias_on_global_spec() {
+            jFactory.register(GlobalSpecAlias.class);
+
+            jFactory.register(NoAliasBeanSpec.class);
+
+            expect(jFactory.spec(NoAliasBeanSpec.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
         }
     }
 }

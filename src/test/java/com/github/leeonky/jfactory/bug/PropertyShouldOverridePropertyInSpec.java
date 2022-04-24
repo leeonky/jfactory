@@ -54,6 +54,16 @@ public class PropertyShouldOverridePropertyInSpec {
         expect(book2.priceBook).should(": {code: amazon name: book2}");
     }
 
+    @Test
+    void should_use_spec_in_property_override_origin_builder_spec() {
+        jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
+                .from(PriceBookSpecInSpec.class).and(builder -> builder));
+
+        ProductPriceBook productPriceBook = jFactory.type(ProductPriceBook.class).property("priceBook(PriceBookSpecInProperty).rate", 10).create();
+        assertThat(productPriceBook.priceBook.getName()).isNotEqualTo("from-spec");
+        expect(productPriceBook.priceBook).match("{code: amazon rate: 10}");
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)
@@ -76,5 +86,21 @@ public class PropertyShouldOverridePropertyInSpec {
     public static class ProductPriceBook {
         private Product product;
         private PriceBook priceBook;
+    }
+
+    public static class PriceBookSpecInSpec extends Spec<PriceBook> {
+
+        @Override
+        public void main() {
+            property("name").value("from-spec");
+        }
+    }
+
+    public static class PriceBookSpecInProperty extends Spec<PriceBook> {
+
+        @Override
+        public void main() {
+            property("code").value("amazon");
+        }
     }
 }

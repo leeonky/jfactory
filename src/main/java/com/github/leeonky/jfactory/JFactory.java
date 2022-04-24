@@ -119,11 +119,11 @@ public class JFactory {
     }
 
     public AliasSetStore.AliasSet aliasOf(Class<?> type) {
-        return aliasSetStore.createSet(BeanClass.create(type));
+        return aliasSetStore.aliasSet(BeanClass.create(type));
     }
 
     public <T, S extends Spec<T>> AliasSetStore.AliasSet aliasOfSpec(Class<S> specClass) {
-        return aliasSetStore.createAliasSet(specClass);
+        return aliasSetStore.specAliasSet(specClass);
     }
 
     public JFactory removeGlobalSpec(Class<?> type) {

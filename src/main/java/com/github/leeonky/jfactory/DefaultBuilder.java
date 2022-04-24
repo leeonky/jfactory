@@ -75,6 +75,10 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public DefaultBuilder<T> clone() {
+        return clone(objectFactory);
+    }
+
+    private DefaultBuilder<T> clone(ObjectFactory<T> objectFactory) {
         DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory);
         builder.properties.appendAll(properties);
         builder.traits.addAll(traits);
@@ -87,13 +91,8 @@ class DefaultBuilder<T> implements Builder<T> {
         DefaultBuilder<T> newBuilder = clone();
         properties.forEach((key, value) -> {
             String property;
-            if (objectFactory instanceof SpecClassFactory) {
-                SpecClassFactory<T> specClassFactory = (SpecClassFactory<T>) objectFactory;
-                property = replaceStartsWithIndexBracket(
-                        jFactory.aliasSetStore.evaluateViaSpec(specClassFactory, key, isCollection(value)), newBuilder);
-            } else
-                property = replaceStartsWithIndexBracket(
-                        jFactory.aliasSetStore.evaluate(objectFactory.getType(), key, isCollection(value)), newBuilder);
+            property = replaceStartsWithIndexBracket(jFactory.aliasSetStore.resolve(
+                    objectFactory, key, isCollection(value)), newBuilder);
             if (isCollection(value)) {
                 List<Object> objects = BeanClass.arrayCollectionToStream(value).collect(Collectors.toList());
                 if (objects.isEmpty() || !property.contains("$"))
@@ -166,13 +165,10 @@ class DefaultBuilder<T> implements Builder<T> {
         return producer.isReverseAssociation(exp.getProperty()) ? exp.setIntently(true) : exp;
     }
 
-    //    TODO cannot merge with different spec class
-//    TODO should use a spec class in origin or another
     public DefaultBuilder<T> marge(DefaultBuilder<T> another) {
-        if (another.objectFactory instanceof SpecClassFactory)
-//    TODO ?? need a test
-            return another;
-        DefaultBuilder<T> newBuilder = clone();
+        ObjectFactory<T> objectFactory = another.objectFactory instanceof SpecClassFactory ? another.objectFactory
+                : this.objectFactory;
+        DefaultBuilder<T> newBuilder = clone(objectFactory);
         newBuilder.properties.appendAll(another.properties);
         newBuilder.traits.addAll(another.traits);
         newBuilder.collectionSize = collectionSize;
