@@ -135,7 +135,7 @@ public class _09_PropertyAlias {
     @Setter
     @Accessors(chain = true)
     public static class Bean {
-        private String value;
+        private String value, value2;
         private AnotherBean anotherBean;
     }
 
@@ -160,6 +160,12 @@ public class _09_PropertyAlias {
 
     @Global
     public static class GlobalSpecAlias extends AliasBeanSpec {
+    }
+
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value2")
+    )
+    public static class OverrideSuperSpec extends AliasBeanSpec {
     }
 
     @Nested
@@ -219,6 +225,14 @@ public class _09_PropertyAlias {
             jFactory.register(NoAliasBeanSpec.class);
 
             expect(jFactory.spec(NoAliasBeanSpec.class).property("aliasOfValue", "hello").create()).should("value: 'hello'");
+        }
+
+        @Test
+        void sub_class_alias_should_override_super_class_alias() {
+            jFactory.register(AliasBeanSpec.class);
+            jFactory.register(OverrideSuperSpec.class);
+
+            expect(jFactory.spec(OverrideSuperSpec.class).property("aliasOfValue", "hello").create()).should("value2: 'hello'");
         }
     }
 }

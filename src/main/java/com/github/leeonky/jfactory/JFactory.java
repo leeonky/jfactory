@@ -67,10 +67,10 @@ public class JFactory {
 
     private List<PropertyAliases> getPropertyAliasesInSpec(Class<?> specClass) {
         return new ArrayList<PropertyAliases>() {{
-            add(specClass.getAnnotation(PropertyAliases.class));
             Class<?> superclass = specClass.getSuperclass();
             if (!superclass.equals(Object.class))
                 addAll(getPropertyAliasesInSpec(superclass));
+            add(specClass.getAnnotation(PropertyAliases.class));
         }};
     }
 
