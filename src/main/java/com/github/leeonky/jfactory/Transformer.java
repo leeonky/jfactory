@@ -6,4 +6,10 @@ public interface Transformer {
     }
 
     Object transform(String input);
+
+    default Object checkAndTransform(Object value) {
+        if (value instanceof String && matches((String) value))
+            return transform((String) value);
+        return value;
+    }
 }

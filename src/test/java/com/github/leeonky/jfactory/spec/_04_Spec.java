@@ -14,6 +14,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class _04_Spec {
     private JFactory jFactory = new JFactory();
@@ -551,15 +552,86 @@ class _04_Spec {
     @Nested
     class Transform {
 
-        @Test
-        void matches() {
-            jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+        @Nested
+        class SingleValue {
 
-            assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+            @Test
+            void matches() {
+                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+            }
+
+            @Test
+            void not_match() {
+                jFactory.factory(Bean.class).transformer("content", new Transformer() {
+                    @Override
+                    public Object transform(String input) {
+                        fail();
+                        return null;
+                    }
+
+                    @Override
+                    public boolean matches(String input) {
+                        return false;
+                    }
+                });
+
+                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
+            }
+
+            @Test
+            void should_convert_input_property_in_query() {
+                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                Bean bean = jFactory.type(Bean.class).property("content", "abc").create();
+                Bean query = jFactory.type(Bean.class).property("content", "abc").query();
+
+                assertThat(query).isSameAs(bean);
+                assertThat(query.getContent()).isEqualTo("ABC");
+            }
         }
 
-//        TODO query
-//        TODO raise error when property is chain
+        @Nested
+        class ListValue {
+
+//            @Test
+//            void matches() {
+//                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+//
+//                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+//            }
+
+//            @Test
+//            void not_match() {
+//                jFactory.factory(Bean.class).transformer("content", new Transformer() {
+//                    @Override
+//                    public Object transform(String input) {
+//                        fail();
+//                        return null;
+//                    }
+//
+//                    @Override
+//                    public boolean matches(String input) {
+//                        return false;
+//                    }
+//                });
+//
+//                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
+//            }
+//
+//            @Test
+//            void should_convert_input_property_in_query() {
+//                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+//
+//                Bean bean = jFactory.type(Bean.class).property("content", "abc").create();
+//                Bean query = jFactory.type(Bean.class).property("content", "abc").query();
+//
+//                assertThat(query).isSameAs(bean);
+//                assertThat(query.getContent()).isEqualTo("ABC");
+//            }
+        }
+
 //        TODO in list
     }
 }

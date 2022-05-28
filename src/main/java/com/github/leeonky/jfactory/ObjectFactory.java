@@ -85,8 +85,7 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     public Object transform(String name, Object value) {
-        if (value instanceof String)
-            return transformers.getOrDefault(name, passThrough).transform((String) value);
-        return value;
+        return transformers.getOrDefault(name, passThrough).checkAndTransform(value);
     }
+
 }
