@@ -88,7 +88,6 @@ class _04_Spec {
         private int value;
     }
 
-
     @Getter
     @Setter
     public static class Person {
@@ -547,5 +546,20 @@ class _04_Spec {
                     "stringValue: /stringValue.*/\n" +
                     "}");
         }
+    }
+
+    @Nested
+    class Transform {
+
+        @Test
+        void matches() {
+            jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+            assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+        }
+
+//        TODO query
+//        TODO raise error when property is chain
+//        TODO in list
     }
 }

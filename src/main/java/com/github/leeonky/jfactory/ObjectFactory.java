@@ -10,6 +10,8 @@ class ObjectFactory<T> implements Factory<T> {
     private final BeanClass<T> type;
     private final FactorySet factorySet;
     private final Map<String, Consumer<Instance<T>>> traits = new HashMap<>();
+    private final Map<String, Transformer> transformers = new LinkedHashMap<>();
+    private final Transformer passThrough = input -> input;
     private Function<Instance<T>, T> constructor = this::defaultConstruct;
     private Consumer<Instance<T>> spec = (instance) -> {
     };
@@ -57,6 +59,12 @@ class ObjectFactory<T> implements Factory<T> {
         return type;
     }
 
+    @Override
+    public Factory<T> transformer(String property, Transformer transformer) {
+        transformers.put(property, transformer);
+        return this;
+    }
+
     public void collectSpec(Collection<String> traits, Instance<T> instance) {
         spec.accept(instance);
         traits.stream().map(name -> this.traits.computeIfAbsent(name, k -> {
@@ -74,5 +82,11 @@ class ObjectFactory<T> implements Factory<T> {
 
     public ObjectFactory<T> getBase() {
         return this;
+    }
+
+    public Object transform(String name, Object value) {
+        if (value instanceof String)
+            return transformers.getOrDefault(name, passThrough).transform((String) value);
+        return value;
     }
 }

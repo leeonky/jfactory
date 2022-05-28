@@ -14,13 +14,14 @@ class DefaultBuilder<T> implements Builder<T> {
     private final JFactory jFactory;
     private final Set<String> traits = new LinkedHashSet<>();
 
-    private final KeyValueCollection properties = new KeyValueCollection();
+    private final KeyValueCollection properties;
     private final DefaultArguments arguments = new DefaultArguments();
     private int collectionSize = 0;
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory) {
         this.jFactory = jFactory;
         this.objectFactory = objectFactory;
+        properties = new KeyValueCollection(objectFactory.getFactorySet());
     }
 
     @Override

@@ -16,8 +16,8 @@ class KeyValue {
     private static final String PATTERN_SPEC_TRAIT_WORD = "[^, )]";
     private static final String PATTERN_TRAIT = "((" + PATTERN_SPEC_TRAIT_WORD + "+[, ])(" + PATTERN_SPEC_TRAIT_WORD + "+[, ])*)?";
     private static final String PATTERN_SPEC = "(" + PATTERN_SPEC_TRAIT_WORD + "+)";
-    private static final String PATTERN_CLAUSE = "(\\." + "(.+)" + ")?";
     private static final String PATTERN_TRAIT_SPEC = "(\\(" + PATTERN_TRAIT + PATTERN_SPEC + "\\))?";
+    private static final String PATTERN_CLAUSE = "(\\." + "(.+)" + ")?";
     private static final String PATTERN_INTENTLY = "(!)?";
     private static final int GROUP_PROPERTY = 1;
     private static final int GROUP_COLLECTION_INDEX = 3;
@@ -27,10 +27,12 @@ class KeyValue {
     private static final int GROUP_CLAUSE = 11;
     private final String key;
     private final Object value;
+    private final FactorySet factorySet;
 
-    public KeyValue(String key, Object value) {
+    public KeyValue(String key, Object value, FactorySet factorySet) {
         this.key = key;
         this.value = value;
+        this.factorySet = factorySet;
     }
 
     public <T> Expression<T> createExpression(BeanClass<T> beanClass) {
@@ -50,7 +52,7 @@ class KeyValue {
     }
 
     private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property) {
-        KeyValueCollection properties = new KeyValueCollection().append(matcher.group(GROUP_CLAUSE), value);
+        KeyValueCollection properties = new KeyValueCollection(factorySet).append(matcher.group(GROUP_CLAUSE), value);
         TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
                 matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
         return properties.createExpression(property, traitsSpec, value).setIntently(matcher.group(GROUP_INTENTLY) != null);

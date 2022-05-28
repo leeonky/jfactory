@@ -13,4 +13,6 @@ public interface Factory<T> {
     Factory<T> spec(String name, Consumer<Instance<T>> instance);
 
     BeanClass<T> getType();
+
+    Factory<T> transformer(String property, Transformer transformer);
 }
