@@ -87,5 +87,4 @@ class ObjectFactory<T> implements Factory<T> {
     public Object transform(String name, Object value) {
         return transformers.getOrDefault(name, passThrough).checkAndTransform(value);
     }
-
 }

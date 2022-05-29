@@ -595,43 +595,51 @@ class _04_Spec {
         @Nested
         class ListValue {
 
-//            @Test
-//            void matches() {
-//                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
-//
-//                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
-//            }
+            @Test
+            void all_input_value_is_list() {
+                jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
 
-//            @Test
-//            void not_match() {
-//                jFactory.factory(Bean.class).transformer("content", new Transformer() {
-//                    @Override
-//                    public Object transform(String input) {
-//                        fail();
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    public boolean matches(String input) {
-//                        return false;
-//                    }
-//                });
-//
-//                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
-//            }
-//
-//            @Test
-//            void should_convert_input_property_in_query() {
-//                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
-//
-//                Bean bean = jFactory.type(Bean.class).property("content", "abc").create();
-//                Bean query = jFactory.type(Bean.class).property("content", "abc").query();
-//
-//                assertThat(query).isSameAs(bean);
-//                assertThat(query.getContent()).isEqualTo("ABC");
-//            }
+                assertThat(jFactory.type(Bean.class).property("stringValues", "a,b,c").create().getStringValues())
+                        .containsExactly("a", "b", "c");
+            }
+
+            @Test
+            void element_matches() {
+                jFactory.factory(Bean.class).transformer("stringValues[]", String::toUpperCase);
+
+                assertThat(jFactory.type(Bean.class).property("stringValues[0]", "a").create().getStringValues())
+                        .containsExactly("A");
+            }
+
+            @Test
+            void not_match() {
+                jFactory.factory(Bean.class).transformer("stringValues[]", new Transformer() {
+                    @Override
+                    public Object transform(String input) {
+                        fail();
+                        return null;
+                    }
+
+                    @Override
+                    public boolean matches(String input) {
+                        return false;
+                    }
+                });
+
+                assertThat(jFactory.type(Bean.class).property("stringValues[0]", "a").create().getStringValues())
+                        .containsExactly("a");
+            }
+
+            @Test
+            void should_convert_input_property_in_query() {
+                jFactory.factory(Bean.class).transformer("stringValues[]", String::toUpperCase);
+                Bean bean = jFactory.type(Bean.class).property("stringValues[0]", "a").create();
+                Bean query = jFactory.type(Bean.class).property("stringValues[0]", "a").query();
+                assertThat(query).isSameAs(bean);
+                assertThat(query.getStringValues()).containsExactly("A");
+            }
         }
 
-//        TODO in list
+//        TODO merge annotation with field alias
     }
 }

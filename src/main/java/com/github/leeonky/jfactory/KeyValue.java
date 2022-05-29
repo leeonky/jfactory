@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.Integer.parseInt;
 
+//TODO use a parser to parse this
 class KeyValue {
     private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
     private static final String PATTERN_COLLECTION_INDEX = "(\\[(\\d+)])?";
@@ -39,23 +40,23 @@ class KeyValue {
         Matcher matcher = parse(beanClass);
         Property<T> property = beanClass.getProperty(matcher.group(GROUP_PROPERTY));
         return hasIndex(matcher).map(index -> createCollectionExpression(matcher, property, index))
-                .orElseGet(() -> createSubExpression(matcher, property));
+                .orElseGet(() -> createSubExpression(matcher, property, null));
     }
 
     private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index) {
         return new CollectionExpression<>(property, parseInt(index),
-                createSubExpression(matcher, property.getWriter().getType().getProperty(index)));
+                createSubExpression(matcher, property.getWriter().getType().getProperty(index), property));
     }
 
     private Optional<String> hasIndex(Matcher matcher) {
         return Optional.ofNullable(matcher.group(GROUP_COLLECTION_INDEX));
     }
 
-    private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property) {
+    private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property, Property<?> parentProperty) {
         KeyValueCollection properties = new KeyValueCollection(factorySet).append(matcher.group(GROUP_CLAUSE), value);
         TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
                 matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
-        return properties.createExpression(property, traitsSpec, value).setIntently(matcher.group(GROUP_INTENTLY) != null);
+        return properties.createExpression(property, traitsSpec, parentProperty).setIntently(matcher.group(GROUP_INTENTLY) != null);
     }
 
     private <T> Matcher parse(BeanClass<T> beanClass) {

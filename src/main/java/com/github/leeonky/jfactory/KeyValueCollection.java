@@ -43,10 +43,17 @@ public class KeyValueCollection {
                 .collect(Collectors.toList());
     }
 
-    <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Object value) {
-        return isSingleValue() ? new SingleValueExpression<>(factorySet.queryObjectFactory(property.getBeanType())
-                .transform(property.getName(), value), traitsSpec, property)
+    <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Property<?> parentProperty) {
+        return isSingleValue() ? new SingleValueExpression<>(transform(property, parentProperty), traitsSpec, property)
                 : new SubObjectExpression<>(this, traitsSpec, property);
+    }
+
+    private <H> Object transform(Property<H> property, Property<?> parentProperty) {
+        return parentProperty != null && property.getBeanType().isCollection() ?
+                factorySet.queryObjectFactory(parentProperty.getBeanType()).transform(parentProperty.getName() + "[]",
+                        keyValues.values().iterator().next().getValue()) :
+                factorySet.queryObjectFactory(property.getBeanType()).transform(property.getName(),
+                        keyValues.values().iterator().next().getValue());
     }
 
     private boolean isSingleValue() {
