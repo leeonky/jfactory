@@ -1,0 +1,24 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: openjdk:8u342
+    steps:
+      - checkout
+      - run:
+          name: build
+          command: |
+            ./gradlew check build coveralls
+
+      - run:
+          name: check version
+          command: |
+            export PUB_VERSION=$(VERSION_SCOPE='' ./gradlew currentVersion -q)
+            ( bash -c "! git tag | grep -q \"^${PUB_VERSION}$\"" ) || echo "Still version ${PUB_VERSION}, CI done" && exit 0
+            echo "Release and tag new version $PUB_VERSION"
+            echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
+            ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" publishToNexus
+            git config --global user.email "travis@travis-ci.org"
+            git config --global user.name "Travis CI"
+            git tag ${PUB_VERSION} -a -m 'CI Release'
+            git push -q "https://${GH_TOKEN}@github.com/leeonky/${CIRCLE_PROJECT_REPONAME}.git" --tags
