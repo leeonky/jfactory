@@ -9,10 +9,6 @@ jobs:
           name: build
           command: |
             ./gradlew check build coveralls
-
-      - run:
-          name: check version
-          command: |
             export PUB_VERSION=$(VERSION_SCOPE='' ./gradlew currentVersion -q)
             ( bash -c "! git tag | grep -q \"^${PUB_VERSION}$\"" ) || echo "Still version ${PUB_VERSION}, CI done" && exit 0
             echo "Release and tag new version $PUB_VERSION"
