@@ -36,24 +36,22 @@ public class KeyValueCollection {
         return builder;
     }
 
-    <T> Collection<Expression<T>> expressions(BeanClass<T> type) {
-        return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type))
+    <T> Collection<Expression<T>> expressions(BeanClass<T> type, ObjectFactory<T> objectFactory) {
+        return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type, objectFactory))
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
                 .map(expressions -> expressions.stream().reduce(Expression::mergeTo).get())
                 .collect(Collectors.toList());
     }
 
-    <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Property<?> parentProperty) {
-        return isSingleValue() ? new SingleValueExpression<>(transform(property, parentProperty), traitsSpec, property)
-                : new SubObjectExpression<>(this, traitsSpec, property);
+    <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Property<?> parentProperty, ObjectFactory<?> objectFactory) {
+        return isSingleValue() ? new SingleValueExpression<>(transform(property, parentProperty, objectFactory), traitsSpec, property)
+                : new SubObjectExpression<>(this, traitsSpec, property, objectFactory);
     }
 
-    private <H> Object transform(Property<H> property, Property<?> parentProperty) {
-        return parentProperty != null && property.getBeanType().isCollection() ?
-                factorySet.queryObjectFactory(parentProperty.getBeanType()).transform(parentProperty.getName() + "[]",
-                        keyValues.values().iterator().next().getValue()) :
-                factorySet.queryObjectFactory(property.getBeanType()).transform(property.getName(),
-                        keyValues.values().iterator().next().getValue());
+    private <H> Object transform(Property<H> property, Property<?> parentProperty, ObjectFactory<?> objectFactory) {
+        String transformerName = parentProperty != null && property.getBeanType().isCollection()
+                ? parentProperty.getName() + "[]" : property.getName();
+        return objectFactory.transform(transformerName, keyValues.values().iterator().next().getValue());
     }
 
     private boolean isSingleValue() {
@@ -77,15 +75,15 @@ public class KeyValueCollection {
                 .orElseGet(() -> super.equals(obj));
     }
 
-    public <T> Matcher<T> matcher(BeanClass<T> type) {
-        return new Matcher<>(type);
+    public <T> Matcher<T> matcher(BeanClass<T> type, ObjectFactory<T> objectFactory) {
+        return new Matcher<>(type, objectFactory);
     }
 
     public class Matcher<T> {
         private final Collection<Expression<T>> expressions;
 
-        Matcher(BeanClass<T> type) {
-            expressions = expressions(type);
+        Matcher(BeanClass<T> type, ObjectFactory<T> objectFactory) {
+            expressions = expressions(type, objectFactory);
         }
 
         public boolean matches(T object) {

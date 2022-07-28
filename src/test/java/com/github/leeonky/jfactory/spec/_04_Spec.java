@@ -14,7 +14,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class _04_Spec {
     private JFactory jFactory = new JFactory();
@@ -65,6 +64,10 @@ class _04_Spec {
             property("intValue").value(100);
             return this;
         }
+    }
+
+    @Global
+    public static class GlobalABean extends Spec<Bean> {
     }
 
     @Getter
@@ -547,99 +550,5 @@ class _04_Spec {
                     "stringValue: /stringValue.*/\n" +
                     "}");
         }
-    }
-
-    @Nested
-    class Transform {
-
-        @Nested
-        class SingleValue {
-
-            @Test
-            void matches() {
-                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
-
-                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
-            }
-
-            @Test
-            void not_match() {
-                jFactory.factory(Bean.class).transformer("content", new Transformer() {
-                    @Override
-                    public Object transform(String input) {
-                        fail();
-                        return null;
-                    }
-
-                    @Override
-                    public boolean matches(String input) {
-                        return false;
-                    }
-                });
-
-                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
-            }
-
-            @Test
-            void should_convert_input_property_in_query() {
-                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
-
-                Bean bean = jFactory.type(Bean.class).property("content", "abc").create();
-                Bean query = jFactory.type(Bean.class).property("content", "abc").query();
-
-                assertThat(query).isSameAs(bean);
-                assertThat(query.getContent()).isEqualTo("ABC");
-            }
-        }
-
-        @Nested
-        class ListValue {
-
-            @Test
-            void all_input_value_is_list() {
-                jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
-
-                assertThat(jFactory.type(Bean.class).property("stringValues", "a,b,c").create().getStringValues())
-                        .containsExactly("a", "b", "c");
-            }
-
-            @Test
-            void element_matches() {
-                jFactory.factory(Bean.class).transformer("stringValues[]", String::toUpperCase);
-
-                assertThat(jFactory.type(Bean.class).property("stringValues[0]", "a").create().getStringValues())
-                        .containsExactly("A");
-            }
-
-            @Test
-            void not_match() {
-                jFactory.factory(Bean.class).transformer("stringValues[]", new Transformer() {
-                    @Override
-                    public Object transform(String input) {
-                        fail();
-                        return null;
-                    }
-
-                    @Override
-                    public boolean matches(String input) {
-                        return false;
-                    }
-                });
-
-                assertThat(jFactory.type(Bean.class).property("stringValues[0]", "a").create().getStringValues())
-                        .containsExactly("a");
-            }
-
-            @Test
-            void should_convert_input_property_in_query() {
-                jFactory.factory(Bean.class).transformer("stringValues[]", String::toUpperCase);
-                Bean bean = jFactory.type(Bean.class).property("stringValues[0]", "a").create();
-                Bean query = jFactory.type(Bean.class).property("stringValues[0]", "a").query();
-                assertThat(query).isSameAs(bean);
-                assertThat(query.getStringValues()).containsExactly("A");
-            }
-        }
-
-//        TODO merge annotation with field alias
     }
 }

@@ -127,7 +127,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Collection<T> queryAll() {
-        KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType());
+        KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType(), objectFactory);
         return jFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
                 .filter(matcher::matches).collect(Collectors.toList());
     }
@@ -158,7 +158,7 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private void processInputProperty(ObjectProducer<T> producer) {
-        properties.expressions(objectFactory.getType()).forEach(exp -> producer.changeChild(exp.getProperty(),
+        properties.expressions(objectFactory.getType(), objectFactory).forEach(exp -> producer.changeChild(exp.getProperty(),
                 intentlyCreateWhenReverseAssociation(producer, exp).buildProducer(jFactory, producer)));
     }
 

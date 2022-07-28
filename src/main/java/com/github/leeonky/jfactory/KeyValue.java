@@ -36,27 +36,27 @@ class KeyValue {
         this.factorySet = factorySet;
     }
 
-    public <T> Expression<T> createExpression(BeanClass<T> beanClass) {
+    public <T> Expression<T> createExpression(BeanClass<T> beanClass, ObjectFactory<T> objectFactory) {
         Matcher matcher = parse(beanClass);
         Property<T> property = beanClass.getProperty(matcher.group(GROUP_PROPERTY));
-        return hasIndex(matcher).map(index -> createCollectionExpression(matcher, property, index))
-                .orElseGet(() -> createSubExpression(matcher, property, null));
+        return hasIndex(matcher).map(index -> createCollectionExpression(matcher, property, index, objectFactory))
+                .orElseGet(() -> createSubExpression(matcher, property, null, objectFactory));
     }
 
-    private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index) {
+    private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index, ObjectFactory<T> objectFactory) {
         return new CollectionExpression<>(property, parseInt(index),
-                createSubExpression(matcher, property.getWriter().getType().getProperty(index), property));
+                createSubExpression(matcher, property.getWriter().getType().getProperty(index), property, objectFactory));
     }
 
     private Optional<String> hasIndex(Matcher matcher) {
         return Optional.ofNullable(matcher.group(GROUP_COLLECTION_INDEX));
     }
 
-    private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property, Property<?> parentProperty) {
+    private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property, Property<?> parentProperty, ObjectFactory<?> objectFactory) {
         KeyValueCollection properties = new KeyValueCollection(factorySet).append(matcher.group(GROUP_CLAUSE), value);
         TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
                 matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
-        return properties.createExpression(property, traitsSpec, parentProperty).setIntently(matcher.group(GROUP_INTENTLY) != null);
+        return properties.createExpression(property, traitsSpec, parentProperty, objectFactory).setIntently(matcher.group(GROUP_INTENTLY) != null);
     }
 
     private <T> Matcher parse(BeanClass<T> beanClass) {

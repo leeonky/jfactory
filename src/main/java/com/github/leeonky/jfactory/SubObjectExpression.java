@@ -8,16 +8,18 @@ import java.util.Optional;
 class SubObjectExpression<P> extends Expression<P> {
     private final KeyValueCollection properties;
     private final TraitsSpec traitsSpec;
+    private final ObjectFactory objectFactory;
 
-    public SubObjectExpression(KeyValueCollection properties, TraitsSpec traitsSpec, Property<P> property) {
+    public SubObjectExpression(KeyValueCollection properties, TraitsSpec traitsSpec, Property<P> property, ObjectFactory<?> objectFactory) {
         super(property);
         this.properties = properties;
         this.traitsSpec = traitsSpec;
+        this.objectFactory = objectFactory;
     }
 
     @Override
     protected boolean isPropertyMatch(Object propertyValue) {
-        return properties.matcher(property.getReaderType()).matches(propertyValue);
+        return properties.matcher(property.getReaderType(), objectFactory).matches(propertyValue);
     }
 
     @Override
