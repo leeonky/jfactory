@@ -123,6 +123,12 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans: []");
     }
 
+    @Test
+    void global_spec_should_not_has_super_spec() {
+        assertThatThrownBy(() -> jFactory.register(InvalidGlobalSpec.class)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Global Spec com.github.leeonky.jfactory.spec._09_PropertyAlias$InvalidGlobalSpec should not have super Spec com.github.leeonky.jfactory.spec._09_PropertyAlias$AliasBeanSpec.");
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)
@@ -169,6 +175,10 @@ public class _09_PropertyAlias {
             @PropertyAlias(alias = "aliasOfValue", property = "value2")
     )
     public static class OverrideSuperSpec extends AliasBeanSpec {
+    }
+
+    @Global
+    public static class InvalidGlobalSpec extends AliasBeanSpec {
     }
 
     @Nested

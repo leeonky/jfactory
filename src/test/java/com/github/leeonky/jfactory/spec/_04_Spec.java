@@ -66,10 +66,6 @@ class _04_Spec {
         }
     }
 
-    @Global
-    public static class GlobalABean extends Spec<Bean> {
-    }
-
     @Getter
     @Setter
     public static class Table {
