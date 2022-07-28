@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.util.Suppressor.run;
@@ -62,7 +63,8 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
-    protected Transformer queryTransformer(String name, Transformer fallback) {
-        return super.queryTransformer(name, base.queryTransformer(name, fallback));
+    protected Supplier<Transformer> fallback(String name, Supplier<Transformer> fallback) {
+        return () -> specClass.getSuperclass().equals(Spec.class) ? base.queryTransformer(name, fallback)
+                : factorySet.querySpecClassFactory((Class) specClass.getSuperclass()).queryTransformer(name, fallback);
     }
 }

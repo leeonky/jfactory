@@ -5,10 +5,11 @@ import com.github.leeonky.util.BeanClass;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 class ObjectFactory<T> implements Factory<T> {
+    protected final FactorySet factorySet;
     private final BeanClass<T> type;
-    private final FactorySet factorySet;
     private final Map<String, Consumer<Instance<T>>> traits = new HashMap<>();
     private final Map<String, Transformer> transformers = new LinkedHashMap<>();
     private final Transformer passThrough = input -> input;
@@ -85,10 +86,16 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     public Object transform(String name, Object value) {
-        return queryTransformer(name, passThrough).checkAndTransform(value);
+        return queryTransformer(name, () -> passThrough).checkAndTransform(value);
     }
 
-    protected Transformer queryTransformer(String name, Transformer fallback) {
-        return transformers.getOrDefault(name, fallback);
+    protected Transformer queryTransformer(String name, Supplier<Transformer> fallback) {
+        return transformers.getOrDefault(name, fallback(name, fallback).get());
+    }
+
+    protected Supplier<Transformer> fallback(String name, Supplier<Transformer> fallback) {
+        return () -> type.getType().getSuperclass() == null ? fallback.get()
+                : factorySet.queryObjectFactory(BeanClass.create(type.getType().getSuperclass()))
+                .queryTransformer(name, fallback);
     }
 }

@@ -159,7 +159,10 @@ public class _09_PropertyAlias {
     }
 
     @Global
-    public static class GlobalSpecAlias extends AliasBeanSpec {
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value")
+    )
+    public static class GlobalSpecAlias extends Spec<Bean> {
     }
 
     @PropertyAliases(

@@ -26,8 +26,17 @@ class FactorySet {
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
                 type -> new SpecClassFactory<>(queryObjectFactory(beanClass), specClass, this));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
-        if (specClass.getAnnotation(Global.class) != null)
+        if (specClass.getAnnotation(Global.class) != null) {
+//            TODO Global should not have super spec
+//            TODO Refactor and test
+            if (!specClass.getSuperclass().equals(Spec.class))
+                throw new IllegalArgumentException(String.format("Global Spec %s should not have super Spec %s.",
+                        specClass.getName(), specClass.getSuperclass().getName()));
             objectFactories.put(beanClass, specClassFactory);
+        }
+        Class<S> superclass = (Class<S>) specClass.getSuperclass();
+        if (!superclass.equals(Spec.class))
+            registerSpecClassFactory(superclass);
     }
 
     public void removeGlobalSpec(BeanClass<?> type) {

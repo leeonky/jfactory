@@ -22,6 +22,9 @@ public class _10_Transformer {
         private String[] stringValues;
     }
 
+    public static class ExtendBean extends Bean {
+    }
+
     public static class ABean extends Spec<Bean> {
     }
 
@@ -34,6 +37,12 @@ public class _10_Transformer {
 
     @Global
     public static class OverrideABean extends Spec<Bean> {
+    }
+
+    public static class AExtendBean extends Spec<ExtendBean> {
+    }
+
+    public static class ABeanWithMore extends ABean {
     }
 
     @Nested
@@ -53,10 +62,32 @@ public class _10_Transformer {
                 }
 
                 @Test
+                void matches_in_sub_type() {
+                    jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.type(ExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+                }
+
+                @Test
+                void override_super_transformer() {
+                    jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+                    jFactory.factory(ExtendBean.class).transformer("content", s -> "(" + s + ")");
+
+                    assertThat(jFactory.type(ExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("(abc)");
+                }
+
+                @Test
                 void matches_in_spec() {
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+                }
+
+                @Test
+                void matches_spec_in_sub_type() {
+                    jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.spec(AExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
                 @Test
@@ -97,6 +128,14 @@ public class _10_Transformer {
                     }
 
                     @Test
+                    void matches_in_sup_type() {
+                        jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+                        jFactory.register(NoOverrideABean.class);
+
+                        assertThat(jFactory.type(ExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+                    }
+
+                    @Test
                     void matches_in_another_spec() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.register(NoOverrideABean.class);
@@ -122,6 +161,14 @@ public class _10_Transformer {
                         jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
 
                         assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("(abc)");
+                    }
+
+                    @Test
+                    void matches_in_sub_type() {
+                        jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+                        jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
+
+                        assertThat(jFactory.type(ExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("(abc)");
                     }
 
                     @Test
@@ -160,6 +207,13 @@ public class _10_Transformer {
                 }
 
                 @Test
+                void matches_in_sub_spec() {
+                    jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.spec(ABeanWithMore.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+                }
+
+                @Test
                 void not_match_in_other_spec() {
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
 
@@ -195,11 +249,27 @@ public class _10_Transformer {
                 }
 
                 @Test
+                void matches_in_sub_type() {
+                    Bean bean = jFactory.type(ExtendBean.class).property("content", "ABC").create();
+                    jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.type(ExtendBean.class).property("content", "abc").query()).isSameAs(bean);
+                }
+
+                @Test
                 void matches_spec() {
                     Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
+                }
+
+                @Test
+                void matches_spec_in_sub_type() {
+                    Bean bean = jFactory.type(ExtendBean.class).property("content", "ABC").create();
+                    jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.spec(AExtendBean.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
                 @Test
@@ -247,6 +317,15 @@ public class _10_Transformer {
                     }
 
                     @Test
+                    void matches_in_sub_type() {
+                        Bean bean = jFactory.type(ExtendBean.class).property("content", "ABC").create();
+                        jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+                        jFactory.register(NoOverrideABean.class);
+
+                        assertThat(jFactory.type(ExtendBean.class).property("content", "abc").query()).isSameAs(bean);
+                    }
+
+                    @Test
                     void matches_in_another_spec() {
                         Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
@@ -267,6 +346,7 @@ public class _10_Transformer {
 
                 @Nested
                 class OverrideSpec {
+
                     @Test
                     void matches_in_type() {
                         Bean bean = jFactory.type(Bean.class).property("content", "(abc)").create();
@@ -274,6 +354,15 @@ public class _10_Transformer {
                         jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
 
                         assertThat(jFactory.type(Bean.class).property("content", "abc").query()).isSameAs(bean);
+                    }
+
+                    @Test
+                    void matches_in_sub_type() {
+                        Bean bean = jFactory.type(ExtendBean.class).property("content", "(abc)").create();
+                        jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+                        jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
+
+                        assertThat(jFactory.type(ExtendBean.class).property("content", "abc").query()).isSameAs(bean);
                     }
 
                     @Test
@@ -293,6 +382,43 @@ public class _10_Transformer {
 
                         assertThat(jFactory.spec(NoOverrideABean.class).property("content", "abc").query()).isSameAs(bean);
                     }
+                }
+            }
+
+            @Nested
+            class DefineInSpec {
+
+                @Test
+                void not_match_in_type() {
+                    jFactory.type(Bean.class).property("content", "ABC").create();
+                    jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.type(Bean.class).property("content", "abc").queryAll()).isEmpty();
+                }
+
+                @Test
+                void matches_in_same_spec() {
+                    Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
+                    jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
+                }
+
+                @Test
+                void not_match_in_other_spec() {
+                    jFactory.type(Bean.class).property("content", "ABC").create();
+                    jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.spec(AnotherBean.class).property("content", "abc").queryAll()).isEmpty();
+                }
+
+                @Test
+                void not_match_in_other_global_spec() {
+                    jFactory.type(Bean.class).property("content", "ABC").create();
+                    jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
+                    jFactory.register(NoOverrideABean.class);
+
+                    assertThat(jFactory.spec(NoOverrideABean.class).property("content", "abc").queryAll()).isEmpty();
                 }
             }
         }
@@ -347,12 +473,8 @@ public class _10_Transformer {
 
 //            TODO transformer in create, query
 //            TODO transformer in single, sub object, sub element
-//            TODO define in global type transformer, use in: type, spec
-//            TODO define in global type transformer, and no override global spec, use in: type, non global spec, global spec
-//            TODO define in global type transformer, override in global spec, use in: type, non global spec, global spec
-//            TODO define in spec, use in: type, same spec, another spec, another global spec
-//            TODO define in global spec, use in: type, non global spec, global spec
-
-//            TODO is extend spec
-//            TODO is extend type
-
+//            TODO define in global type transformer, use in: type, spec, sub type, extend spec
+//            TODO define in global type transformer, and no override global spec, use in: type, non global spec, global spec, sub type, extend spec
+//            TODO define in global type transformer, override in global spec, use in: type, non global spec, global spec, sub type, extend spec
+//            TODO define in spec, use in: type, same spec, another spec, another global spec, sub type, extend spec
+//            TODO define in global spec, use in: type, non global spec, global spec, sub type, extend spec
