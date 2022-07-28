@@ -60,4 +60,9 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     public Class<? extends Spec<T>> getSpecClass() {
         return specClass;
     }
+
+    @Override
+    protected Transformer queryTransformer(String name, Transformer fallback) {
+        return super.queryTransformer(name, base.queryTransformer(name, fallback));
+    }
 }

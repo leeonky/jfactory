@@ -36,6 +36,7 @@ public class KeyValueCollection {
         return builder;
     }
 
+    //    TODO remove arg type
     <T> Collection<Expression<T>> expressions(BeanClass<T> type, ObjectFactory<T> objectFactory) {
         return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type, objectFactory))
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()

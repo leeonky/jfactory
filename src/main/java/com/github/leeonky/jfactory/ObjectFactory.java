@@ -85,6 +85,10 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     public Object transform(String name, Object value) {
-        return transformers.getOrDefault(name, passThrough).checkAndTransform(value);
+        return queryTransformer(name, passThrough).checkAndTransform(value);
+    }
+
+    protected Transformer queryTransformer(String name, Transformer fallback) {
+        return transformers.getOrDefault(name, fallback);
     }
 }

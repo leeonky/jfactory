@@ -21,7 +21,7 @@ public class _10_Transformer {
         private String[] stringValues;
     }
 
-    public static class ABean extends Spec<_04_Spec.Bean> {
+    public static class ABean extends Spec<Bean> {
     }
 
     @Nested
@@ -29,37 +29,83 @@ public class _10_Transformer {
 
         @Nested
         class Single {
-            @Test
-            void matches() {
-                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
-                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
-            }
+            @Nested
+            class DefineInType {
 
-            @Test
-            void not_match() {
-                jFactory.factory(Bean.class).transformer("content", new Transformer() {
-                    @Override
-                    public Object transform(String input) {
-                        fail();
-                        return null;
+                @Nested
+                class UseInType {
+
+                    @Test
+                    void matches() {
+                        jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                        assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                     }
 
-                    @Override
-                    public boolean matches(String input) {
-                        return false;
+                    @Test
+                    void not_match() {
+                        jFactory.factory(Bean.class).transformer("content", new Transformer() {
+                            @Override
+                            public Object transform(String input) {
+                                fail();
+                                return null;
+                            }
+
+                            @Override
+                            public boolean matches(String input) {
+                                return false;
+                            }
+                        });
+
+                        assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
                     }
-                });
 
-                assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
-            }
+                    @Test
+                    void property_is_list() {
+                        jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
 
-            @Test
-            void property_is_list() {
-                jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
+                        assertThat(jFactory.type(Bean.class).property("stringValues", "a,b,c").create().getStringValues())
+                                .containsExactly("a", "b", "c");
+                    }
+                }
 
-                assertThat(jFactory.type(Bean.class).property("stringValues", "a,b,c").create().getStringValues())
-                        .containsExactly("a", "b", "c");
+                @Nested
+                class UseInSpec {
+
+                    @Test
+                    void matches() {
+                        jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                        assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+                    }
+
+                    @Test
+                    void not_match() {
+                        jFactory.factory(Bean.class).transformer("content", new Transformer() {
+                            @Override
+                            public Object transform(String input) {
+                                fail();
+                                return null;
+                            }
+
+                            @Override
+                            public boolean matches(String input) {
+                                return false;
+                            }
+                        });
+
+                        assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
+                    }
+
+                    @Test
+                    void property_is_list() {
+                        jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
+
+                        assertThat(jFactory.spec(ABean.class).property("stringValues", "a,b,c").create().getStringValues())
+                                .containsExactly("a", "b", "c");
+                    }
+                }
             }
         }
     }
@@ -70,45 +116,98 @@ public class _10_Transformer {
         @Nested
         class Single {
 
-            @Test
-            void matches() {
-                Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
-                jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+            @Nested
+            class DefineInType {
 
-                assertThat(jFactory.type(Bean.class).property("content", "abc").query()).isSameAs(bean);
-            }
+                @Nested
+                class UseInType {
 
-            @Test
-            void not_match() {
-                Bean bean = jFactory.type(Bean.class).property("content", "abc").create();
+                    @Test
+                    void matches() {
+                        Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
+                        jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
-                jFactory.factory(Bean.class).transformer("content", new Transformer() {
-                    @Override
-                    public Object transform(String input) {
-                        fail();
-                        return null;
+                        assertThat(jFactory.type(Bean.class).property("content", "abc").query()).isSameAs(bean);
                     }
 
-                    @Override
-                    public boolean matches(String input) {
-                        return false;
+                    @Test
+                    void not_match() {
+                        Bean bean = jFactory.type(Bean.class).property("content", "abc").create();
+
+                        jFactory.factory(Bean.class).transformer("content", new Transformer() {
+                            @Override
+                            public Object transform(String input) {
+                                fail();
+                                return null;
+                            }
+
+                            @Override
+                            public boolean matches(String input) {
+                                return false;
+                            }
+                        });
+
+                        assertThat(jFactory.type(Bean.class).property("content", "abc").query()).isSameAs(bean);
                     }
-                });
 
-                assertThat(jFactory.type(Bean.class).property("content", "abc").query()).isSameAs(bean);
-            }
-
-            //            @Test
+                    //            @Test
 //            TODO compare array not ok
-            void property_is_list() {
-                Bean bean = jFactory.type(Bean.class)
-                        .property("stringValues[0]", "a")
-                        .property("stringValues[1]", "b")
-                        .property("stringValues[2]", "c").create();
+                    void property_is_list() {
+                        Bean bean = jFactory.type(Bean.class)
+                                .property("stringValues[0]", "a")
+                                .property("stringValues[1]", "b")
+                                .property("stringValues[2]", "c").create();
 
-                jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
+                        jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
 
-                assertThat(jFactory.type(Bean.class).property("stringValues", "a,b,c").query()).isSameAs(bean);
+                        assertThat(jFactory.type(Bean.class).property("stringValues", "a,b,c").query()).isSameAs(bean);
+                    }
+                }
+
+                @Nested
+                class DefineInSpec {
+
+                    @Test
+                    void matches() {
+                        Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
+                        jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
+
+                        assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
+                    }
+
+                    @Test
+                    void not_match() {
+                        Bean bean = jFactory.type(Bean.class).property("content", "abc").create();
+
+                        jFactory.factory(Bean.class).transformer("content", new Transformer() {
+                            @Override
+                            public Object transform(String input) {
+                                fail();
+                                return null;
+                            }
+
+                            @Override
+                            public boolean matches(String input) {
+                                return false;
+                            }
+                        });
+
+                        assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
+                    }
+
+                    //            @Test
+//            TODO compare array not ok
+                    void property_is_list() {
+                        Bean bean = jFactory.type(Bean.class)
+                                .property("stringValues[0]", "a")
+                                .property("stringValues[1]", "b")
+                                .property("stringValues[2]", "c").create();
+
+                        jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
+
+                        assertThat(jFactory.spec(ABean.class).property("stringValues", "a,b,c").query()).isSameAs(bean);
+                    }
+                }
             }
         }
     }
