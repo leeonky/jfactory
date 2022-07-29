@@ -13,6 +13,7 @@ import static com.github.leeonky.dal.Assertions.expect;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class _04_Spec {
@@ -523,16 +524,12 @@ class _04_Spec {
         }
 
         @Test
-        void replace_global_spec() {
-            jFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("base"));
+        void do_not_allow_two_global_spec() {
             jFactory.register(BeanGlobal1.class);
-            jFactory.register(BeanGlobal2.class);
-
-            expect(jFactory.create(Bean.class)).match("{" +
-                    "content: 'base'\n" +
-                    "stringValue: /stringValue.*/\n" +
-                    "intValue: 1000\n" +
-                    "}");
+            assertThatThrownBy(() -> jFactory.register(BeanGlobal2.class))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage(String.format("More than one @Global Spec class `%s` and `%s`",
+                            BeanGlobal1.class.getName(), BeanGlobal2.class.getName()));
         }
 
         @Test

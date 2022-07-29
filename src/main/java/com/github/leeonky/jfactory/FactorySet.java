@@ -22,19 +22,24 @@ class FactorySet {
 
     public <T, S extends Spec<T>> void registerSpecClassFactory(Class<S> specClass) {
         Spec<T> spec = BeanClass.newInstance(specClass);
-        BeanClass<T> beanClass = BeanClass.create(spec.getType());
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
-                type -> new SpecClassFactory<>(queryObjectFactory(beanClass), specClass, this));
+                type -> new SpecClassFactory<>(queryObjectFactory(BeanClass.create(spec.getType())), specClass, this));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
-        if (specClass.getAnnotation(Global.class) != null) {
-            if (!specClass.getSuperclass().equals(Spec.class))
-                throw new IllegalArgumentException(String.format("Global Spec %s should not have super Spec %s.",
-                        specClass.getName(), specClass.getSuperclass().getName()));
-            objectFactories.put(beanClass, specClassFactory);
-        }
-        Class<S> superclass = (Class<S>) specClass.getSuperclass();
-        if (!superclass.equals(Spec.class))
-            registerSpecClassFactory(superclass);
+        if (specClass.getAnnotation(Global.class) != null)
+            registerGlobalSpec(specClassFactory);
+        if (!specClass.getSuperclass().equals(Spec.class))
+            registerSpecClassFactory((Class<S>) specClass.getSuperclass());
+    }
+
+    private <T> void registerGlobalSpec(SpecClassFactory<?> specClassFactory) {
+        Class<? extends Spec<?>> specClass = specClassFactory.getSpecClass();
+        if (specClassFactory.getBase() instanceof SpecClassFactory)
+            throw new IllegalArgumentException(String.format("More than one @Global Spec class `%s` and `%s`",
+                    ((SpecClassFactory<?>) specClassFactory.getBase()).getSpecClass().getName(), specClass.getName()));
+        if (!specClass.getSuperclass().equals(Spec.class))
+            throw new IllegalArgumentException(String.format("Global Spec %s should not have super Spec %s.",
+                    specClass.getName(), specClass.getSuperclass().getName()));
+        objectFactories.put(specClassFactory.getType(), specClassFactory);
     }
 
     public void removeGlobalSpec(BeanClass<?> type) {

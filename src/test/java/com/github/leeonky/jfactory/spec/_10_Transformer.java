@@ -380,7 +380,7 @@ public class _10_Transformer {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
 
-                        assertThat(jFactory.spec(NoOverrideABean.class).property("content", "abc").query()).isSameAs(bean);
+                        assertThat(jFactory.spec(AnotherBean.class).property("content", "abc").query()).isSameAs(bean);
                     }
                 }
             }
