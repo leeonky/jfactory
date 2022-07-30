@@ -45,6 +45,10 @@ public class _10_Transformer {
     public static class ABeanWithMore extends ABean {
     }
 
+    @Global
+    public static class GlobalABean extends Spec<Bean> {
+    }
+
     @Nested
     class Create {
 
@@ -211,6 +215,13 @@ public class _10_Transformer {
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(ABeanWithMore.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
+                }
+
+                @Test
+                void matches_from_base_spec() {
+                    jFactory.specFactory(GlobalABean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
                 @Test
@@ -400,6 +411,22 @@ public class _10_Transformer {
                 void matches_in_same_spec() {
                     Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
+                }
+
+                @Test
+                void matches_in_sub_spec() {
+                    Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
+                    jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
+
+                    assertThat(jFactory.spec(ABeanWithMore.class).property("content", "abc").query()).isSameAs(bean);
+                }
+
+                @Test
+                void matches_from_base_spec() {
+                    Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
+                    jFactory.specFactory(GlobalABean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
                 }
