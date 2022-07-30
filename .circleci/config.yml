@@ -10,7 +10,10 @@ jobs:
           command: |
             ./gradlew check build coveralls
             export PUB_VERSION=$(VERSION_SCOPE='' ./gradlew currentVersion -q)
-            ( bash -c "! git tag | grep -q \"^${PUB_VERSION}$\"" ) || echo "Still version ${PUB_VERSION}, CI done" && exit 0
+            if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
+              echo "Still version ${PUB_VERSION}, CI done"
+              exit 0
+            fi
             echo "Release and tag new version $PUB_VERSION"
             echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
             ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" publishToNexus
