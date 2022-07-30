@@ -22,13 +22,18 @@ class FactorySet {
 
     public <T, S extends Spec<T>> void registerSpecClassFactory(Class<S> specClass) {
         Spec<T> spec = BeanClass.newInstance(specClass);
+        boolean globalSpec = isGlobalSpec(specClass);
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
-                type -> new SpecClassFactory<>(queryObjectFactory(BeanClass.create(spec.getType())), specClass, this));
+                type -> new SpecClassFactory<>(specClass, this, globalSpec));
         specClassFactoriesWithName.put(spec.getName(), specClassFactory);
-        if (specClass.getAnnotation(Global.class) != null)
+        if (globalSpec)
             registerGlobalSpec(specClassFactory);
         if (!specClass.getSuperclass().equals(Spec.class))
             registerSpecClassFactory((Class<S>) specClass.getSuperclass());
+    }
+
+    private <T, S extends Spec<T>> boolean isGlobalSpec(Class<S> specClass) {
+        return specClass.getAnnotation(Global.class) != null;
     }
 
     private <T> void registerGlobalSpec(SpecClassFactory<?> specClassFactory) {
@@ -73,8 +78,7 @@ class FactorySet {
     }
 
     public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {
-        S spec = BeanClass.newInstance(specClass);
-        return new SpecFactory<>(queryObjectFactory(BeanClass.create(spec.getType())), spec, this, trait);
+        return new SpecFactory<>(BeanClass.newInstance(specClass), this, trait);
     }
 
     public <T> void registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {

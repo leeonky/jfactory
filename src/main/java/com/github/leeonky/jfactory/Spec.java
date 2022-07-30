@@ -97,4 +97,9 @@ public class Spec<T> {
     void consume(PropertySpec<T>.IsSpec<?, ? extends Spec<?>> isSpec) {
         invalidIsSpecs.remove(isSpec);
     }
+
+    void append(Spec<T> spec) {
+        operations.addAll(spec.operations);
+        invalidIsSpecs.addAll(spec.invalidIsSpecs);
+    }
 }

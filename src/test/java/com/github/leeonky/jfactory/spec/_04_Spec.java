@@ -543,5 +543,16 @@ class _04_Spec {
                     "stringValue: /stringValue.*/\n" +
                     "}");
         }
+
+        @Test
+        void should_use_base_factory_at_runtime() {
+            jFactory.factory(Bean.class).spec(instance -> instance.spec().property("stringValue").value("value1"));
+            jFactory.register(ABean.class);
+            jFactory.register(BeanGlobal1.class);
+
+            expect(jFactory.createAs(ABean.class)).match("{" +
+                    "stringValue: 'base 1'\n" +
+                    "}");
+        }
     }
 }

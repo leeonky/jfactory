@@ -5,25 +5,33 @@ import com.github.leeonky.util.BeanClass;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.util.Suppressor.run;
 
 class SpecClassFactory<T> extends ObjectFactory<T> {
-    private final ObjectFactory<T> base;
     private final Class<? extends Spec<T>> specClass;
+    private final Supplier<ObjectFactory<T>> base;
 
-    public SpecClassFactory(ObjectFactory<T> base, Class<? extends Spec<T>> specClass, FactorySet factorySet) {
+    public SpecClassFactory(Class<? extends Spec<T>> specClass, FactorySet factorySet, boolean globalSpec) {
         super(BeanClass.create(BeanClass.newInstance(specClass).getType()), factorySet);
         this.specClass = specClass;
-        this.base = base;
+        base = guessBaseFactory(factorySet, globalSpec);
         registerTraits();
-        constructor(base::create);
+        constructor(getBase()::create);
+    }
+
+    private Supplier<ObjectFactory<T>> guessBaseFactory(FactorySet factorySet, boolean globalSpec) {
+        if (!globalSpec)
+            return () -> factorySet.queryObjectFactory(getType());
+        ObjectFactory<T> typeBaseFactory = factorySet.queryObjectFactory(getType()); // DO NOT INLINE
+        return () -> typeBaseFactory;
     }
 
     @Override
-    public Spec<T> createSpec() {
+    protected Spec<T> createSpec() {
         return BeanClass.newInstance(specClass);
     }
 
@@ -44,18 +52,24 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
 
     @Override
     public void collectSpec(Collection<String> traits, Instance<T> instance) {
-        collectClassSpec(instance);
-        base.collectSpec(Collections.emptyList(), instance);
         super.collectSpec(traits, instance);
+        getBase().collectSpec(Collections.emptyList(), instance);
+        collectClassSpec(instance, Spec::main);
     }
 
-    protected void collectClassSpec(Instance<T> instance) {
-        instance.spec().main();
+    protected void collectClassSpec(Instance<T> instance, Consumer<Spec<T>> consumer) {
+        if (instance.spec().getClass().equals(specClass))
+            consumer.accept(instance.spec());
+        else {
+            Spec<T> spec = createSpec().setInstance(instance);
+            consumer.accept(spec);
+            instance.spec().append(spec);
+        }
     }
 
     @Override
     public ObjectFactory<T> getBase() {
-        return base;
+        return base.get();
     }
 
     public Class<? extends Spec<T>> getSpecClass() {
@@ -63,8 +77,10 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected Supplier<Transformer> fallback(String name, Supplier<Transformer> fallback) {
-        return () -> specClass.getSuperclass().equals(Spec.class) ? base.queryTransformer(name, fallback)
-                : factorySet.querySpecClassFactory((Class) specClass.getSuperclass()).queryTransformer(name, fallback);
+        return () -> specClass.getSuperclass().equals(Spec.class) ? getBase().queryTransformer(name, fallback)
+                : factorySet.querySpecClassFactory((Class<? extends Spec<T>>) specClass.getSuperclass())
+                .queryTransformer(name, fallback);
     }
 }
