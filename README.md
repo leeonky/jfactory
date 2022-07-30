@@ -1,6 +1,6 @@
 # JFactory
 
-[![travis-ci](https://travis-ci.com/leeonky/jfactory.svg?branch=master)](https://travis-ci.com/github/leeonky/jfactory)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/leeonky/jfactory/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/leeonky/jfactory/tree/master)
 [![coveralls](https://img.shields.io/coveralls/github/leeonky/jfactory/master.svg)](https://coveralls.io/github/leeonky/jfactory)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fleeonky%2Fjfactory%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/leeonky/jfactory/master)
 [![Lost commit](https://img.shields.io/github/last-commit/leeonky/jfactory.svg)](https://github.com/leeonky/jfactory)
