@@ -11,13 +11,13 @@ jobs:
             ./gradlew check build coveralls
             export PUB_VERSION=$(VERSION_SCOPE='' ./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
-              echo "\n====== Still version ${PUB_VERSION}, CI done ======\n"
+              echo "====== Still version ${PUB_VERSION}, CI done ======"
               exit 0
             fi
-            echo "\n====== Release and tag new version $PUB_VERSION ======\n"
+            echo "====== Release and tag new version $PUB_VERSION ======"
             echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
             ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" publishToNexus
             git config --global user.email "travis@travis-ci.org"
             git config --global user.name "Travis CI"
             git tag ${PUB_VERSION} -a -m 'CI Release'
-            git push -q "https://${GH_TOKEN}@github.com/leeonky/${CIRCLE_PROJECT_REPONAME}.git" --tags
+            git push --tags
