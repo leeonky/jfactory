@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.CollectionHelper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -95,7 +96,7 @@ class DefaultBuilder<T> implements Builder<T> {
             property = replaceStartsWithIndexBracket(jFactory.aliasSetStore.resolve(
                     objectFactory, key, isCollection(value)), newBuilder);
             if (isCollection(value)) {
-                List<Object> objects = BeanClass.arrayCollectionToStream(value).collect(Collectors.toList());
+                List<Object> objects = CollectionHelper.toStream(value).collect(Collectors.toList());
                 if (objects.isEmpty() || !property.contains("$"))
                     newBuilder.properties.append(trimIndexAlias(property), objects);
                 else for (int i = 0; i < objects.size(); i++)
