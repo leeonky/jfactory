@@ -11,8 +11,9 @@ jobs:
       - run:
           name: build
           command: |
+            export VERSION_SCOPE=''
             ./gradlew check build coveralls
-            export PUB_VERSION=$(VERSION_SCOPE='' ./gradlew currentVersion -q)
+            export PUB_VERSION=$(./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
               echo "====== Still version ${PUB_VERSION}, CI done ======"
               exit 0
@@ -20,7 +21,7 @@ jobs:
             echo "====== Release and tag new version $PUB_VERSION ======"
             echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
             ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" publishToNexus
-            git config --global user.email "travis@travis-ci.org"
-            git config --global user.name "Travis CI"
+            git config --global user.email "leeonky@gmail.com"
+            git config --global user.name "leeonky"
             git tag ${PUB_VERSION} -a -m 'CI Release'
             git push --tags
