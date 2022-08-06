@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.github.leeonky.dal.Assertions.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -55,6 +56,27 @@ public class _03_CreateWithSpec {
         }
     }
 
+    public static class TraitPriority extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            property("content").value("this is a bean");
+        }
+
+        @Trait
+        public void hello() {
+            property("content").value("hello");
+        }
+    }
+
+    public static class TraitSpec extends Spec<Bean> {
+
+        @Trait
+        public void hello() {
+            property("content").value("hello");
+        }
+    }
+
     @Nested
     class SpecInLambda {
 
@@ -81,7 +103,7 @@ public class _03_CreateWithSpec {
         @Test
         void support_method_chain_in_spec_definition() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
-                    .property("stringValue").value("hello"))
+                            .property("stringValue").value("hello"))
                     .spec("a bean", instance -> instance.spec()
                             .property("content").value("a bean"))
                     .constructor(instance -> new BeanSub());
@@ -150,5 +172,28 @@ public class _03_CreateWithSpec {
         void should_raise_error_when_invalid_generic_args() {
             assertThrows(IllegalStateException.class, () -> jFactory.createAs(InvalidGenericArgSpec.class));
         }
+
+        @Test
+        void trait_override_spec_in_instance_spec() {
+            jFactory.register(TraitPriority.class);
+            expect(jFactory.createAs(TraitPriority.class, TraitPriority::hello)).should("content: hello");
+        }
+
+        @Test
+        void trait_override_spec_in_spec_class() {
+            jFactory.register(TraitPriority.class);
+            expect(jFactory.createAs("hello", "TraitPriority")).should("content: hello");
+        }
+
+        @Test
+        void trait_override_spec_in_type_spec() {
+            jFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("in type"));
+
+            jFactory.register(TraitSpec.class);
+
+            expect(jFactory.createAs("hello", "TraitSpec")).should("content: hello");
+        }
+
+//        TODO override type spec, class spec, instance class spec
     }
 }

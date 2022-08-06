@@ -68,9 +68,13 @@ class ObjectFactory<T> implements Factory<T> {
 
     public void collectSpec(Collection<String> traits, Instance<T> instance) {
         spec.accept(instance);
+        collectSubSpec(instance);
         traits.stream().map(name -> this.traits.computeIfAbsent(name, k -> {
             throw new IllegalArgumentException("Trait `" + k + "` not exist");
         })).forEach(spec -> spec.accept(instance));
+    }
+
+    protected void collectSubSpec(Instance<T> instance) {
     }
 
     public RootInstance<T> createInstance(DefaultArguments argument) {

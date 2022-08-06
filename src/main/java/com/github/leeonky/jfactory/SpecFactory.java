@@ -1,6 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import java.util.Collection;
 import java.util.function.Consumer;
 
 public class SpecFactory<T, S extends Spec<T>> extends SpecClassFactory<T> {
@@ -20,8 +19,8 @@ public class SpecFactory<T, S extends Spec<T>> extends SpecClassFactory<T> {
     }
 
     @Override
-    public void collectSpec(Collection<String> traits, Instance<T> instance) {
-        super.collectSpec(traits, instance);
+    protected void collectSubSpec(Instance<T> instance) {
+        super.collectSubSpec(instance);
         collectClassSpec(instance, spec -> trait.accept((S) spec));
     }
 }

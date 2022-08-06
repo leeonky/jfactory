@@ -3,7 +3,6 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -51,8 +50,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
-    public void collectSpec(Collection<String> traits, Instance<T> instance) {
-        super.collectSpec(traits, instance);
+    protected void collectSubSpec(Instance<T> instance) {
         getBase().collectSpec(Collections.emptyList(), instance);
         collectClassSpec(instance, Spec::main);
     }
