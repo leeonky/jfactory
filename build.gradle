@@ -57,7 +57,8 @@ dependencies {
     testImplementation 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.3'
-    testImplementation("com.github.leeonky:DAL-java:0.3.3")
+    testImplementation("com.github.leeonky:DAL-java:0.3.4")
+    testImplementation "io.cucumber:cucumber-java:6.10.4"
 
     pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }

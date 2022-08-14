@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.CollectionHelper;
 import com.github.leeonky.util.Property;
 
 import java.util.Objects;
@@ -16,7 +17,8 @@ class SingleValueExpression<P> extends Expression<P> {
 
     @Override
     protected boolean isPropertyMatch(Object propertyValue) {
-        return Objects.equals(propertyValue, property.getReader().tryConvert(value));
+        return property.getReaderType().isCollection() ? CollectionHelper.equals(propertyValue, value)
+                : Objects.equals(propertyValue, property.getReader().tryConvert(value));
     }
 
     @Override

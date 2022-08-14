@@ -356,8 +356,7 @@ public class _10_Transformer {
                     assertThat(jFactory.type(Bean.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
-                //            @Test
-//            TODO compare array not ok
+                @Test
                 void property_is_list() {
                     Bean bean = jFactory.type(Bean.class)
                             .property("stringValues[0]", "a")
