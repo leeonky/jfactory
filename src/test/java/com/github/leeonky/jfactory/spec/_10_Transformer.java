@@ -576,9 +576,9 @@ public class _10_Transformer {
 }
 
 //            TODO transformer in create, query
-//            TODO transformer in single, sub object, sub element
-//            TODO define in global type transformer, use in: type, spec, sub type, extend spec
-//            TODO define in global type transformer, and no override global spec, use in: type, non global spec, global spec, sub type, extend spec
-//            TODO define in global type transformer, override in global spec, use in: type, non global spec, global spec, sub type, extend spec
-//            TODO define in spec, use in: type, same spec, another spec, another global spec, sub type, extend spec
-//            TODO define in global spec, use in: type, non global spec, global spec, sub type, extend spec
+//            transformer in single, sub object, sub element
+//            define in global type transformer, use in: type, spec, sub type, extend spec
+//            define in global type transformer, and no override global spec, use in: type, non global spec, global spec, sub type, extend spec
+//            define in global type transformer, override in global spec, use in: type, non global spec, global spec, sub type, extend spec
+//            define in spec, use in: type, same spec, another spec, another global spec, sub type, extend spec
+//            define in global spec, use in: type, non global spec, global spec, sub type, extend spec
