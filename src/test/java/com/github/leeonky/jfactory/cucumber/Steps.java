@@ -30,7 +30,22 @@ public class Steps {
 
     @When("create type {string} with traits {string}")
     public void create_type_with_traits(String type, String traits) {
-        integrationTestContext.create(type, traits.split(","));
+        integrationTestContext.create(type, traits.split(" "));
+    }
+
+    @When("create {string}")
+    public void create(String specAndTrait) {
+        integrationTestContext.createSpec(specAndTrait.split(" "));
+    }
+
+    @When("create from spec {string} with:")
+    public void create_from_spec_with(String spec, String traitSnippet) {
+        integrationTestContext.createSpecWithSnippet(spec, traitSnippet);
+    }
+
+    @Given("the following spec class:")
+    public void the_following_spec_class(String specClass) {
+        integrationTestContext.specClass(specClass);
     }
 
     @Then("the result should:")

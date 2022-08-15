@@ -2,10 +2,7 @@ package com.github.leeonky.jfactory.cucumber;
 
 import lombok.SneakyThrows;
 
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
+import javax.tools.*;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
@@ -18,6 +15,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.groupingBy;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
@@ -51,13 +49,17 @@ public class Compiler {
         throw new IllegalStateException("Can not guess class name");
     }
 
+    @SneakyThrows
     public List<Class<?>> compileToClasses(List<String> classCodes) {
         if (classCodes.isEmpty())
             return emptyList();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         List<JavaSourceFromString> files = classCodes.stream().map(code ->
                 new JavaSourceFromString(guessClassName(code), code)).collect(Collectors.toList());
-        boolean success = getSystemJavaCompiler().getTask(null, null, diagnostics, null, null, files).call();
+        JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
+        StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
+        standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, asList(new File("./")));
+        boolean success = systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, files).call();
         if (!success) {
             System.out.println(diagnostics.getDiagnostics().stream().collect(groupingBy(Diagnostic::getSource))
                     .entrySet().stream().map(this::compileResults).collect(Collectors.joining("\n")));
@@ -88,7 +90,7 @@ public class Compiler {
 
     @SneakyThrows
     private Class<?> loadClass(String name) {
-        return Class.forName(name, true, loader);
+        return Class.forName("src.test." + name, true, loader);
     }
 }
 
