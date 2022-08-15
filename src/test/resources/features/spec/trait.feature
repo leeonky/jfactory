@@ -9,13 +9,11 @@ Feature: trait
     """
 
   Scenario: naming spec(trait) override spec in type
-    Given spec of type "Bean"
+    Given register factory:
     """
-      instance.spec().property("value").value("type spec");
-    """
-    And trait "hello" of type "Bean"
-    """
-      instance.spec().property("value").value("hello");
+    jfactory.factory(Bean.class)
+      .spec(instance-> instance.spec().property("value").value("type spec"))
+      .spec("hello", instance-> instance.spec().property("value").value("hello"));
     """
     When create type "Bean" with traits "hello"
     Then the result should:
@@ -24,9 +22,10 @@ Feature: trait
     """
 
   Scenario: trait in spec class override spec in type
-    Given spec of type "Bean"
+    Given register factory:
     """
-      instance.spec().property("value").value("type spec");
+    jfactory.factory(Bean.class)
+      .spec(instance-> instance.spec().property("value").value("type spec"));
     """
     And the following spec class:
     """

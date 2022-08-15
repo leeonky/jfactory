@@ -1,6 +1,5 @@
 package com.github.leeonky.jfactory.cucumber;
 
-import com.github.leeonky.jfactory.Instance;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
 import com.github.leeonky.util.BeanClass;
@@ -12,14 +11,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static java.util.Arrays.asList;
 
 public class IntegrationTestContext {
-    private final List<String> beanCodes = new ArrayList<>();
-    private final List<String> specCodes = new ArrayList<>();
+    private final List<String> classCodes = new ArrayList<>();
     private final List<Class> classes = new ArrayList<>();
     private final JFactory jFactory = new JFactory();
     private final List<Runnable> register = new ArrayList<>();
@@ -28,27 +24,7 @@ public class IntegrationTestContext {
     private Object bean;
 
     public void givenBean(String classCode) {
-        beanCodes.add(classCode);
-    }
-
-    public void givenTypeSpec(String type, String specCode) {
-        register.add(() -> jFactory.factory(getType(type)).spec(defineSpec(specCode)));
-    }
-
-
-    @SneakyThrows
-    private Consumer<Instance<?>> defineSpec(String specCode) {
-        String className = "Snip" + (snippetIndex++);
-        String snipCode = "package src.test;" +
-                "import java.util.function.*;" +
-                "import java.util.*;" +
-                "import com.github.leeonky.jfactory.*;" +
-                "public class " + className + " implements Consumer<Instance<?>> {\n" +
-                "    @Override\n" +
-                "    public void accept(Instance<?> instance) {" + specCode + "}\n" +
-                "}";
-
-        return (Consumer<Instance<?>>) compiler.compileToClasses(asList(snipCode)).get(0).newInstance();
+        classCodes.add(classCode);
     }
 
     private String specTraitMothodCall(String spec, String specCode) {
@@ -60,12 +36,8 @@ public class IntegrationTestContext {
                 "    @Override\n" +
                 "    public void accept(" + spec + " spec) {" + specCode + ";}\n" +
                 "}";
-        specCodes.add(snipCode);
+        classCodes.add(snipCode);
         return className;
-    }
-
-    public void givenTypeTrait(String type, String trait, String codeSnippet) {
-        register.add(() -> jFactory.factory(getType(type)).spec(trait, defineSpec(codeSnippet)));
     }
 
     private Class getType(String className) {
@@ -77,17 +49,28 @@ public class IntegrationTestContext {
 
     private void compileAll() {
         if (classes.isEmpty()) {
-            classes.addAll(compiler.compileToClasses(Stream.concat(beanCodes.stream(), specCodes.stream()).map(s ->
-                    "package src.test;" + "import com.github.leeonky.jfactory.*;\n" +
-                            "import com.github.leeonky.jfactory.*;\n" +
-                            "import java.util.*;\n" +
-                            "import java.math.*;\n" + s).collect(Collectors.toList())));
+            classes.addAll(compiler.compileToClasses(classCodes.stream().map(s -> "package src.test;\n" +
+                    "import com.github.leeonky.jfactory.*;\n" +
+                    "import java.util.function.*;\n" +
+                    "import java.util.*;\n" +
+                    "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.stream().filter(Spec.class::isAssignableFrom).forEach(jFactory::register);
         }
     }
 
-    public void create(String type, String[] traits) {
-        create(() -> jFactory.type(getType(type)).traits(traits).create());
+    public void create(String type, String[] traits, Map<String, ?> properties) {
+        switch (properties.size()) {
+            case 0:
+                create(() -> jFactory.type(getType(type)).traits(traits).create());
+                break;
+            case 1:
+                create(() -> jFactory.type(getType(type)).traits(traits).property(properties.keySet().iterator().next(),
+                        properties.values().iterator().next()).create());
+                break;
+            default:
+                create(() -> jFactory.type(getType(type)).traits(traits).properties(properties).create());
+                break;
+        }
     }
 
     private void create(Supplier<Object> supplier) {
@@ -101,7 +84,7 @@ public class IntegrationTestContext {
     }
 
     public void specClass(String specClass) {
-        specCodes.add(specClass);
+        classCodes.add(specClass);
     }
 
     public void createSpec(String[] specTraits) {
@@ -114,6 +97,26 @@ public class IntegrationTestContext {
 
     public void createSpecWithSnippet(String spec, String traitSnippet) {
         String tmpClass = specTraitMothodCall(spec, traitSnippet);
-        create(() -> jFactory.createAs(getType(spec), (Consumer) BeanClass.create(getType(tmpClass)).newInstance()));
+        create(() -> jFactory.createAs(getType(spec), (Consumer) createProcedure(tmpClass)));
+    }
+
+    @SneakyThrows
+    private String registerJFactoryCode(String snippet) {
+        String className = "Snip" + (snippetIndex++);
+        String snipCode = "public class " + className + " implements Consumer<JFactory> {\n" +
+                "    @Override\n" +
+                "    public void accept(JFactory jfactory) {" + snippet + "}\n" +
+                "}";
+        classCodes.add(snipCode);
+        return className;
+    }
+
+    public void registerJfactory(String registerCode) {
+        String tmpClass = registerJFactoryCode(registerCode);
+        register.add(() -> ((Consumer) createProcedure(tmpClass)).accept(jFactory));
+    }
+
+    private Object createProcedure(String tmpClass) {
+        return BeanClass.create(getType(tmpClass)).newInstance();
     }
 }

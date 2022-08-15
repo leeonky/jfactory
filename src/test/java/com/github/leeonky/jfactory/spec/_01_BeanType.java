@@ -13,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 
 import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;
-import static com.github.leeonky.jfactory.spec._01_BeanType.Enums.A;
-import static com.github.leeonky.jfactory.spec._01_BeanType.Enums.B;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -22,47 +20,9 @@ class _01_BeanType {
     private JFactory jFactory = new JFactory();
 
     @Test
-    void default_creation_with_default_value_producing() {
-        assertThat(jFactory.create(Bean.class))
-                .hasFieldOrPropertyWithValue("stringValue", "stringValue#1")
-        ;
-
-        assertThat(jFactory.create(Bean.class))
-                .hasFieldOrPropertyWithValue("stringValue", "stringValue#2")
-        ;
-    }
-
-    @Test
-    void support_specify_properties_in_building() {
-        assertThat(jFactory.type(Bean.class)
-                .property("stringValue", "hello")
-                .property("intValue", 100).create())
-                .hasFieldOrPropertyWithValue("stringValue", "hello")
-                .hasFieldOrPropertyWithValue("intValue", 100);
-    }
-
-    @Test
     void should_raise_error_when_property_expression_invalid() {
         assertThrows(IllegalArgumentException.class, () -> jFactory.type(Bean.class)
                 .property(".a", 100).create());
-    }
-
-    @Test
-    void support_customized_constructor() {
-        jFactory.factory(BeanWithNoDefaultConstructor.class).constructor(arg -> new BeanWithNoDefaultConstructor("hello", 100));
-
-        assertThat(jFactory.type(BeanWithNoDefaultConstructor.class).create())
-                .hasFieldOrPropertyWithValue("stringValue", "hello")
-                .hasFieldOrPropertyWithValue("intValue", 100);
-    }
-
-    @Test
-    void support_default_enum_value() {
-        JFactory JFactory = new JFactory();
-        assertThat(JFactory.create(EnumBean.class))
-                .hasFieldOrPropertyWithValue("enums", A);
-        assertThat(JFactory.create(EnumBean.class))
-                .hasFieldOrPropertyWithValue("enums", B);
     }
 
     enum Enums {

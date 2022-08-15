@@ -9,6 +9,8 @@ import io.cucumber.java.en.When;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyMap;
+
 public class Steps {
     private IntegrationTestContext integrationTestContext = new IntegrationTestContext();
 
@@ -22,19 +24,19 @@ public class Steps {
         integrationTestContext.givenBean(classCode);
     }
 
-    @Given("spec of type {string}")
-    public void spec_of_type(String type, String specCode) {
-        integrationTestContext.givenTypeSpec(type, specCode);
+    @Given("the following spec class:")
+    public void the_following_spec_class(String specClass) {
+        integrationTestContext.specClass(specClass);
     }
 
-    @Given("trait {string} of type {string}")
-    public void trait_of_type(String trait, String type, String codeSnippet) {
-        integrationTestContext.givenTypeTrait(type, trait, codeSnippet);
+    @Then("the result should:")
+    public void the_result_should(String dal) {
+        integrationTestContext.verifyBean(dal);
     }
 
     @When("create type {string} with traits {string}")
     public void create_type_with_traits(String type, String traits) {
-        integrationTestContext.create(type, traits.split(" "));
+        integrationTestContext.create(type, traits.split(" "), emptyMap());
     }
 
     @When("create {string}")
@@ -47,18 +49,23 @@ public class Steps {
         integrationTestContext.createSpecWithSnippet(spec, traitSnippet);
     }
 
-    @Given("the following spec class:")
-    public void the_following_spec_class(String specClass) {
-        integrationTestContext.specClass(specClass);
-    }
-
-    @Then("the result should:")
-    public void the_result_should(String dal) {
-        integrationTestContext.verifyBean(dal);
-    }
-
     @And("create {string} with property:")
     public void createWithProperty(String specTraits, List<Map<String, String>> properties) {
         integrationTestContext.createSpec(specTraits, properties.get(0));
+    }
+
+    @When("create type {string}")
+    public void createType(String type) {
+        integrationTestContext.create(type, new String[0], emptyMap());
+    }
+
+    @When("create type {string} with property:")
+    public void createTypeWithProperty(String type, List<Map<String, String>> properties) {
+        integrationTestContext.create(type, new String[0], properties.get(0));
+    }
+
+    @And("register factory:")
+    public void registerFactory(String registerCode) {
+        integrationTestContext.registerJfactory(registerCode);
     }
 }
