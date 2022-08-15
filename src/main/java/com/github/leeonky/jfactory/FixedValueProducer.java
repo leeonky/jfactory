@@ -21,4 +21,9 @@ class FixedValueProducer<T> extends Producer<T> {
             return newProducer;
         return this;
     }
+
+    @Override
+    protected boolean isFixed() {
+        return true;
+    }
 }

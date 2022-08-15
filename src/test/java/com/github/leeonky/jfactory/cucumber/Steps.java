@@ -1,9 +1,13 @@
 package com.github.leeonky.jfactory.cucumber;
 
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
+import java.util.List;
+import java.util.Map;
 
 public class Steps {
     private IntegrationTestContext integrationTestContext = new IntegrationTestContext();
@@ -51,5 +55,10 @@ public class Steps {
     @Then("the result should:")
     public void the_result_should(String dal) {
         integrationTestContext.verifyBean(dal);
+    }
+
+    @And("create {string} with property:")
+    public void createWithProperty(String specTraits, List<Map<String, String>> properties) {
+        integrationTestContext.createSpec(specTraits, properties.get(0));
     }
 }

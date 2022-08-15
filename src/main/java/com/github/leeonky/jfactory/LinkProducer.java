@@ -34,4 +34,9 @@ class LinkProducer<T> extends Producer<T> {
     public Optional<Producer<?>> child(String property) {
         return linkerReference.getLinker().chooseProducer().child(property);
     }
+
+    @Override
+    protected Producer<T> changeFrom(ObjectProducer<T> producer) {
+        return producer.isFixed() ? producer : this;
+    }
 }

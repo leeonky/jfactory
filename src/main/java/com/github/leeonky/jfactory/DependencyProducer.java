@@ -20,4 +20,11 @@ class DependencyProducer<T> extends Producer<T> {
     protected T produce() {
         return rule.apply(dependencies.stream().map(Supplier::get).toArray());
     }
+
+    @Override
+    protected Producer<T> changeFrom(ObjectProducer<T> producer) {
+        if (producer.isFixed())
+            return producer;
+        return super.changeFrom(producer);
+    }
 }

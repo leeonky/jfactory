@@ -176,4 +176,9 @@ class ObjectProducer<T> extends Producer<T> {
                         && ignorePropertiesInSpec.contains(e.getKey())).map(Map.Entry::getKey).collect(Collectors.toList())
                 .forEach(children::remove);
     }
+
+    @Override
+    protected boolean isFixed() {
+        return children.values().stream().anyMatch(Producer::isFixed);
+    }
 }

@@ -96,4 +96,8 @@ abstract class Producer<T> {
 
     protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
     }
+
+    protected boolean isFixed() {
+        return false;
+    }
 }

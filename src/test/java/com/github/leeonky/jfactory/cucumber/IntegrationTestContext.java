@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -79,6 +80,7 @@ public class IntegrationTestContext {
             classes.addAll(compiler.compileToClasses(Stream.concat(beanCodes.stream(), specCodes.stream()).map(s ->
                     "package src.test;" + "import com.github.leeonky.jfactory.*;\n" +
                             "import com.github.leeonky.jfactory.*;\n" +
+                            "import java.util.*;\n" +
                             "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.stream().filter(Spec.class::isAssignableFrom).forEach(jFactory::register);
         }
@@ -104,6 +106,10 @@ public class IntegrationTestContext {
 
     public void createSpec(String[] specTraits) {
         create(() -> jFactory.createAs(specTraits));
+    }
+
+    public void createSpec(String specTraits, Map<String, String> properties) {
+        create(() -> jFactory.spec(specTraits).properties(properties).create());
     }
 
     public void createSpecWithSnippet(String spec, String traitSnippet) {
