@@ -76,7 +76,8 @@ public class Compiler {
         result.add(e.getKey().toString());
         for (Diagnostic<?> diagnostic : e.getValue()) {
             result.add(diagnostic.getMessage(null));
-            codeBase[(int) diagnostic.getPosition()] = '^';
+            if (diagnostic.getPosition() >= 0)
+                codeBase[(int) diagnostic.getPosition()] = '^';
         }
         String[] codes = sourceCode.split("\n");
         String[] codeMarks = Stream.of(codeBase).map(String::valueOf).collect(Collectors.joining()).split("\n");

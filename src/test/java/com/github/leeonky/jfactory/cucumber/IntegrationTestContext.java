@@ -4,12 +4,10 @@ import com.github.leeonky.jfactory.Builder;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
 import com.github.leeonky.util.BeanClass;
-import lombok.SneakyThrows;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -24,21 +22,12 @@ public class IntegrationTestContext {
     private int snippetIndex = 0;
     private Object bean;
 
-    public void givenBean(String classCode) {
-        classCodes.add(classCode);
+    private <T> T createProcedure(Class<T> type, String tmpClass) {
+        return (T) BeanClass.create(getType(tmpClass)).newInstance();
     }
 
-    private String specTraitMothodCall(String spec, String specCode) {
-        String className = "Snip" + (snippetIndex++);
-        String snipCode = "import java.util.function.*;" +
-                "import java.util.*;" +
-                "import com.github.leeonky.jfactory.*;" +
-                "public class " + className + " implements Consumer<" + spec + "> {\n" +
-                "    @Override\n" +
-                "    public void accept(" + spec + " spec) {" + specCode + ";}\n" +
-                "}";
-        classCodes.add(snipCode);
-        return className;
+    public void givenBean(String classCode) {
+        classCodes.add(classCode);
     }
 
     private Class getType(String className) {
@@ -48,43 +37,37 @@ public class IntegrationTestContext {
         return type;
     }
 
+    private String jFactoryAction(String builderSnippet) {
+        String className = "Snip" + (snippetIndex++);
+        String snipCode = "import java.util.function.*;" +
+                "import java.util.*;" +
+                "import com.github.leeonky.jfactory.*;" +
+                "public class " + className + " implements Function<JFactory, Object> {\n" +
+                "    @Override\n" +
+                "    public Object apply(JFactory jfactory) { return jfactory." + builderSnippet + ";}\n" +
+                "}";
+        classCodes.add(snipCode);
+        return className;
+    }
+
     private void compileAll() {
-        if (classes.isEmpty()) {
-            classes.addAll(compiler.compileToClasses(classCodes.stream().map(s -> "package src.test;\n" +
-                    "import com.github.leeonky.jfactory.*;\n" +
-                    "import java.util.function.*;\n" +
-                    "import java.util.*;\n" +
-                    "import java.math.*;\n" + s).collect(Collectors.toList())));
-            classes.stream().filter(Spec.class::isAssignableFrom).forEach(jFactory::register);
-        }
+        classes.clear();
+        classes.addAll(compiler.compileToClasses(classCodes.stream().map(s -> "package src.test;\n" +
+                "import com.github.leeonky.jfactory.*;\n" +
+                "import java.util.function.*;\n" +
+                "import java.util.*;\n" +
+                "import java.math.*;\n" + s).collect(Collectors.toList())));
+        classes.stream().filter(Spec.class::isAssignableFrom).forEach(jFactory::register);
     }
 
-    public void create(String type, String[] traits, Map<String, ?> properties) {
-        create(() -> setProperties(jFactory.type(getType(type)).traits(traits), properties).create());
+    public void create(String builderSnippet) {
+        String tmpClass = jFactoryAction(builderSnippet);
+        create(() -> ((Builder) createProcedure(Function.class, tmpClass).apply(jFactory)).create());
     }
 
-    public Builder setProperties(Builder builder, Map<String, ?> properties) {
-        switch (properties.size()) {
-            case 0:
-                return builder;
-            case 1:
-                return builder.property(properties.keySet().iterator().next(),
-                        properties.values().iterator().next());
-            default:
-                return builder.properties(properties);
-        }
-    }
-
-    public Builder setParams(Builder builder, Map<String, ?> params) {
-        switch (params.size()) {
-            case 0:
-                return builder;
-            case 1:
-                return builder.arg(params.keySet().iterator().next(),
-                        params.values().iterator().next());
-            default:
-                return builder.args(params);
-        }
+    public void register(String factorySnippet) {
+        String tmpClass = jFactoryAction(factorySnippet);
+        register.add(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
     }
 
     private void create(Supplier<Object> supplier) {
@@ -101,40 +84,8 @@ public class IntegrationTestContext {
         classCodes.add(specClass);
     }
 
-    public void createSpec(String[] specTraits) {
-        create(() -> jFactory.createAs(specTraits));
-    }
-
-    public void createSpec(String specTraits, Map<String, String> properties) {
-        create(() -> jFactory.spec(specTraits).properties(properties).create());
-    }
-
-    public void createSpecWithSnippet(String spec, String traitSnippet) {
-        String tmpClass = specTraitMothodCall(spec, traitSnippet);
-        create(() -> jFactory.createAs(getType(spec), (Consumer) createProcedure(tmpClass)));
-    }
-
-    @SneakyThrows
-    private String registerJFactoryCode(String snippet) {
-        String className = "Snip" + (snippetIndex++);
-        String snipCode = "public class " + className + " implements Consumer<JFactory> {\n" +
-                "    @Override\n" +
-                "    public void accept(JFactory jfactory) {" + snippet + "}\n" +
-                "}";
-        classCodes.add(snipCode);
-        return className;
-    }
-
-    public void registerJfactory(String registerCode) {
-        String tmpClass = registerJFactoryCode(registerCode);
-        register.add(() -> ((Consumer) createProcedure(tmpClass)).accept(jFactory));
-    }
-
-    private Object createProcedure(String tmpClass) {
-        return BeanClass.create(getType(tmpClass)).newInstance();
-    }
-
-    public void create(String type, String[] traits, Map<String, ?> properties, Map<String, ?> params) {
-        create(() -> setParams(setProperties(jFactory.type(getType(type)).traits(traits), properties), params).create());
+    public void execute(String exeSnippet) {
+        String tmpClass = jFactoryAction(exeSnippet);
+        create(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
     }
 }
