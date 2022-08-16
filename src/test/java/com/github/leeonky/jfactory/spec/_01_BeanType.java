@@ -86,7 +86,7 @@ class _01_BeanType {
     @Nested
     class Params {
 
-        @Test
+        //        @Test
         void support_specify_params() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value((Object) instance.param("p"))
@@ -97,7 +97,7 @@ class _01_BeanType {
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
-        @Test
+        //        @Test
         void support_default_params() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value(instance.param("p", "default")));
@@ -106,7 +106,7 @@ class _01_BeanType {
                     .hasFieldOrPropertyWithValue("stringValue", "default");
         }
 
-        @Test
+        //        @Test
         void support_specify_params_in_map() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value((Object) instance.param("p"))

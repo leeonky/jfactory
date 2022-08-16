@@ -68,4 +68,9 @@ public class Steps {
     public void registerFactory(String registerCode) {
         integrationTestContext.registerJfactory(registerCode);
     }
+
+    @When("create type {string} with params")
+    public void createTypeWithParams(String type, List<Map<String, String>> params) {
+        integrationTestContext.create(type, new String[0], emptyMap(), params.get(0));
+    }
 }

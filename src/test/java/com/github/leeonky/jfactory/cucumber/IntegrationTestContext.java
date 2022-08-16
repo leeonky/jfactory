@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory.cucumber;
 
+import com.github.leeonky.jfactory.Builder;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
 import com.github.leeonky.util.BeanClass;
@@ -59,17 +60,30 @@ public class IntegrationTestContext {
     }
 
     public void create(String type, String[] traits, Map<String, ?> properties) {
+        create(() -> setProperties(jFactory.type(getType(type)).traits(traits), properties).create());
+    }
+
+    public Builder setProperties(Builder builder, Map<String, ?> properties) {
         switch (properties.size()) {
             case 0:
-                create(() -> jFactory.type(getType(type)).traits(traits).create());
-                break;
+                return builder;
             case 1:
-                create(() -> jFactory.type(getType(type)).traits(traits).property(properties.keySet().iterator().next(),
-                        properties.values().iterator().next()).create());
-                break;
+                return builder.property(properties.keySet().iterator().next(),
+                        properties.values().iterator().next());
             default:
-                create(() -> jFactory.type(getType(type)).traits(traits).properties(properties).create());
-                break;
+                return builder.properties(properties);
+        }
+    }
+
+    public Builder setParams(Builder builder, Map<String, ?> params) {
+        switch (params.size()) {
+            case 0:
+                return builder;
+            case 1:
+                return builder.arg(params.keySet().iterator().next(),
+                        params.values().iterator().next());
+            default:
+                return builder.args(params);
         }
     }
 
@@ -118,5 +132,9 @@ public class IntegrationTestContext {
 
     private Object createProcedure(String tmpClass) {
         return BeanClass.create(getType(tmpClass)).newInstance();
+    }
+
+    public void create(String type, String[] traits, Map<String, ?> properties, Map<String, ?> params) {
+        create(() -> setParams(setProperties(jFactory.type(getType(type)).traits(traits), properties), params).create());
     }
 }
