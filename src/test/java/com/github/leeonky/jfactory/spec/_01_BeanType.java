@@ -120,7 +120,7 @@ class _01_BeanType {
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
-        @Test
+        //        @Test
         void support_specify_params_in_arg() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("stringValue").value((Object) instance.param("p"))
@@ -135,7 +135,7 @@ class _01_BeanType {
         @Nested
         class NestedParams {
 
-            @Test
+            //            @Test
             void pass_arg_to_nested_spec_type() {
                 jFactory.factory(Bean.class).spec(instance -> instance.spec()
                         .property("stringValue").value((Object) instance.param("p")));
@@ -145,7 +145,7 @@ class _01_BeanType {
 
             }
 
-            @Test
+            //            @Test
             void pass_arg_to_nested_spec_type_in_2_levels() {
                 jFactory.factory(Bean.class).spec(instance -> instance.spec()
                         .property("stringValue").value((Object) instance.param("p")));
@@ -161,7 +161,7 @@ class _01_BeanType {
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
-            @Test
+            //            @Test
             void pass_arg_to_nested_spec_with_spec_class() {
                 jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                         .property("bean").is(ABean.class));
@@ -170,7 +170,7 @@ class _01_BeanType {
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
-            @Test
+            //            @Test
             void pass_arg_to_nested_spec_with_spec_instance() {
                 jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
                         .property("bean").from(ABean.class).which(spec -> {
@@ -180,7 +180,7 @@ class _01_BeanType {
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
-            @Test
+            //            @Test
             void pass_arg_to_nested_spec_with_spec_name() {
                 jFactory.register(ABean.class);
 
@@ -191,7 +191,7 @@ class _01_BeanType {
                         .hasFieldOrPropertyWithValue("stringValue", "hello");
             }
 
-            @Test
+            //            @Test
             void pass_arg_to_nested_spec_with_spec_class_and_properties() {
                 jFactory.register(ABean.class);
 

@@ -76,7 +76,7 @@ public class Compiler {
         result.add(e.getKey().toString());
         for (Diagnostic<?> diagnostic : e.getValue()) {
             result.add(diagnostic.getMessage(null));
-            if (diagnostic.getPosition() >= 0)
+            if (diagnostic.getPosition() >= 0 && diagnostic.getPosition() < codeBase.length)
                 codeBase[(int) diagnostic.getPosition()] = '^';
         }
         String[] codes = sourceCode.split("\n");

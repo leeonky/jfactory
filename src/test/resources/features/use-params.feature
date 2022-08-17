@@ -76,7 +76,7 @@ Feature: create with params
     """
     When create:
     """
-      type(Bean.class).args(ArgumentMapFactory.arg("p1", "hello").arg("p2", "world"))
+      type(Bean.class).args(arg("p1", "hello").arg("p2", "world"))
     """
     Then the result should:
     """
@@ -84,4 +84,104 @@ Feature: create with params
         str1= hello
         str2= world
       }
+    """
+
+  Scenario: support nested args
+    Given the following bean class:
+    """
+      public class Bean {
+        public String str;
+      }
+    """
+    And the following bean class:
+    """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+    """
+    And register:
+    """
+      factory(Bean.class).spec(instance -> instance.spec()
+        .property("str").value((Object) instance.param("p")))
+    """
+    And register:
+    """
+      factory(BeanWrapper.class).spec(instance -> instance.spec()
+        .property("bean").byFactory())
+    """
+    When create:
+    """
+      type(BeanWrapper.class).args("bean", arg("p", "hello"))
+    """
+    Then the result should:
+    """
+      bean.str= hello
+    """
+
+  Scenario: support nested args in deep levels
+    Given the following bean class:
+    """
+      public class Bean {
+        public String str;
+      }
+    """
+    And the following bean class:
+    """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+    """
+    And the following bean class:
+    """
+      public class BeanWrapperWrapper {
+        public BeanWrapper beanWrapper;
+      }
+    """
+    And register:
+    """
+      factory(Bean.class).spec(instance -> instance.spec()
+        .property("str").value((Object) instance.param("p")))
+    """
+    And register:
+    """
+      factory(BeanWrapper.class).spec(instance -> instance.spec()
+        .property("bean").byFactory())
+    """
+    And register:
+    """
+      factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
+        .property("beanWrapper").byFactory())
+    """
+    When create:
+    """
+      type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello"))
+    """
+    Then the result should:
+    """
+      beanWrapper.bean.str= hello
+    """
+
+  Scenario: use args in spec class
+    Given the following bean class:
+    """
+      public class Bean {
+        public String str;
+      }
+    """
+    And the following spec class:
+    """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("str").value((Object)param("p"));
+        }
+      }
+    """
+    When create:
+    """
+      spec(ABean.class).arg("p", "hello")
+    """
+    Then the result should:
+    """
+      str= hello
     """
