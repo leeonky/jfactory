@@ -66,8 +66,8 @@ Feature: basic
         localDate: '1996-01-24'
         localTime: '00:00:01'
         localDateTime: '1996-01-23T00:00:01'
-        offsetDateTime: '1996-01-23T00:00:01Z'
-        zonedDateTime: '1996-01-23T00:00:01Z[Etc/UTC]'
+        offsetDateTime.toInstant: '1996-01-23T00:00:01Z'
+        zonedDateTime.toInstant: '1996-01-23T00:00:01Z'
         enumValue: A
       }
     """
@@ -101,8 +101,8 @@ Feature: basic
         localDate: '1996-01-25'
         localTime: '00:00:02'
         localDateTime: '1996-01-23T00:00:02'
-        offsetDateTime: '1996-01-23T00:00:02Z'
-        zonedDateTime: '1996-01-23T00:00:02Z[Etc/UTC]'
+        offsetDateTime.toInstant: '1996-01-23T00:00:02Z'
+        zonedDateTime.toInstant: '1996-01-23T00:00:02Z'
         enumValue: B
       }
     """

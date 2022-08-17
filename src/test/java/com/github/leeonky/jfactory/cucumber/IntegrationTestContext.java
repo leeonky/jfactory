@@ -41,6 +41,7 @@ public class IntegrationTestContext {
         String className = "Snip" + (snippetIndex++);
         String snipCode = "import java.util.function.*;" +
                 "import java.util.*;" +
+                "import com.github.leeonky.util.*;" +
                 "import com.github.leeonky.jfactory.*;" +
                 "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;" +
                 "public class " + className + " implements Function<JFactory, Object> {\n" +

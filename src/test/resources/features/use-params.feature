@@ -185,3 +185,77 @@ Feature: create with params
     """
       str= hello
     """
+
+  Scenario: fetch nested arg in spec
+    Given the following bean class:
+    """
+      public class Bean {
+        public String str;
+        public Bean setStr(String s) {
+          this.str = s;
+          return this;
+        }
+      }
+    """
+    And the following bean class:
+    """
+      public class BeanWrapper {
+        public Bean bean;
+        public BeanWrapper setBean(Bean b) {
+          this.bean = b;
+          return this;
+        }
+      }
+    """
+    And the following bean class:
+    """
+      public class BeanWrapperWrapper {
+        public BeanWrapper beanWrapper;
+      }
+    """
+    And register:
+    """
+      factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
+        .property("beanWrapper").value(new BeanWrapper().setBean(new Bean()
+          .setStr(instance.params("beanWrapper").params("bean").param("p")))))
+    """
+    When create:
+    """
+      type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello"))
+    """
+    Then the result should:
+    """
+      beanWrapper.bean.str= hello
+    """
+
+  Scenario: fetch all params in spec
+    Given the following bean class:
+    """
+      public class Bean {
+        public String str;
+      }
+    """
+    And the following bean class:
+    """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+    """
+    And register:
+    """
+      factory(Bean.class).spec(instance -> instance.spec()
+        .property("str").value((Object) instance.param("p")))
+    """
+    And register:
+    """
+      factory(BeanWrapper.class).spec(instance -> instance.spec()
+        .property("bean").byFactory(builder ->builder.args(instance.params())))
+    """
+    When create:
+    """
+      type(BeanWrapper.class).arg("p", "hello")
+    """
+    Then the result should:
+    """
+      bean.str= hello
+    """

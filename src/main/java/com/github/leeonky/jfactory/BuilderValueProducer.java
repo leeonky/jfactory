@@ -22,10 +22,12 @@ public class BuilderValueProducer<T> extends Producer<T> {
                 DefaultBuilder<T> marge = ((DefaultBuilder<T>) builder).marge((DefaultBuilder<T>) ((BuilderValueProducer<Object>) newProducer).builder);
                 return new BuilderValueProducer<>(getType(), marge);
             }
+//        TODO need test
             return newProducer;
         }
         if (newProducer instanceof ObjectProducer)
             return builder.createProducer().changeTo(newProducer);
+//        TODO need test
         return this;
     }
 
@@ -33,6 +35,7 @@ public class BuilderValueProducer<T> extends Producer<T> {
         Object[] objects = builder.queryAll().toArray();
         if (objects.length != 0)
             return new FixedValueProducer<>(getType(), objects[0]);
+//        TODO need test
         return builder.createProducer();
     }
 }
