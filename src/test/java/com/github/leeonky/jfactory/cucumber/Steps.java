@@ -37,4 +37,19 @@ public class Steps {
     public void execute(String exeSnippet) {
         integrationTestContext.execute(exeSnippet);
     }
+
+    @When("query:")
+    public void query(String builderSnippet) {
+        integrationTestContext.query(builderSnippet);
+    }
+
+    @When("query all:")
+    public void queryAll(String builderSnippet) {
+        integrationTestContext.queryAll(builderSnippet);
+    }
+
+    @And("operate:")
+    public void operate(String operateSnippet) {
+        integrationTestContext.operate(operateSnippet);
+    }
 }

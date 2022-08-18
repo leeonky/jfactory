@@ -7,6 +7,7 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -52,6 +53,21 @@ public class IntegrationTestContext {
         return className;
     }
 
+    private String jFactoryOperate(String builderSnippet) {
+        String className = "Snip" + (snippetIndex++);
+        String snipCode = "import java.util.function.*;" +
+                "import java.util.*;" +
+                "import com.github.leeonky.util.*;" +
+                "import com.github.leeonky.jfactory.*;" +
+                "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;" +
+                "public class " + className + " implements Consumer<JFactory> {\n" +
+                "    @Override\n" +
+                "    public void accept(JFactory jfactory) { jfactory." + builderSnippet + ";}\n" +
+                "}";
+        classCodes.add(snipCode);
+        return className;
+    }
+
     private void compileAll() {
         classes.clear();
         classes.addAll(compiler.compileToClasses(classCodes.stream().map(s -> "package src.test;\n" +
@@ -89,5 +105,20 @@ public class IntegrationTestContext {
     public void execute(String exeSnippet) {
         String tmpClass = jFactoryAction(exeSnippet);
         create(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
+    }
+
+    public void query(String builderSnippet) {
+        String tmpClass = jFactoryAction(builderSnippet);
+        create(() -> ((Builder) createProcedure(Function.class, tmpClass).apply(jFactory)).query());
+    }
+
+    public void queryAll(String builderSnippet) {
+        String tmpClass = jFactoryAction(builderSnippet);
+        create(() -> ((Builder) createProcedure(Function.class, tmpClass).apply(jFactory)).queryAll());
+    }
+
+    public void operate(String operateSnippet) {
+        String tmpClass = jFactoryOperate(operateSnippet);
+        register.add(() -> createProcedure(Consumer.class, tmpClass).accept(jFactory));
     }
 }
