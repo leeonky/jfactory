@@ -22,6 +22,7 @@ public class IntegrationTestContext {
     private final Compiler compiler = new Compiler();
     private int snippetIndex = 0;
     private Object bean;
+    private Throwable throwable;
 
     private <T> T createProcedure(Class<T> type, String tmpClass) {
         return (T) BeanClass.create(getType(tmpClass)).newInstance();
@@ -80,7 +81,14 @@ public class IntegrationTestContext {
 
     public void create(String builderSnippet) {
         String tmpClass = jFactoryAction(builderSnippet);
-        create(() -> ((Builder) createProcedure(Function.class, tmpClass).apply(jFactory)).create());
+        create(() -> {
+            try {
+                return ((Builder) createProcedure(Function.class, tmpClass).apply(jFactory)).create();
+            } catch (Throwable throwable) {
+                this.throwable = throwable;
+                return null;
+            }
+        });
     }
 
     public void register(String factorySnippet) {
@@ -120,5 +128,9 @@ public class IntegrationTestContext {
     public void operate(String operateSnippet) {
         String tmpClass = jFactoryOperate(operateSnippet);
         register.add(() -> createProcedure(Consumer.class, tmpClass).accept(jFactory));
+    }
+
+    public void shouldThrow(String dal) {
+        expect(throwable).should(dal);
     }
 }

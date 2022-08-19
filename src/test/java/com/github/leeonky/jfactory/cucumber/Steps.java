@@ -52,4 +52,9 @@ public class Steps {
     public void operate(String operateSnippet) {
         integrationTestContext.operate(operateSnippet);
     }
+
+    @Then("should raise error:")
+    public void shouldRaiseError(String dal) {
+        integrationTestContext.shouldThrow(dal);
+    }
 }
