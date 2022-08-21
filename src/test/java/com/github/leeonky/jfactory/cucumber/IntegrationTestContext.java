@@ -41,11 +41,11 @@ public class IntegrationTestContext {
 
     private String jFactoryAction(String builderSnippet) {
         String className = "Snip" + (snippetIndex++);
-        String snipCode = "import java.util.function.*;" +
-                "import java.util.*;" +
-                "import com.github.leeonky.util.*;" +
-                "import com.github.leeonky.jfactory.*;" +
-                "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;" +
+        String snipCode = "import java.util.function.*;\n" +
+                "import java.util.*;\n" +
+                "import com.github.leeonky.util.*;\n" +
+                "import com.github.leeonky.jfactory.*;\n" +
+                "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;\n" +
                 "public class " + className + " implements Function<JFactory, Object> {\n" +
                 "    @Override\n" +
                 "    public Object apply(JFactory jfactory) { return jfactory." + builderSnippet + ";}\n" +
@@ -56,11 +56,11 @@ public class IntegrationTestContext {
 
     private String jFactoryOperate(String builderSnippet) {
         String className = "Snip" + (snippetIndex++);
-        String snipCode = "import java.util.function.*;" +
-                "import java.util.*;" +
-                "import com.github.leeonky.util.*;" +
-                "import com.github.leeonky.jfactory.*;" +
-                "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;" +
+        String snipCode = "import java.util.function.*;\n" +
+                "import java.util.*;\n" +
+                "import com.github.leeonky.util.*;\n" +
+                "import com.github.leeonky.jfactory.*;\n" +
+                "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;\n" +
                 "public class " + className + " implements Consumer<JFactory> {\n" +
                 "    @Override\n" +
                 "    public void accept(JFactory jfactory) { jfactory." + builderSnippet + ";}\n" +

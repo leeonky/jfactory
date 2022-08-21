@@ -1,8 +1,70 @@
-Feature: basic
+Feature: basic use
 
-  Scenario: create bean with default value
-    Given the following bean class:
-    """
+  Rule: create bean
+
+    Scenario: simple create - create bean with input property
+      Given the following bean class:
+      """
+      public class Bean {
+        public String stringValue;
+        public int intValue;
+      }
+      """
+      When create:
+      """
+      type(Bean.class).property("stringValue", "input-value")
+      """
+      Then the result should:
+      """
+      stringValue= input-value
+      """
+      When create:
+      """
+      type(Bean.class).properties(new HashMap<String, Object>() {{
+        put("stringValue", "input-value");
+        put("intValue", 100);
+      }})
+      """
+      Then the result should:
+      """
+      = {
+        stringValue= input-value
+        intValue= 100
+      }
+      """
+
+    Scenario: customize constructor - create bean use customer constructor
+      Given the following bean class:
+      """
+      public class Bean {
+        private int i;
+        public Bean(int i) {
+          this.i = i;
+        }
+
+        public int getI() {
+          return i;
+        }
+      }
+      """
+      And register:
+      """
+      factory(Bean.class).constructor(arg -> new Bean(100))
+      """
+      When create:
+      """
+      type(Bean.class)
+      """
+      Then the result should:
+      """
+      i= 100
+      """
+
+  Rule: default value
+
+    Scenario: supported types - all supported build-in default value types
+      Given the following bean class:
+      """
       public class Bean {
         public String stringValue;
         public int intValue;
@@ -35,13 +97,13 @@ Feature: basic
           A, B
         }
       }
-    """
-    When create:
-    """
+      """
+      When create:
+      """
       type(Bean.class)
-    """
-    Then the result should:
-    """
+      """
+      Then the result should:
+      """
       = {
         stringValue= stringValue#1
         intValue= 1
@@ -70,13 +132,13 @@ Feature: basic
         zonedDateTime.toInstant: '1996-01-23T00:00:01Z'
         enumValue: A
       }
-    """
-    When create:
-    """
+      """
+      When create:
+      """
       type(Bean.class)
-    """
-    Then the result should:
-    """
+      """
+      Then the result should:
+      """
       = {
         stringValue= stringValue#2
         intValue= 2
@@ -105,63 +167,49 @@ Feature: basic
         zonedDateTime.toInstant: '1996-01-23T00:00:02Z'
         enumValue: B
       }
-    """
+      """
 
-  Scenario: create bean with input property
-    Given the following bean class:
-    """
+    Scenario: customized - define default value strategy by type
+      Given the following bean class:
+      """
       public class Bean {
-        public String stringValue;
-        public int intValue;
+        public String str;
       }
-    """
-    When create:
-    """
-      type(Bean.class).property("stringValue", "input-value")
-    """
-    Then the result should:
-    """
-      stringValue= input-value
-    """
-    When create:
-    """
-      type(Bean.class).properties(new HashMap<String, Object>() {{
-        put("stringValue", "input-value");
-        put("intValue", 100);
-      }})
-    """
-    Then the result should:
-    """
-      = {
-        stringValue= input-value
-        intValue= 100
-      }
-    """
+      """
+      When register:
+      """
+      registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
+        @Override
+          public <T> String create(BeanClass<T> beanType, SubInstance<T> instance) {
+            return "hello";
+          }
+        })
+      """
+      And create:
+      """
+      type(Bean.class)
+      """
+      Then the result should:
+      """
+      str= hello
+      """
 
-  Scenario: create bean use customer constructor
-    Given the following bean class:
-    """
-    public class Bean {
-      private int i;
-      public Bean(int i) {
-        this.i = i;
+    Scenario: skip - support skip default value generation
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
       }
-
-      public int getI() {
-        return i;
-      }
-    }
-    """
-    And register:
-    """
-    factory(Bean.class).constructor(arg -> new Bean(100))
-    """
-    When create:
-    """
-    type(Bean.class)
-    """
-    Then the result should:
-    """
-    i= 100
-    """
-
+      """
+      When register:
+      """
+      ignoreDefaultValue(propertyWriter -> "str".equals(propertyWriter.getName()))
+      """
+      And create:
+      """
+      type(Bean.class)
+      """
+      Then the result should:
+      """
+      str= null
+      """
