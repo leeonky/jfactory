@@ -124,7 +124,7 @@ public class _03_CreateWithSpec {
     @Nested
     class SpecInClass {
 
-        @Test
+        //        @Test
         void support_define_spec_in_class() {
             assertThat(jFactory.spec(ABean.class).traits("int100", "hello").create())
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
@@ -135,7 +135,7 @@ public class _03_CreateWithSpec {
                     .hasFieldOrPropertyWithValue("content", "this is a bean");
         }
 
-        @Test
+        //        @Test
         void support_pass_spec_arg_in_java_code() {
             assertThat(jFactory.createAs(ABean.class, spec -> spec.int100().strHello()))
                     .hasFieldOrPropertyWithValue("content", "this is a bean")
@@ -143,6 +143,19 @@ public class _03_CreateWithSpec {
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
+        //        @Test
+        void support_build_through_spec_name() {
+            jFactory.spec(ABean.class);
+
+            assertThat((Bean) jFactory.createAs("hello", "ABean"))
+                    .hasFieldOrPropertyWithValue("content", "this is a bean")
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
+
+        //        @Test
+        void should_raise_error_when_definition_or_trait_not_exist() {
+            assertThrows(IllegalArgumentException.class, () -> jFactory.createAs("ABean"));
+        }
 
         @Test
         void should_call_type_base_constructor_and_main_spec() {
@@ -152,20 +165,6 @@ public class _03_CreateWithSpec {
             assertThat(jFactory.createAs(ABean.class))
                     .isInstanceOf(BeanSub.class)
                     .hasFieldOrPropertyWithValue("intValue", 50);
-        }
-
-        @Test
-        void support_build_through_spec_name() {
-            jFactory.spec(ABean.class);
-
-            assertThat((Bean) jFactory.createAs("hello", "ABean"))
-                    .hasFieldOrPropertyWithValue("content", "this is a bean")
-                    .hasFieldOrPropertyWithValue("stringValue", "hello");
-        }
-
-        @Test
-        void should_raise_error_when_definition_or_trait_not_exist() {
-            assertThrows(IllegalArgumentException.class, () -> jFactory.createAs("ABean"));
         }
 
         @Test

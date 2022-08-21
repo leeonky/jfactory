@@ -57,4 +57,9 @@ public class Steps {
     public void shouldRaiseError(String dal) {
         integrationTestContext.shouldThrow(dal);
     }
+
+    @When("create as:")
+    public void createAs(String createAs) {
+        integrationTestContext.createAs(createAs);
+    }
 }

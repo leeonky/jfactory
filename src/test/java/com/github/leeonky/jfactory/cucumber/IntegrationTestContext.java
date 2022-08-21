@@ -99,7 +99,11 @@ public class IntegrationTestContext {
     private void create(Supplier<Object> supplier) {
         compileAll();
         register.forEach(Runnable::run);
-        bean = supplier.get();
+        try {
+            bean = supplier.get();
+        } catch (Throwable throwable) {
+            this.throwable = throwable;
+        }
     }
 
     public void verifyBean(String dal) {
@@ -132,5 +136,10 @@ public class IntegrationTestContext {
 
     public void shouldThrow(String dal) {
         expect(throwable).should(dal);
+    }
+
+    public void createAs(String createAs) {
+        String tmpClass = jFactoryAction(createAs);
+        create(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
     }
 }

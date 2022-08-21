@@ -1,14 +1,12 @@
 Feature: trait
 
-  Background:
+  Scenario: naming spec(trait) override spec in type
     Given the following bean class:
     """
       public class Bean {
         public String value;
       }
     """
-
-  Scenario: naming spec(trait) override spec in type
     Given register:
     """
       factory(Bean.class)
@@ -25,6 +23,12 @@ Feature: trait
     """
 
   Scenario: trait in spec class override spec in type
+    Given the following bean class:
+    """
+      public class Bean {
+        public String value;
+      }
+    """
     Given register:
     """
       factory(Bean.class)
@@ -49,6 +53,12 @@ Feature: trait
     """
 
   Scenario: trait in spec class override spec in spec class
+    Given the following bean class:
+    """
+      public class Bean {
+        public String value;
+      }
+    """
     Given the following spec class:
     """
       public class ABean extends Spec<Bean> {
@@ -73,6 +83,12 @@ Feature: trait
     """
 
   Scenario: trait in spec class override spec in spec instance
+    Given the following bean class:
+    """
+      public class Bean {
+        public String value;
+      }
+    """
     Given the following spec class:
     """
       public class ABean extends Spec<Bean> {
@@ -98,6 +114,12 @@ Feature: trait
     """
 
   Scenario: trait in spec class override spec in global spec class
+    Given the following bean class:
+    """
+      public class Bean {
+        public String value;
+      }
+    """
     Given the following spec class:
     """
       @Global
