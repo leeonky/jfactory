@@ -1,5 +1,7 @@
 Feature: basic use
 
+  Background: JFactory jFactory = new JFactory();
+
   Rule: create bean
 
     Scenario: simple create - create bean with input property
@@ -10,20 +12,20 @@ Feature: basic use
         public int intValue;
       }
       """
-      When create:
+      When build:
       """
-      type(Bean.class).property("stringValue", "input-value")
+      jFactory.type(Bean.class).property("stringValue", "input-value").create();
       """
       Then the result should:
       """
       stringValue= input-value
       """
-      When create:
+      When build:
       """
-      type(Bean.class).properties(new HashMap<String, Object>() {{
+      jFactory.type(Bean.class).properties(new HashMap<String, Object>() {{
         put("stringValue", "input-value");
         put("intValue", 100);
-      }})
+      }}).create();
       """
       Then the result should:
       """
@@ -49,11 +51,11 @@ Feature: basic use
       """
       And register:
       """
-      factory(Bean.class).constructor(arg -> new Bean(100))
+      jFactory.factory(Bean.class).constructor(arg -> new Bean(100));
       """
-      When create:
+      When build:
       """
-      type(Bean.class)
+      jFactory.type(Bean.class).create();
       """
       Then the result should:
       """
@@ -98,9 +100,9 @@ Feature: basic use
         }
       }
       """
-      When create:
+      When build:
       """
-      type(Bean.class)
+      jFactory.type(Bean.class).create();
       """
       Then the result should:
       """
@@ -133,9 +135,9 @@ Feature: basic use
         enumValue: A
       }
       """
-      When create:
+      When build:
       """
-      type(Bean.class)
+      jFactory.type(Bean.class).create();
       """
       Then the result should:
       """
@@ -178,16 +180,16 @@ Feature: basic use
       """
       When register:
       """
-      registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
+      jFactory.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
         @Override
           public <T> String create(BeanClass<T> beanType, SubInstance<T> instance) {
             return "hello";
           }
-        })
+        });
       """
-      And create:
+      And build:
       """
-      type(Bean.class)
+      jFactory.type(Bean.class).create();
       """
       Then the result should:
       """
@@ -203,11 +205,11 @@ Feature: basic use
       """
       When register:
       """
-      ignoreDefaultValue(propertyWriter -> "str".equals(propertyWriter.getName()))
+      jFactory.ignoreDefaultValue(propertyWriter -> "str".equals(propertyWriter.getName()));
       """
-      And create:
+      And build:
       """
-      type(Bean.class)
+      jFactory.type(Bean.class).create();
       """
       Then the result should:
       """

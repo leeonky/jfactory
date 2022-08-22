@@ -62,4 +62,9 @@ public class Steps {
     public void createAs(String createAs) {
         integrationTestContext.createAs(createAs);
     }
+
+    @When("build:")
+    public void build(String builderSnippet) {
+        integrationTestContext.build(builderSnippet);
+    }
 }

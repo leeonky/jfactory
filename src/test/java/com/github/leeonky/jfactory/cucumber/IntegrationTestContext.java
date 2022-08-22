@@ -16,6 +16,7 @@ import static com.github.leeonky.dal.Assertions.expect;
 
 public class IntegrationTestContext {
     private final List<String> classCodes = new ArrayList<>();
+    private final List<String> registers = new ArrayList<>();
     private final List<Class> classes = new ArrayList<>();
     private final JFactory jFactory = new JFactory();
     private final List<Runnable> register = new ArrayList<>();
@@ -92,8 +93,12 @@ public class IntegrationTestContext {
     }
 
     public void register(String factorySnippet) {
-        String tmpClass = jFactoryAction(factorySnippet);
-        register.add(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
+        if (factorySnippet.startsWith("jFactory"))
+            registers.add(factorySnippet);
+        else {
+            String tmpClass = jFactoryAction(factorySnippet);
+            register.add(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
+        }
     }
 
     private void create(Supplier<Object> supplier) {
@@ -141,5 +146,27 @@ public class IntegrationTestContext {
     public void createAs(String createAs) {
         String tmpClass = jFactoryAction(createAs);
         create(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
+    }
+
+    public void build(String builderSnippet) {
+        String tmpClass = jFactoryAction2(builderSnippet);
+        create(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
+    }
+
+    private String jFactoryAction2(String builderSnippet) {
+        String className = "Snip" + (snippetIndex++);
+        String snipCode = "import java.util.function.*;\n" +
+                "import java.util.*;\n" +
+                "import com.github.leeonky.util.*;\n" +
+                "import com.github.leeonky.jfactory.*;\n" +
+                "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;\n" +
+                "public class " + className + " implements Function<JFactory, Object> {\n" +
+                "    @Override\n" +
+                "    public Object apply(JFactory jFactory) {\n" +
+                String.join("\n", registers) + "\n" +
+                " return " + builderSnippet + "}\n" +
+                "}";
+        classCodes.add(snipCode);
+        return className;
     }
 }
