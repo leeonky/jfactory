@@ -1,6 +1,10 @@
 Feature: basic use
 
-  Background: JFactory jFactory = new JFactory();
+  Background:
+    Given declaration jFactory =
+    """
+    new JFactory();
+    """
 
   Rule: create bean
 
@@ -215,3 +219,209 @@ Feature: basic use
       """
       str= null
       """
+
+  Rule: data repo
+
+    Scenario: save/query/query all - save bean after create bean
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").query();
+      """
+      Then the result should:
+      """
+      str= hello
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      str[]= [hello]
+      """
+
+    Scenario: query empty - query nothing when property miss
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "not match").query();
+      """
+      Then the result should:
+      """
+      = null
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "not match").queryAll();
+      """
+      Then the result should:
+      """
+      = []
+      """
+
+    Scenario: clear repo - query nothing when repo is cleared before query
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").create();
+      """
+      And operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").query();
+      """
+      Then the result should:
+      """
+      = null
+      """
+
+    Scenario: property chain - save and query with property chain
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And build:
+      """
+      jFactory.type(BeanWrapper.class).property("bean.str", "hello").create();
+      """
+      When build:
+      """
+      jFactory.type(BeanWrapper.class).property("bean.str", "hello").query();
+      """
+      Then the result should:
+      """
+      bean.str= hello
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").query();
+      """
+      Then the result should:
+      """
+      str= hello
+      """
+      When build:
+      """
+      jFactory.type(BeanWrapper.class).property("bean.str", "not hello").query();
+      """
+      Then the result should:
+      """
+      = null
+      """
+
+    Scenario: data relation - query and use saved been as sub object
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And create:
+      """
+      type(Bean.class).property("str", "hello")
+      """
+      When create:
+      """
+      type(BeanWrapper.class).property("bean.str", "hello")
+      """
+      Then query all:
+      """
+      type(Bean.class)
+      """
+      And the result should:
+      """
+      ::size= 1
+      """
+
+    Scenario: list matching - matches means some of element matches, not all list elements equal
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeansWrapper {
+        public Beans beans;
+      }
+      """
+      And build:
+      """
+      jFactory.type(BeansWrapper.class)
+        .property("beans.beans[0].str", "hello")
+        .property("beans.beans[1].str", "world")
+        .create();
+      """
+      And build:
+      """
+      jFactory.type(BeansWrapper.class).property("beans.beans[1].str", "world").create();
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).queryAll();
+      """
+      Then the result should:
+      """
+      ::size= 1
+      """
+      When build:
+      """
+      jFactory.type(BeansWrapper.class).property("beans.beans[1].str", "not match").create();
+      """
+      And query all:
+      """
+      type(Beans.class)
+      """
+      Then the result should:
+      """
+      ::size= 2
+      """
+

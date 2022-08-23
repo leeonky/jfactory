@@ -67,4 +67,9 @@ public class Steps {
     public void build(String builderSnippet) {
         integrationTestContext.build(builderSnippet);
     }
+
+    @Given("declaration jFactory =")
+    public void declarationJFactory(String declaration) {
+        integrationTestContext.declare(declaration);
+    }
 }

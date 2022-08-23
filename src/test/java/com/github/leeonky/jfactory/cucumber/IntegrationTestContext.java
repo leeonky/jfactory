@@ -13,14 +13,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static java.util.Arrays.asList;
 
 public class IntegrationTestContext {
     private final List<String> classCodes = new ArrayList<>();
     private final List<String> registers = new ArrayList<>();
     private final List<Class> classes = new ArrayList<>();
-    private final JFactory jFactory = new JFactory();
     private final List<Runnable> register = new ArrayList<>();
     private final Compiler compiler = new Compiler();
+    private JFactory jFactory = new JFactory();
     private int snippetIndex = 0;
     private Object bean;
     private Throwable throwable;
@@ -64,7 +65,7 @@ public class IntegrationTestContext {
                 "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;\n" +
                 "public class " + className + " implements Consumer<JFactory> {\n" +
                 "    @Override\n" +
-                "    public void accept(JFactory jfactory) { jfactory." + builderSnippet + ";}\n" +
+                "    public void accept(JFactory jFactory) { " + builderSnippet + ";}\n" +
                 "}";
         classCodes.add(snipCode);
         return className;
@@ -168,5 +169,24 @@ public class IntegrationTestContext {
                 "}";
         classCodes.add(snipCode);
         return className;
+    }
+
+
+    private String createJFactory(String declaration) {
+        return "package src.test;\n" +
+                "import java.util.function.*;\n" +
+                "import java.util.*;\n" +
+                "import com.github.leeonky.util.*;\n" +
+                "import com.github.leeonky.jfactory.*;\n" +
+                "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;\n" +
+                "public class Declaration implements Supplier<Object> {\n" +
+                "    @Override\n" +
+                "    public Object get() { return " + declaration + "}\n" +
+                "}";
+    }
+
+    public void declare(String declaration) {
+        jFactory = (JFactory) ((Supplier) BeanClass.create(compiler.
+                compileToClasses(asList(createJFactory(declaration))).get(0)).newInstance()).get();
     }
 }
