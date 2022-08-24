@@ -357,24 +357,24 @@ Feature: basic use
         public Bean bean;
       }
       """
-      And create:
+      And build:
       """
-      type(Bean.class).property("str", "hello")
+      jFactory.type(Bean.class).property("str", "hello").create();
       """
-      When create:
+      When build:
       """
-      type(BeanWrapper.class).property("bean.str", "hello")
+      jFactory.type(BeanWrapper.class).property("bean.str", "hello").create();
       """
-      Then query all:
+      Then build:
       """
-      type(Bean.class)
+      jFactory.type(Bean.class).queryAll();
       """
       And the result should:
       """
       ::size= 1
       """
 
-    Scenario: list matching - matches means some of element matches, not all list elements equal
+    Scenario: list matching - list matching means some of element matches, not all list elements equal
       Given the following bean class:
       """
       public class Bean {
@@ -400,11 +400,11 @@ Feature: basic use
         .property("beans.beans[1].str", "world")
         .create();
       """
-      And build:
+      When build:
       """
       jFactory.type(BeansWrapper.class).property("beans.beans[1].str", "world").create();
       """
-      When build:
+      And build:
       """
       jFactory.type(Beans.class).queryAll();
       """
@@ -416,12 +416,229 @@ Feature: basic use
       """
       jFactory.type(BeansWrapper.class).property("beans.beans[1].str", "not match").create();
       """
-      And query all:
+      And build:
       """
-      type(Beans.class)
+      jFactory.type(Beans.class).queryAll();
       """
       Then the result should:
       """
       ::size= 2
       """
 
+  Rule: params
+
+    Scenario: use params - use params in spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str1, str2;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("str1").value((Object) instance.param("p1"))
+        .property("str2").value((Object) instance.param("p2")));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).arg("p1", "foo").create();
+      """
+      Then the result should:
+      """
+      str1= foo
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).args(new HashMap<String, String>() {{
+        put("p1", "hello");
+        put("p2", "world");
+      }}).create();
+      """
+      Then the result should:
+      """
+      = {
+        str1= hello
+        str2= world
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).args(arg("p1", "hello").arg("p2", "world")).create();
+      """
+      Then the result should:
+      """
+      = {
+        str1= hello
+        str2= world
+      }
+      """
+
+    Scenario: default value - support default params
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str1, str2;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("str1").value((Object) instance.param("p1", "default1"))
+        .property("str2").value((Object) instance.param("p2", "default2")));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+      Then the result should:
+      """
+      = {
+        str1= default1
+        str2= default2
+      }
+      """
+
+    Scenario: nested arg - support nested args
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapperWrapper {
+        public BeanWrapper beanWrapper;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("str").value((Object) instance.param("p")));
+      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+        .property("bean").byFactory());
+      jFactory.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
+        .property("beanWrapper").byFactory());
+      """
+      When build:
+      """
+      jFactory.type(BeanWrapper.class).args("bean", arg("p", "hello")).create();
+      """
+      Then the result should:
+      """
+      bean.str= hello
+      """
+      When build:
+      """
+      jFactory.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello")).create();
+      """
+      Then the result should:
+      """
+      beanWrapper.bean.str= hello
+      """
+
+    Scenario: in spec class - use args in spec class
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("str").value((Object)param("p"));
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class).arg("p", "hello").create();
+      """
+      Then the result should:
+      """
+      str= hello
+      """
+
+    Scenario: fetch arg - fetch arg in spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+        public Bean setStr(String s) {
+          this.str = s;
+          return this;
+        }
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+        public BeanWrapper setBean(Bean b) {
+          this.bean = b;
+          return this;
+        }
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapperWrapper {
+        public BeanWrapper beanWrapper;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
+        .property("beanWrapper").value(new BeanWrapper().setBean(new Bean()
+          .setStr(instance.params("beanWrapper").params("bean").param("p")))));
+      """
+      When build:
+      """
+      jFactory.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello")).create();
+      """
+      Then the result should:
+      """
+      beanWrapper.bean.str= hello
+      """
+
+    Scenario: pass args - pass args to another builder
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("str").value((Object) instance.param("p")));
+      """
+      And register:
+      """
+      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+        .property("bean").byFactory(builder ->builder.args(instance.params())));
+      """
+      When build:
+      """
+      jFactory.type(BeanWrapper.class).arg("p", "hello").create();
+      """
+      Then the result should:
+      """
+      bean.str= hello
+      """
