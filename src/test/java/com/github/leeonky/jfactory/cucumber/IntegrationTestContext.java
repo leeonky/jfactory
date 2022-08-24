@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegrationTestContext {
     private final List<String> classCodes = new ArrayList<>();
@@ -21,6 +22,7 @@ public class IntegrationTestContext {
     private final List<Class> classes = new ArrayList<>();
     private final List<Runnable> register = new ArrayList<>();
     private final Compiler compiler = new Compiler();
+    private List list;
     private JFactory jFactory = new JFactory();
     private int snippetIndex = 0;
     private Object bean;
@@ -113,6 +115,7 @@ public class IntegrationTestContext {
     }
 
     public void verifyBean(String dal) {
+        assertThat(throwable).isNull();
         expect(bean).should(dal);
     }
 
@@ -172,21 +175,32 @@ public class IntegrationTestContext {
     }
 
 
-    private String createJFactory(String declaration) {
+    private String createObject(String declaration) {
+        String className = "Snip" + (snippetIndex++);
         return "package src.test;\n" +
                 "import java.util.function.*;\n" +
                 "import java.util.*;\n" +
                 "import com.github.leeonky.util.*;\n" +
                 "import com.github.leeonky.jfactory.*;\n" +
                 "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;\n" +
-                "public class Declaration implements Supplier<Object> {\n" +
+                "public class " + className + " implements Function<List<Object>, Object> {\n" +
                 "    @Override\n" +
-                "    public Object get() { return " + declaration + "}\n" +
+                "    public Object apply(List<Object> list) { return " + declaration + "}\n" +
                 "}";
     }
 
     public void declare(String declaration) {
-        jFactory = (JFactory) ((Supplier) BeanClass.create(compiler.
-                compileToClasses(asList(createJFactory(declaration))).get(0)).newInstance()).get();
+        jFactory = (JFactory) ((Function) BeanClass.create(compiler.
+                compileToClasses(asList(createObject(declaration))).get(0)).newInstance()).apply(list);
+    }
+
+    public void declareList(String listDeclaration) {
+        list = (List) ((Function) BeanClass.create(compiler.
+                compileToClasses(asList(createObject(listDeclaration))).get(0)).newInstance()).apply(null);
+    }
+
+    public void listShould(String dal) {
+        assertThat(throwable).isNull();
+        expect(list).should(dal);
     }
 }

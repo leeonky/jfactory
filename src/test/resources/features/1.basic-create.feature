@@ -425,6 +425,195 @@ Feature: basic use
       ::size= 2
       """
 
+    Scenario: customized repo - use customized repo in build
+      Given declaration list =
+      """
+      new ArrayList<>();
+      """
+      And declaration jFactory =
+      """
+      new JFactory(new DataRepository() {
+          @Override
+          public void save(Object object) {
+              list.add(object);
+          }
+          @Override
+          public <T> Collection<T> queryAll(Class<T> type) {
+              return null;
+          }
+          @Override
+          public void clear() {
+          }
+      });
+      """
+      And the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").create();
+      """
+      Then the list in repo should:
+      """
+      : [{
+        str= hello
+        class.simpleName= Bean
+      }]
+      """
+
+    Scenario: order of repo saving - save object and sub objects in right order
+      Given declaration list =
+      """
+      new ArrayList<>();
+      """
+      And declaration jFactory =
+      """
+      new JFactory(new DataRepository() {
+          @Override
+          public void save(Object object) {
+              list.add(object);
+          }
+          @Override
+          public <T> Collection<T> queryAll(Class<T> type) {
+              return Collections.emptyList();
+          }
+          @Override
+          public void clear() {
+          }
+      });
+      """
+      And the following bean class:
+      """
+      public class Bean {
+        public String stringValue;
+      }
+      """
+      And the following bean class:
+      """
+      public class Beans {
+        public Bean bean;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeansWrapper {
+        public Beans beans;
+      }
+      """
+      When build:
+      """
+      jFactory.type(BeansWrapper.class).property("beans.bean.stringValue", "hello").create();
+      """
+      Then the list in repo should:
+      """
+      : [{
+        stringValue= hello
+        class.simpleName= Bean
+      }{
+        class.simpleName= Beans
+      }{
+        class.simpleName= BeansWrapper
+      }]
+      """
+
+  Rule: spec
+
+    Scenario: in lambda - define spec and naming spec(trait) in lambda
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class)
+        .spec("hello", instance -> instance.spec().property("value1").value("hello"))
+        .spec(instance -> instance.spec().property("value2").value("world"));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+      Then the result should:
+      """
+      = {
+        value1= /^value1.*/
+        value2= "world"
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).traits("hello").create();
+      """
+      Then the result should:
+      """
+      = {
+        value1= hello
+        value2= world
+      }
+      """
+
+    Scenario: in class - define spec and trait in class
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class ABean extends Spec<Bean> {
+
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class).traits("hello").create();
+      """
+      Then the result should:
+      """
+      = {
+        value1= hello
+        value2= world
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABean.class, spec -> spec.hello());
+      """
+      Then the result should:
+      """
+      = {
+        value1= hello
+        value2= world
+      }
+      """
+      When build:
+      """
+      jFactory.createAs("hello", "ABean");
+      """
+      Then the result should:
+      """
+      = {
+        value1= hello
+        value2= world
+      }
+      """
+
   Rule: params
 
     Scenario: use params - use params in spec

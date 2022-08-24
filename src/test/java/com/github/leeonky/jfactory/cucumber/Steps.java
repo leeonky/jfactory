@@ -72,4 +72,14 @@ public class Steps {
     public void declarationJFactory(String declaration) {
         integrationTestContext.declare(declaration);
     }
+
+    @Given("declaration list =")
+    public void declarationList(String listDeclaration) {
+        integrationTestContext.declareList(listDeclaration);
+    }
+
+    @Then("the list in repo should:")
+    public void theListInRepoShould(String dal) {
+        integrationTestContext.listShould(dal);
+    }
 }
