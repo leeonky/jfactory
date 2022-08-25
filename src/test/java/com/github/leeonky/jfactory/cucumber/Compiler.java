@@ -54,8 +54,10 @@ public class Compiler {
         if (classCodes.isEmpty())
             return emptyList();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        List<JavaSourceFromString> files = classCodes.stream().map(code ->
-                new JavaSourceFromString(guessClassName(code), code)).collect(Collectors.toList());
+        List<JavaSourceFromString> files = classCodes.stream().map(code -> {
+            String name = guessClassName(code);
+            return new JavaSourceFromString(name.replaceAll("<.*>", ""), code);
+        }).collect(Collectors.toList());
         JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
         StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
         standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, asList(new File("./")));

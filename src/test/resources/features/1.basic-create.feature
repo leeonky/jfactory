@@ -557,63 +557,6 @@ Feature: basic use
       }
       """
 
-    Scenario: in class - define spec and trait in class
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value1, value2;
-      }
-      """
-      Given the following spec class:
-      """
-      @Global
-      public class ABean extends Spec<Bean> {
-
-        @Override
-        public void main() {
-          property("value2").value("world");
-        }
-
-        @Trait
-        public void hello() {
-          property("value1").value("hello");
-        }
-      }
-      """
-      When build:
-      """
-      jFactory.spec(ABean.class).traits("hello").create();
-      """
-      Then the result should:
-      """
-      = {
-        value1= hello
-        value2= world
-      }
-      """
-      When build:
-      """
-      jFactory.createAs(ABean.class, spec -> spec.hello());
-      """
-      Then the result should:
-      """
-      = {
-        value1= hello
-        value2= world
-      }
-      """
-      When build:
-      """
-      jFactory.createAs("hello", "ABean");
-      """
-      Then the result should:
-      """
-      = {
-        value1= hello
-        value2= world
-      }
-      """
-
   Rule: params
 
     Scenario: use params - use params in spec

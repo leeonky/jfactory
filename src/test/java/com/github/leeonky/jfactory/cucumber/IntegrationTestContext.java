@@ -105,9 +105,9 @@ public class IntegrationTestContext {
     }
 
     private void create(Supplier<Object> supplier) {
-        compileAll();
-        register.forEach(Runnable::run);
         try {
+            compileAll();
+            register.forEach(Runnable::run);
             bean = supplier.get();
         } catch (Throwable throwable) {
             this.throwable = throwable;

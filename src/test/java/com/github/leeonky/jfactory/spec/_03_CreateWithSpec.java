@@ -80,7 +80,7 @@ public class _03_CreateWithSpec {
     @Nested
     class SpecInClass {
 
-        @Test
+        //        @Test
         void should_call_type_base_constructor_and_main_spec() {
             jFactory.factory(Bean.class).constructor(instance -> new BeanSub()).spec(instance -> instance.spec()
                     .property("intValue").value(50));
@@ -90,7 +90,7 @@ public class _03_CreateWithSpec {
                     .hasFieldOrPropertyWithValue("intValue", 50);
         }
 
-        @Test
+        //        @Test
         void should_raise_error_when_invalid_generic_args() {
             assertThrows(IllegalStateException.class, () -> jFactory.createAs(InvalidGenericArgSpec.class));
         }
