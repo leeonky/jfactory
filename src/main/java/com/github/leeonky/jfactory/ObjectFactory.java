@@ -78,7 +78,10 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     public RootInstance<T> createInstance(DefaultArguments argument) {
-        return new RootInstance<>(factorySet.nextSequence(type.getType()), createSpec(), argument);
+        Spec<T> spec = createSpec();
+        RootInstance<T> rootInstance = new RootInstance<>(factorySet.nextSequence(type.getType()), spec, argument);
+        spec.setInstance(rootInstance);
+        return rootInstance;
     }
 
     public FactorySet getFactorySet() {

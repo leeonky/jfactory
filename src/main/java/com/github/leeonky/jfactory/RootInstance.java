@@ -2,7 +2,6 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.PropertyWriter;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -15,7 +14,7 @@ class RootInstance<T> implements Instance<T> {
 
     public RootInstance(int sequence, Spec<T> spec, DefaultArguments arguments) {
         this.sequence = sequence;
-        this.spec = Objects.requireNonNull(spec).setInstance(this);
+        this.spec = spec;
         this.arguments = arguments;
     }
 

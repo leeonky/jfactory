@@ -74,21 +74,21 @@ Feature: define spec
       """
       bean.value= hello
       """
-#      And the following spec class:
-#      """
-#      public class ABean extends Spec<Bean> {
-#        @Override
-#        public void main() {
-#          property("value").value("world");
-#          property("bean").value(() -> instance().reference().get());
-#        }
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.createAs(ABean.class);
-#      """
-#      Then the result should:
-#      """
-#      bean.value= world
-#      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value").value("world");
+          property("bean").value(() -> instance().reference().get());
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABean.class);
+      """
+      Then the result should:
+      """
+      bean.value= world
+      """

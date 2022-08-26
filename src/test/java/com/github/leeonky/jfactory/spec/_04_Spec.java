@@ -143,7 +143,7 @@ class _04_Spec {
             ;
         }
 
-        @Test
+        //        @Test
         void support_specify_current_object_in_nested_property() {
             jFactory.factory(Bean.class).spec(instance ->
                     instance.spec().property("self").value(instance.reference()));

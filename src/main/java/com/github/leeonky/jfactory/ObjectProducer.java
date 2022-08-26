@@ -48,8 +48,7 @@ class ObjectProducer<T> extends Producer<T> {
                 .map(index -> getType().getPropertyWriter(index)).forEach((PropertyWriter<T> propertyWriter) ->
                         setChild(propertyWriter.getName(), new DefaultValueFactoryProducer<>(factory.getType(),
                                 factory.getFactorySet().getDefaultValueBuilder(propertyWriter.getType()),
-                                instance.sub(propertyWriter))
-                        ));
+                                instance.sub(propertyWriter))));
     }
 
     private void setupReverseAssociations() {
