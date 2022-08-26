@@ -68,7 +68,7 @@ Feature: basic use
 
   Rule: default value
 
-    Scenario: supported types - all supported build-in default value types
+    Scenario: default value types - support generate default value for these types under the current version of JFactory
       Given the following bean class:
       """
       public class Bean {

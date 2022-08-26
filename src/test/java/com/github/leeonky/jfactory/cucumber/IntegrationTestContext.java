@@ -114,8 +114,9 @@ public class IntegrationTestContext {
         }
     }
 
-    public void verifyBean(String dal) {
-        assertThat(throwable).isNull();
+    public void verifyBean(String dal) throws Throwable {
+        if (throwable != null)
+            throw throwable;
         expect(bean).should(dal);
     }
 

@@ -123,7 +123,7 @@ class _04_Spec {
     @Nested
     class SpecifyValue {
 
-        @Test
+        //        @Test
         void support_specify_value_in_spec() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("content").value("hello"));
@@ -133,7 +133,7 @@ class _04_Spec {
             ;
         }
 
-        @Test
+        //        @Test
         void support_specify_value_supplier_in_spc() {
             jFactory.factory(Bean.class).spec(instance ->
                     instance.spec().property("content").value(() -> "hello"));
@@ -152,7 +152,7 @@ class _04_Spec {
             assertThat(bean).isEqualTo(bean.getSelf());
         }
 
-        @Test
+        //        @Test
         void should_process_null_as_null_value() {
             jFactory.factory(Bean.class).spec(instance ->
                     instance.spec().property("content").value(null));
@@ -512,7 +512,7 @@ class _04_Spec {
     @Nested
     class SpecAsBaseType {
 
-        @Test
+        //        @Test
         void use_spec_as_global_spec_and_use_origin_factory_as_base_base() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("base"));
             jFactory.register(BeanGlobal1.class);
@@ -523,7 +523,7 @@ class _04_Spec {
                     "}");
         }
 
-        @Test
+        //        @Test
         void do_not_allow_two_global_spec() {
             jFactory.register(BeanGlobal1.class);
             assertThatThrownBy(() -> jFactory.register(BeanGlobal2.class))
@@ -532,7 +532,7 @@ class _04_Spec {
                             BeanGlobal1.class.getName(), BeanGlobal2.class.getName()));
         }
 
-        @Test
+        //        @Test
         void remove_global_spec_and_origin_type_factory_should_be_enabled() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec().property("content").value("base"));
             jFactory.register(BeanGlobal1.class);

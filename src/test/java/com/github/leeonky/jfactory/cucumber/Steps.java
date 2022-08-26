@@ -19,7 +19,7 @@ public class Steps {
     }
 
     @Then("the result should:")
-    public void the_result_should(String dal) {
+    public void the_result_should(String dal) throws Throwable {
         integrationTestContext.verifyBean(dal);
     }
 
