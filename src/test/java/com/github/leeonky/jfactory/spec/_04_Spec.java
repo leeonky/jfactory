@@ -234,7 +234,7 @@ class _04_Spec {
             ;
         }
 
-        @Test
+        //        @Test
         void should_use_any_exist_object_in_specify_spec_instance_when_which_clause_is_empty() {
             Bean bean = jFactory.create(Bean.class);
 
@@ -244,7 +244,7 @@ class _04_Spec {
             assertThat(jFactory.create(Beans.class).getBean()).isSameAs(bean);
         }
 
-        @Test
+        //        @Test
         void support_specify_spec_name_method_is_will_always_create_object() {
             jFactory.createAs(ABean.class);
 
@@ -258,7 +258,7 @@ class _04_Spec {
             ;
         }
 
-        @Test
+        //        @Test
         void support_specify_customized_builder_args() {
             jFactory.factory(Beans.class).spec(instance -> instance.spec().property("bean").from(ABean.class).and(builder -> builder.traits("int100")));
 
@@ -267,7 +267,7 @@ class _04_Spec {
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
-        @Test
+        //        @Test
         void should_use_exist_object_when_use_empty_builder_in_and_clause() {
             Bean bean = jFactory.create(Bean.class);
 
@@ -278,7 +278,7 @@ class _04_Spec {
                     .isSameAs(bean);
         }
 
-        @Test
+        //        @Test
         void should_raise_error_when_invalid_call() {
             int currentLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             jFactory.factory(Beans.class).spec(instance -> instance.spec()

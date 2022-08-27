@@ -126,7 +126,7 @@ public class PropertySpec<T> {
 
         public Spec<T> which(Consumer<S> trait) {
             spec.consume(this);
-            return appendProducer(jFactory -> createQueryOrCreateProducer(jFactory.spec(specClass, trait)));
+            return appendProducer(jFactory -> createCreateProducer(jFactory.spec(specClass, trait)));
         }
 
         public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {

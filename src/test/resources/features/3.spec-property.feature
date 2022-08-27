@@ -6,7 +6,7 @@ Feature: define spec
     new JFactory();
     """
 
-  Rule: by property value
+  Rule: value
 
     Scenario: lazy value - support use lamdba in property value in spec
       Given the following bean class:
@@ -204,7 +204,7 @@ Feature: define spec
 
   Rule: sub spec
 
-    Scenario: specify property by spec class and create sub object with out query during creation
+    Scenario: create sub object with out query during creation when use `is` spec and trait method
       Given the following bean class:
       """
       public class Bean {
@@ -259,11 +259,11 @@ Feature: define spec
       bean.value= bean
       """
 
-    Scenario: spec class with trait method
+    Scenario: create sub object with out query during creation when use `is` with spec and trait name
       Given the following bean class:
       """
       public class Bean {
-        public String value;
+        public String value1, value2;
       }
       """
       Given the following bean class:
@@ -272,12 +272,95 @@ Feature: define spec
         public Bean bean;
       }
       """
+      And declaration jFactory =
+      """
+      new JFactory(new DataRepository() {
+        @Override
+        public void save(Object object) {
+        }
+        @Override
+        public <T> Collection<T> queryAll(Class<T> type) {
+            throw new java.lang.RuntimeException("Failed!");
+        }
+        @Override
+        public void clear() {
+        }
+      });
+      """
       And the following spec class:
       """
       public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value2").value("bean");
+        }
+
         @Trait
         public void hello() {
-          property("value").value("hello");
+          property("value1").value("hello");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class ABeanWrapper extends Spec<BeanWrapper> {
+        @Override
+        public void main() {
+          property("bean").is("hello", "ABean");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABeanWrapper.class);
+      """
+      Then the result should:
+      """
+      bean= {
+        value1= hello
+        value2= bean
+      }
+      """
+
+    Scenario: create sub object with out query during creation when use `from which`
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And declaration jFactory =
+      """
+      new JFactory(new DataRepository() {
+        @Override
+        public void save(Object object) {
+        }
+        @Override
+        public <T> Collection<T> queryAll(Class<T> type) {
+            throw new java.lang.RuntimeException("Failed!");
+        }
+        @Override
+        public void clear() {
+        }
+      });
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value2").value("bean");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
         }
       }
       """
@@ -296,14 +379,17 @@ Feature: define spec
       """
       Then the result should:
       """
-      bean.value= hello
+      bean= {
+        value1= hello
+        value2= bean
+      }
       """
 
-    Scenario: 'query before creation' for spec class and trait method
+    Scenario: should query exist object when use `from and` during creation
       Given the following bean class:
       """
       public class Bean {
-        public String value;
+        public String value1, value2;
       }
       """
       Given the following bean class:
@@ -315,9 +401,14 @@ Feature: define spec
       And the following spec class:
       """
       public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value2").value("bean");
+        }
+
         @Trait
         public void hello() {
-          property("value").value("hello");
+          property("value1").value("hello");
         }
       }
       """
@@ -326,25 +417,33 @@ Feature: define spec
       public class ABeanWrapper extends Spec<BeanWrapper> {
         @Override
         public void main() {
-          property("bean").from(ABean.class).which(ABean::hello);
+          property("bean").from(ABean.class).and(builder -> builder.property("value1", "query"));
         }
       }
       """
-      When operate:
+      And build:
+      """
+      jFactory.type(Bean.class)
+        .property("value1", "query")
+        .property("value2", "cached")
+        .create();
+      """
+      When build:
       """
       jFactory.createAs(ABeanWrapper.class);
-      jFactory.createAs(ABeanWrapper.class);
       """
-      Then "jFactory.type(Bean.class).queryAll()" should
+      Then the result should:
       """
-      ::size= 1
+      bean= {
+        value1= query
+        value2= cached
+      }
       """
 
-    Scenario: sub object query should be matched when empty trait
+    Scenario: raise error when incomplete method invoke
       Given the following bean class:
       """
       public class Bean {
-        public String value;
       }
       """
       Given the following bean class:
@@ -363,16 +462,20 @@ Feature: define spec
       public class ABeanWrapper extends Spec<BeanWrapper> {
         @Override
         public void main() {
-          property("bean").from(ABean.class).which(spec -> {});
+          property("bean").from(ABean.class);
         }
       }
       """
-      When operate:
+      When build:
       """
       jFactory.createAs(ABeanWrapper.class);
-      jFactory.createAs(ABeanWrapper.class);
       """
-      Then "jFactory.type(Bean.class).queryAll()" should
+      Then should raise error:
       """
-      ::size= 1
+      message: "Invalid property spec:
+      \tsrc.test.ABeanWrapper.main(ABeanWrapper.java:9)
+      Should finish method chain with `and` or `which`:
+      \tproperty().from().which()
+      \tproperty().from().and()
+      Or use property().is() to create object with only spec directly."
       """
