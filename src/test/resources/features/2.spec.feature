@@ -354,9 +354,9 @@ Feature: use spec
       """
       Given register:
       """
-      factory(Bean.class)
+      jFactory.factory(Bean.class)
         .spec(instance-> instance.spec().property("value").value("type spec"))
-        .spec("hello", instance-> instance.spec().property("value").value("hello"))
+        .spec("hello", instance-> instance.spec().property("value").value("hello"));
       """
       When build:
       """
@@ -376,8 +376,8 @@ Feature: use spec
       """
       Given register:
       """
-      factory(Bean.class)
-        .spec(instance-> instance.spec().property("value").value("type spec"))
+      jFactory.factory(Bean.class)
+        .spec(instance-> instance.spec().property("value").value("type spec"));
       """
       And the following spec class:
       """

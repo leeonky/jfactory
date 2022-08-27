@@ -1,6 +1,5 @@
 package com.github.leeonky.jfactory.cucumber;
 
-import com.github.leeonky.jfactory.Builder;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
 import com.github.leeonky.util.BeanClass;
@@ -43,21 +42,6 @@ public class IntegrationTestContext {
         return type;
     }
 
-    private String jFactoryAction(String builderSnippet) {
-        String className = "Snip" + (snippetIndex++);
-        String snipCode = "import java.util.function.*;\n" +
-                "import java.util.*;\n" +
-                "import com.github.leeonky.util.*;\n" +
-                "import com.github.leeonky.jfactory.*;\n" +
-                "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;\n" +
-                "public class " + className + " implements Function<JFactory, Object> {\n" +
-                "    @Override\n" +
-                "    public Object apply(JFactory jfactory) { return jfactory." + builderSnippet + ";}\n" +
-                "}";
-        classCodes.add(snipCode);
-        return className;
-    }
-
     private String jFactoryOperate(String builderSnippet) {
         String className = "Snip" + (snippetIndex++);
         String snipCode = "import java.util.function.*;\n" +
@@ -83,25 +67,8 @@ public class IntegrationTestContext {
         classes.stream().filter(Spec.class::isAssignableFrom).forEach(jFactory::register);
     }
 
-    public void create(String builderSnippet) {
-        String tmpClass = jFactoryAction(builderSnippet);
-        create(() -> {
-            try {
-                return ((Builder) createProcedure(Function.class, tmpClass).apply(jFactory)).create();
-            } catch (Throwable throwable) {
-                this.throwable = throwable;
-                return null;
-            }
-        });
-    }
-
     public void register(String factorySnippet) {
-        if (factorySnippet.startsWith("jFactory"))
-            registers.add(factorySnippet);
-        else {
-            String tmpClass = jFactoryAction(factorySnippet);
-            register.add(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
-        }
+        registers.add(factorySnippet);
     }
 
     private void create(Supplier<Object> supplier) {
@@ -114,7 +81,7 @@ public class IntegrationTestContext {
         }
     }
 
-    public void verifyBean(String dal) throws Throwable {
+    public void verify(String dal) throws Throwable {
         if (throwable != null)
             throw throwable;
         expect(bean).should(dal);
@@ -122,21 +89,6 @@ public class IntegrationTestContext {
 
     public void specClass(String specClass) {
         classCodes.add(specClass);
-    }
-
-    public void execute(String exeSnippet) {
-        String tmpClass = jFactoryAction(exeSnippet);
-        create(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
-    }
-
-    public void query(String builderSnippet) {
-        String tmpClass = jFactoryAction(builderSnippet);
-        create(() -> ((Builder) createProcedure(Function.class, tmpClass).apply(jFactory)).query());
-    }
-
-    public void queryAll(String builderSnippet) {
-        String tmpClass = jFactoryAction(builderSnippet);
-        create(() -> ((Builder) createProcedure(Function.class, tmpClass).apply(jFactory)).queryAll());
     }
 
     public void operate(String operateSnippet) {
@@ -148,17 +100,12 @@ public class IntegrationTestContext {
         expect(throwable).should(dal);
     }
 
-    public void createAs(String createAs) {
-        String tmpClass = jFactoryAction(createAs);
-        create(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
-    }
-
     public void build(String builderSnippet) {
-        String tmpClass = jFactoryAction2(builderSnippet);
+        String tmpClass = jFactoryAction(builderSnippet);
         create(() -> createProcedure(Function.class, tmpClass).apply(jFactory));
     }
 
-    private String jFactoryAction2(String builderSnippet) {
+    private String jFactoryAction(String builderSnippet) {
         String className = "Snip" + (snippetIndex++);
         String snipCode = "import java.util.function.*;\n" +
                 "import java.util.*;\n" +

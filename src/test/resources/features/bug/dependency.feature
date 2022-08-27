@@ -35,13 +35,13 @@ Feature: dependency
       public class OneOrder extends Spec<Order> {
       }
     """
-    And create:
+    And build:
     """
-      spec(OneOrder.class).property("user.name", "Tom").property("id", "001")
+      jFactory.spec(OneOrder.class).property("user.name", "Tom").property("id", "001").create();
     """
-    When create:
+    When build:
     """
-      spec(OneRecorder.class).property("user.name", "Lucy").property("order.id", "001")
+      jFactory.spec(OneRecorder.class).property("user.name", "Lucy").property("order.id", "001").create();
     """
     Then the result should:
     """

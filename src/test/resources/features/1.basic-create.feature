@@ -357,19 +357,12 @@ Feature: basic use
         public Bean bean;
       }
       """
-      And build:
+      When operate:
       """
       jFactory.type(Bean.class).property("str", "hello").create();
-      """
-      When build:
-      """
       jFactory.type(BeanWrapper.class).property("bean.str", "hello").create();
       """
-      Then build:
-      """
-      jFactory.type(Bean.class).queryAll();
-      """
-      And the result should:
+      And "jFactory.type(Bean.class).queryAll()" should
       """
       ::size= 1
       """
@@ -393,22 +386,15 @@ Feature: basic use
         public Beans beans;
       }
       """
-      And build:
+      When operate:
       """
       jFactory.type(BeansWrapper.class)
         .property("beans.beans[0].str", "hello")
         .property("beans.beans[1].str", "world")
         .create();
-      """
-      When build:
-      """
       jFactory.type(BeansWrapper.class).property("beans.beans[1].str", "world").create();
       """
-      And build:
-      """
-      jFactory.type(Beans.class).queryAll();
-      """
-      Then the result should:
+      Then "jFactory.type(Beans.class).queryAll()" should
       """
       ::size= 1
       """
@@ -416,11 +402,7 @@ Feature: basic use
       """
       jFactory.type(BeansWrapper.class).property("beans.beans[1].str", "not match").create();
       """
-      And build:
-      """
-      jFactory.type(Beans.class).queryAll();
-      """
-      Then the result should:
+      Then "jFactory.type(Beans.class).queryAll()" should
       """
       ::size= 2
       """

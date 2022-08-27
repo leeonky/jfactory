@@ -20,32 +20,12 @@ public class Steps {
 
     @Then("the result should:")
     public void the_result_should(String dal) throws Throwable {
-        integrationTestContext.verifyBean(dal);
-    }
-
-    @When("create:")
-    public void create(String builderSnippet) {
-        integrationTestContext.create(builderSnippet);
+        integrationTestContext.verify(dal);
     }
 
     @And("register:")
     public void register(String factorySnippet) {
         integrationTestContext.register(factorySnippet);
-    }
-
-    @When("execute:")
-    public void execute(String exeSnippet) {
-        integrationTestContext.execute(exeSnippet);
-    }
-
-    @When("query:")
-    public void query(String builderSnippet) {
-        integrationTestContext.query(builderSnippet);
-    }
-
-    @When("query all:")
-    public void queryAll(String builderSnippet) {
-        integrationTestContext.queryAll(builderSnippet);
     }
 
     @And("operate:")
@@ -56,11 +36,6 @@ public class Steps {
     @Then("should raise error:")
     public void shouldRaiseError(String dal) {
         integrationTestContext.shouldThrow(dal);
-    }
-
-    @When("create as:")
-    public void createAs(String createAs) {
-        integrationTestContext.createAs(createAs);
     }
 
     @When("build:")
@@ -81,5 +56,11 @@ public class Steps {
     @Then("the list in repo should:")
     public void theListInRepoShould(String dal) {
         integrationTestContext.listShould(dal);
+    }
+
+    @Then("{string} should")
+    public void should(String code, String dal) throws Throwable {
+        integrationTestContext.build(code + ";");
+        integrationTestContext.verify(dal);
     }
 }
