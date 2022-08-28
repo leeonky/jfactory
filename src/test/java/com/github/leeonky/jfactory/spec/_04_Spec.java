@@ -297,7 +297,7 @@ class _04_Spec {
     @Nested
     class DefaultTypeBuild {
 
-        @Test
+        //        @Test
         void support_create_property_with_default_no_args_by_factory_will_always_create_object() {
             Bean bean = jFactory.create(Bean.class);
 
@@ -310,7 +310,7 @@ class _04_Spec {
             ;
         }
 
-        @Test
+        //        @Test
         void support_specify_customized_builder_args() {
             jFactory.factory(Beans.class).spec(instance ->
                     instance.spec().property("bean").byFactory(builder -> builder.property("intValue", 100)));
@@ -319,7 +319,7 @@ class _04_Spec {
                     .hasFieldOrPropertyWithValue("intValue", 100);
         }
 
-        @Test
+        //        @Test
         void should_use_created_object_in_customized_builder() {
             Bean bean = jFactory.type(Bean.class).property("intValue", 100).create();
 
@@ -330,7 +330,7 @@ class _04_Spec {
                     .isEqualTo(bean);
         }
 
-        @Test
+        //        @Test
         void support_default_primitive_type_spec() {
             jFactory.factory(Bean.class).spec(instance ->
                     instance.spec().property("stringValue").byFactory());
@@ -338,7 +338,7 @@ class _04_Spec {
             assertThat(jFactory.create(Bean.class).stringValue).isEqualTo("stringValue#1");
         }
 
-        @Test
+        //        @Test
         void should_use_any_exist_object_when_no_properties_in_by_factory_builder() {
             Bean bean = jFactory.create(Bean.class);
 
@@ -353,7 +353,7 @@ class _04_Spec {
     @Nested
     class CollectionProperty {
 
-        @Test
+        //        @Test
         void support_define_collection_element_spec() {
             jFactory.factory(Table.class).spec(instance ->
                     instance.spec().property("rows[0]").byFactory(builder -> builder.property("number", 100)));
@@ -371,12 +371,11 @@ class _04_Spec {
         void should_raise_error_when_collection_property_is_null() {
             jFactory.factory(Table.class).spec(instance -> instance.spec()
                     .property("rows").byFactory());
-
             assertThrows(IllegalArgumentException.class, () ->
                     jFactory.type(Table.class).property("rows[0]", null).create());
         }
 
-        @Test
+        //        @Test
         void support_default_primitive_type_spec() {
             jFactory.factory(Bean.class).spec(instance ->
                     instance.spec().property("stringValues[0]").byFactory());
@@ -384,13 +383,13 @@ class _04_Spec {
             assertThat(jFactory.create(Bean.class).stringValues[0]).isEqualTo("stringValues#1[0]");
         }
 
-        @Test
+        //        @Test
         void support_empty_list_in_property() {
             assertThat(jFactory.type(Bean.class).property("stringValues", emptyList()).create().getStringValues())
                     .isEmpty();
         }
 
-        @Test
+        //        @Test
         void support_use_list_in_property() {
             assertThat(jFactory.type(Bean.class).property("stringValues", asList("a", "b")).create().getStringValues())
                     .containsExactly("a", "b");

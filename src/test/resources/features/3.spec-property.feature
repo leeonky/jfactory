@@ -385,7 +385,7 @@ Feature: define spec
       }
       """
 
-    Scenario: should query exist object when use `from and` during creation
+    Scenario: should query exist object when use `from and` with property value during creation
       Given the following bean class:
       """
       public class Bean {
@@ -417,7 +417,7 @@ Feature: define spec
       public class ABeanWrapper extends Spec<BeanWrapper> {
         @Override
         public void main() {
-          property("bean").from(ABean.class).and(builder -> builder.property("value1", "query"));
+          property("bean").from(ABean.class).and(builder -> builder.traits("hello").property("value1", "query"));
         }
       }
       """
@@ -438,6 +438,52 @@ Feature: define spec
         value1= query
         value2= cached
       }
+      """
+
+    Scenario: should choose any exist object when use `from and` with no property during creation
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And the following spec class:
+      """
+      public class ABeanWrapper extends Spec<BeanWrapper> {
+        @Override
+        public void main() {
+          property("bean").from(ABean.class).and(builder -> builder);
+        }
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "query").create();
+      """
+      When build:
+      """
+      jFactory.createAs(ABeanWrapper.class);
+      """
+      Then the result should:
+      """
+      bean= {
+        value= query
+      }
+      """
+      And "jFactory.type(Bean.class).queryAll()" should
+      """
+      ::size= 1
       """
 
     Scenario: raise error when incomplete method invoke
@@ -478,4 +524,295 @@ Feature: define spec
       \tproperty().from().which()
       \tproperty().from().and()
       Or use property().is() to create object with only spec directly."
+      """
+
+  Rule: sub factory
+
+    Scenario: create sub object with out query during creation when use `byFactory`
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And declaration jFactory =
+      """
+      new JFactory(new DataRepository() {
+        @Override
+        public void save(Object object) {
+        }
+        @Override
+        public <T> Collection<T> queryAll(Class<T> type) {
+            throw new java.lang.RuntimeException("Failed!");
+        }
+        @Override
+        public void clear() {
+        }
+      });
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("value").value("bean"));
+      """
+      And the following spec class:
+      """
+      public class ABeanWrapper extends Spec<BeanWrapper> {
+        @Override
+        public void main() {
+          property("bean").byFactory();
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABeanWrapper.class);
+      """
+      Then the result should:
+      """
+      bean.value= bean
+      """
+
+    Scenario: should query exist object when use `byFactory` with property value during creation
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("value2").value("bean"));
+      jFactory.factory(Bean.class).spec("hello", instance -> instance.spec()
+        .property("value1").value("hello"));
+      """
+      And the following spec class:
+      """
+      public class ABeanWrapper extends Spec<BeanWrapper> {
+        @Override
+        public void main() {
+          property("bean").byFactory(builder -> builder.traits("hello").property("value1", "query"));
+        }
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class)
+        .property("value1", "query")
+        .property("value2", "cached")
+        .create();
+      """
+      When build:
+      """
+      jFactory.createAs(ABeanWrapper.class);
+      """
+      Then the result should:
+      """
+      bean= {
+        value1= query
+        value2= cached
+      }
+      """
+
+    Scenario: should choose any exist object when use `byFactory` with no property during creation
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And the following spec class:
+      """
+      public class ABeanWrapper extends Spec<BeanWrapper> {
+        @Override
+        public void main() {
+          property("bean").byFactory(builder -> builder);
+        }
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "query").create();
+      """
+      When build:
+      """
+      jFactory.createAs(ABeanWrapper.class);
+      """
+      Then the result should:
+      """
+      bean= {
+        value= query
+      }
+      """
+      And "jFactory.type(Bean.class).queryAll()" should
+      """
+      ::size= 1
+      """
+
+    Scenario: use factory to create primitive property
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("value").byFactory());
+      """
+      When build:
+      """
+      jFactory.create(Bean.class);
+      """
+      Then the result should:
+      """
+      value= value#1
+      """
+
+  Rule: collection property
+
+    Scenario: given collection value in spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public String[] values;
+      }
+      """
+      When register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("values").value(Arrays.asList("hello")));
+      """
+      Then "jFactory.type(Bean.class).create()" should
+      """
+      values: [ hello ]
+      """
+      When register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("values").value(null));
+      """
+      Then "jFactory.type(Bean.class).create()" should
+      """
+      values: null
+      """
+      When register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("values").value(Collections.emptyList()));
+      """
+      Then "jFactory.type(Bean.class).create()" should
+      """
+      values= []
+      """
+
+    Scenario: support define collection element spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public String[] values;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("values[0]").value("hello"));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+      Then the result should:
+      """
+      values: [ hello ]
+      """
+
+    Scenario: generate default value when skipped index
+      Given the following bean class:
+      """
+      public class Bean {
+        public String[] values;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+        .property("values[1]").value("hello"));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+      Then the result should:
+      """
+      values: [
+        'values#1[0]'
+        hello
+      ]
+      """
+
+    Scenario: specify spec for collection element
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value").value(() -> "hello");
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[1]").is(ABean.class));
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).create();
+      """
+      Then the result should:
+      """
+      beans: [
+        null
+        {
+          value= hello
+        }
+      ]
       """
