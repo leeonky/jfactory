@@ -120,7 +120,7 @@ class _04_Spec {
         }
     }
 
-    @Nested
+    //    @Nested
     class SpecifyValue {
 
         //        @Test
@@ -163,7 +163,7 @@ class _04_Spec {
         }
     }
 
-    @Nested
+    //    @Nested
     class SpecifyDefaultValue {
 
         //        @Test
@@ -209,7 +209,7 @@ class _04_Spec {
         }
     }
 
-    @Nested
+    //    @Nested
     class SpecifySpec {
 
         //        @Test
@@ -294,7 +294,7 @@ class _04_Spec {
         }
     }
 
-    @Nested
+    //    @Nested
     class DefaultTypeBuild {
 
         //        @Test
@@ -396,10 +396,10 @@ class _04_Spec {
         }
     }
 
-    @Nested
+    //    @Nested
     class NotSupportPropertyChain {
 
-        @Test
+        //        @Test
         void should_raise_error_when_use_property_chain_in_spec_definition() {
             jFactory.factory(Beans.class).spec(instance ->
                     instance.spec().property("bean.intValue").value(0));
@@ -458,7 +458,7 @@ class _04_Spec {
             assertThat(cached).containsExactly(table, table.getRows().get(0), table.getRows().get(0).getCells().get(0));
         }
 
-        @Test
+        //        @Test
         void should_support_define_single_reverse_association_in_parent_spec() {
             jFactory.factory(Person.class).spec(instance -> instance.spec()
                     .property("id").reverseAssociation("person")
@@ -497,10 +497,10 @@ class _04_Spec {
         }
     }
 
-    @Nested
+    //    @Nested
     class Others {
 
-        @Test
+        //        @Test
         void skip_property_in_spec() {
             jFactory.factory(IgnoreProperty.class).spec(instance ->
                     instance.spec().property("value").ignore());
@@ -508,7 +508,7 @@ class _04_Spec {
         }
     }
 
-    @Nested
+    //    @Nested
     class SpecAsBaseType {
 
         //        @Test
@@ -543,7 +543,7 @@ class _04_Spec {
                     "}");
         }
 
-        @Test
+        //        @Test
         void should_use_base_factory_at_runtime() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec().property("stringValue").value("value1"));
             jFactory.register(ABean.class);

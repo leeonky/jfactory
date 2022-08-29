@@ -99,6 +99,37 @@ Feature: define spec
       bean.value= world
       """
 
+    Scenario: not support property chain
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABeanWrapper extends Spec<BeanWrapper> {
+        @Override
+        public void main() {
+          property("bean.value").value("hello");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABeanWrapper.class);
+      """
+      Then should raise error:
+      """
+      message: "Not support property chain 'bean.value' in current operation"
+      """
+
   Rule: default value
 
     Scenario: support define default value
@@ -200,6 +231,57 @@ Feature: define spec
       Then the result should:
       """
       value= override
+      """
+
+    Scenario: support skip default value in build
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value").ignore();
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABean.class);
+      """
+      Then the result should:
+      """
+      value= null
+      """
+
+    Scenario: ignore property in global spec class
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following spec class:
+      """
+      @Global
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value").ignore();
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.create(Bean.class);
+      """
+      Then the result should:
+      """
+      value= null
       """
 
   Rule: sub spec
@@ -815,4 +897,65 @@ Feature: define spec
           value= hello
         }
       ]
+      """
+
+  Rule: Reverse association
+    Scenario: reverse association on single object
+      Given the following bean class:
+      """
+      public class Person {
+          public Passport passport;
+      }
+      """
+      And the following bean class:
+      """
+      public class Passport {
+          public Person person;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Person.class).spec(instance -> instance.spec()
+        .property("passport").reverseAssociation("person")
+        .property("passport").byFactory());
+      """
+      When build:
+      """
+      jFactory.type(Person.class).create();
+      """
+      Then the result should:
+      """
+      = .passport.person
+      """
+
+    Scenario: should always create sub object when use reverse association
+      Given the following bean class:
+      """
+      public class Person {
+          public Passport passport;
+      }
+      """
+      And the following bean class:
+      """
+      public class Passport {
+          public Person person;
+          public String number;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Person.class).spec(instance -> instance.spec()
+        .property("passport").reverseAssociation("person"));
+      """
+      When build:
+      """
+      jFactory.type(Person.class).property("passport.number", "001").create();
+      """
+      When build:
+      """
+      jFactory.type(Person.class).property("passport.number", "001").create();
+      """
+      Then "jFactory.type(Passport.class).queryAll()" should
+      """
+      ::size= 2
       """

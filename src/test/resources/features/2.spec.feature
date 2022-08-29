@@ -240,6 +240,37 @@ Feature: use spec
       }
       """
 
+    Scenario: should use base spec in runtime
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean>{
+      }
+      """
+      And the following spec class:
+      """
+      @Global
+      public class ABeanGlobal extends Spec<Bean>{
+        @Override
+        public void main() {
+          property("value").value("global base");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABean.class);
+      """
+      Then the result should:
+      """
+      value= 'global base'
+      """
+
   Rule: spec override
 
     Scenario: spec class override base lambda spec
