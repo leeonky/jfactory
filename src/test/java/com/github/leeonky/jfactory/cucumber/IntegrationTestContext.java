@@ -91,6 +91,7 @@ public class IntegrationTestContext {
         classCodes.add(specClass);
     }
 
+    @Deprecated
     public void operate(String operateSnippet) {
         String tmpClass = jFactoryOperate(operateSnippet);
         register.add(() -> createProcedure(Consumer.class, tmpClass).accept(jFactory));

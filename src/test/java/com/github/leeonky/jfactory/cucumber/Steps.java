@@ -18,31 +18,6 @@ public class Steps {
         integrationTestContext.specClass(specClass);
     }
 
-    @Then("the result should:")
-    public void the_result_should(String dal) throws Throwable {
-        integrationTestContext.verify(dal);
-    }
-
-    @And("register:")
-    public void register(String factorySnippet) {
-        integrationTestContext.register(factorySnippet);
-    }
-
-    @And("operate:")
-    public void operate(String operateSnippet) {
-        integrationTestContext.operate(operateSnippet);
-    }
-
-    @Then("should raise error:")
-    public void shouldRaiseError(String dal) {
-        integrationTestContext.shouldThrow(dal);
-    }
-
-    @When("build:")
-    public void build(String builderSnippet) {
-        integrationTestContext.build(builderSnippet);
-    }
-
     @Given("declaration jFactory =")
     public void declarationJFactory(String declaration) {
         integrationTestContext.declare(declaration);
@@ -58,9 +33,34 @@ public class Steps {
         integrationTestContext.listShould(dal);
     }
 
+    @And("register:")
+    public void register(String factorySnippet) {
+        integrationTestContext.register(factorySnippet);
+    }
+
+    @And("operate:")
+    public void operate(String operateSnippet) {
+        integrationTestContext.register(operateSnippet);
+    }
+
+    @When("build:")
+    public void build(String builderSnippet) {
+        integrationTestContext.build(builderSnippet);
+    }
+
     @Then("{string} should")
     public void should(String code, String dal) throws Throwable {
         integrationTestContext.build(code + ";");
         integrationTestContext.verify(dal);
+    }
+
+    @Then("the result should:")
+    public void the_result_should(String dal) throws Throwable {
+        integrationTestContext.verify(dal);
+    }
+
+    @Then("should raise error:")
+    public void shouldRaiseError(String dal) {
+        integrationTestContext.shouldThrow(dal);
     }
 }
