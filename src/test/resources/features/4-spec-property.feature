@@ -899,6 +899,48 @@ Feature: define spec
       ]
       """
 
+#    Scenario: collection element property should override collection spec
+    Scenario: to be implement
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value").value(() -> "hello");
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans").byFactory());
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[0].value", "hello").create();
+      """
+      Then should raise error:
+      """
+      class.simpleName: IllegalArgumentException
+      """
+#      TODO
+#      Then the result should:
+#      """
+#      beans.value[]: [ hello ]
+#      """
+
   Rule: Reverse association
 
     Scenario: reverse association on single object

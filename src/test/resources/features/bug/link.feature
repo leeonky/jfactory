@@ -48,5 +48,6 @@ Feature: link
       user.name: Lucy
     """
 
+#  TODO Scenario: should ignore collection property link when specify sub property(create sub)
 #    TODO link / dep
 #  TODO link merge objectproducer

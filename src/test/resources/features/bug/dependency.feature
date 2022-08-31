@@ -47,3 +47,5 @@ Feature: dependency
     """
       user.name: Lucy
     """
+
+#  TODO Scenario: should ignore collection property link when specify sub property(create sub)
