@@ -132,7 +132,7 @@ class _05_ComplexPropertyArgs {
     @Nested
     class MergeProperty {
 
-        @Test
+        //        @Test
         void support_specify_multi_properties_in_nested_property_creation_and_query() {
             Builder<BeansWrapper> builder = jFactory.type(BeansWrapper.class)
                     .property("beans.bean.content", "hello")
@@ -159,7 +159,7 @@ class _05_ComplexPropertyArgs {
                     .create());
         }
 
-        @Test
+        //        @Test
         void support_merge_with_has_spec_and_no_spec() {
             jFactory.register(ABean.class);
             jFactory.register(AnotherBean.class);
