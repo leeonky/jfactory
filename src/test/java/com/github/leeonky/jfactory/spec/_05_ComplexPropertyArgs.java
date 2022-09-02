@@ -129,7 +129,7 @@ class _05_ComplexPropertyArgs {
         private Beans beans;
     }
 
-    @Nested
+    //    @Nested
     class MergeProperty {
 
         //        @Test
@@ -148,7 +148,7 @@ class _05_ComplexPropertyArgs {
             assertThat(builder.query()).isEqualTo(beansWrapper);
         }
 
-        @Test
+        //        @Test
         void should_raise_error_when_property_has_different_spec() {
             jFactory.register(ABean.class)
                     .register(AnotherBean.class);
@@ -183,7 +183,7 @@ class _05_ComplexPropertyArgs {
             ;
         }
 
-        @Test
+        //        @Test
         void should_raise_error_when_property_has_different_trait() {
             jFactory.register(ABean.class);
 
@@ -193,7 +193,7 @@ class _05_ComplexPropertyArgs {
                     .create());
         }
 
-        @Test
+        //        @Test
         void support_merge_with_trait_and_empty_trait() {
             jFactory.register(ABean.class);
 
@@ -214,10 +214,10 @@ class _05_ComplexPropertyArgs {
             ;
         }
 
-        @Nested
+        //        @Nested
         class OverrideThroughMerge {
 
-            @Test
+            //            @Test
             void new_property_should_override_old_property_1() {
                 BeanCollection beans = jFactory.type(BeanCollection.class)
                         .property("list[0]", null)
@@ -228,7 +228,7 @@ class _05_ComplexPropertyArgs {
                         .hasFieldOrPropertyWithValue("intValue", 1);
             }
 
-            @Test
+            //            @Test
             void new_property_should_override_old_property_2() {
                 BeanCollection beans = jFactory.type(BeanCollection.class)
                         .property("list[0].intValue", 1)
@@ -238,7 +238,7 @@ class _05_ComplexPropertyArgs {
                 assertThat(beans.list.get(0)).isNull();
             }
 
-            @Test
+            //            @Test
             void new_property_should_override_old_property_3() {
                 BeanCollections beans = jFactory.type(BeanCollections.class)
                         .property("list[0].list[0].intValue", 1)
@@ -250,22 +250,22 @@ class _05_ComplexPropertyArgs {
         }
     }
 
-    @Nested
+    //    @Nested
     class SupportCollection {
 
-        @Test
+        //        @Test
         void support_specify_element_in_property() {
             assertThat(jFactory.type(Strings.class).property("strings[0]", "hello").create().getStrings())
                     .containsExactly("hello");
         }
 
-        @Test
+        //        @Test
         void should_create_default_value_type_element_when_not_specified() {
             assertThat(jFactory.type(Strings.class).property("strings[1]", "hello").create().getStrings())
                     .containsExactly("strings#1[0]", "hello");
         }
 
-        @Test
+        //        @Test
         void default_class_type_collection_element_is_null() {
             BeanCollection beanCollection = jFactory.type(BeanCollection.class)
                     .property("list[1].stringValue", "world")
@@ -274,7 +274,7 @@ class _05_ComplexPropertyArgs {
             assertThat(beanCollection.getList().get(0)).isNull();
         }
 
-        @Test
+        //        @Test
         void support_nested_element_creation_in_collection() {
             BeanCollection beanCollection = jFactory.type(BeanCollection.class)
                     .property("list[0].stringValue", "hello")
@@ -289,7 +289,7 @@ class _05_ComplexPropertyArgs {
             ;
         }
 
-        @Test
+        //        @Test
         void support_query_with_collection_element() {
             Builder<BeanCollection> builder = jFactory.type(BeanCollection.class)
                     .property("list[0].stringValue", "hello")
@@ -302,7 +302,7 @@ class _05_ComplexPropertyArgs {
             assertThat(builder.queryAll()).containsExactly(beanCollection);
         }
 
-        @Test
+        //        @Test
         void also_support_spec_and_trait_in_element() {
             jFactory.spec(ABean.class);
 
@@ -322,7 +322,7 @@ class _05_ComplexPropertyArgs {
                     .containsExactly(beanCollection);
         }
 
-        @Test
+        //        @Test
         void support_different_type_in_each_element() {
             Bean bean = new Bean();
             Builder<BeanCollection> builder = jFactory.type(BeanCollection.class)
@@ -342,7 +342,7 @@ class _05_ComplexPropertyArgs {
             assertThat(builder.queryAll()).containsExactly(beanCollection);
         }
 
-        @Test
+        //        @Test
         void should_create_default_enum_value_type_element_when_not_specified() {
             assertThat(jFactory.type(EnumArray.class).property("enums[1]", B).create().getEnums())
                     .containsExactly(A, B);
