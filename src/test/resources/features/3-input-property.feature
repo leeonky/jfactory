@@ -465,3 +465,319 @@ Feature: input property
       """
       beansList.beans[]: [ null ]
       """
+
+  Rule: intently create
+
+    Scenario: intently create sub object should always create object evan repo has one matched data
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      When operate:
+      """
+      jFactory.type(BeanWrapper.class).property("bean.value", "hello").create();
+      jFactory.type(BeanWrapper.class).property("bean!.value", "hello").create();
+      """
+      Then "jFactory.type(Bean.class).queryAll()" should
+      """
+      ::size= 2
+      """
+
+    Scenario: intently create sub object with null
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      When operate:
+      """
+      jFactory.type(BeanWrapper.class).property("bean!.value", null).create();
+      jFactory.type(BeanWrapper.class).property("bean!.value", null).create();
+      """
+      Then "jFactory.type(Bean.class).queryAll()" should
+      """
+      ::size= 2
+      """
+
+    Scenario: intently query should always return empty
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      When operate:
+      """
+      jFactory.type(BeanWrapper.class).property("bean.value", "hello").create();
+      """
+      When build:
+      """
+      jFactory.type(BeanWrapper.class).property("bean!.value", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      : []
+      """
+
+    Scenario: intently create can ignore
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And the following spec class:
+      """
+      @Global
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value").value("hello");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.type(BeanWrapper.class).property("bean(ABean)!", null).create();
+      """
+      Then the result should:
+      """
+      bean.value= hello
+      """
+
+    Scenario: should intently create when property has at least one intently flag
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      When operate:
+      """
+      jFactory.type(BeanWrapper.class)
+        .property("bean!.value1", "hello")
+        .property("bean.value2", "world")
+        .create();
+      jFactory.type(BeanWrapper.class)
+        .property("bean.value1", "hello")
+        .property("bean!.value2", "world")
+        .create();
+      """
+      Then "jFactory.type(Bean.class).queryAll()" should
+      """
+      ::size= 2
+      """
+
+  Rule: try to use a spec
+
+    Scenario: should try use a spec in parent spec and override property when input and keep the value in spec which not specified from input property
+      Given the following bean class:
+      """
+      public class Product {
+        public String name, color;
+        public int price;
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public Product product;
+      }
+      """
+      And the following spec class:
+      """
+      public class DefaultProduct extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("product");
+        }
+        @Trait
+        public void Red() {
+          property("color").value("red");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class AStore extends Spec<Store> {
+        @Override
+        public void main() {
+          property("product").from(DefaultProduct.class).which(spec -> spec.Red());
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(AStore.class).property("product.price", "100").create();
+      """
+      Then the result should:
+      """
+      product= {
+        name= product
+        color= red
+        price= 100
+      }
+      """
+
+    Scenario: input property could override spec and trait in parent spec
+      Given the following bean class:
+      """
+      public class Product {
+        public String name, color;
+        public int price;
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public Product product;
+      }
+      """
+      And the following spec class:
+      """
+      public class DefaultProduct extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("product");
+        }
+        @Trait
+        public void Red() {
+          property("color").value("red");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class Computer extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("computer");
+        }
+        @Trait
+        public void Black() {
+          property("color").value("black");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class AStore extends Spec<Store> {
+        @Override
+        public void main() {
+          property("product").from(DefaultProduct.class).which(spec -> spec.Red());
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(AStore.class).property("product(Black Computer).price", "100").create();
+      """
+      Then the result should:
+      """
+      product= {
+        name= computer
+        color= black
+        price= 100
+      }
+      """
+
+    Scenario: spec in property chain
+      Given the following bean class:
+      """
+      public class Product {
+        public String name, color;
+        public int price;
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public Product product;
+      }
+      """
+      And the following bean class:
+      """
+      public class StoreGroup {
+        public Store store;
+      }
+      """
+      And the following spec class:
+      """
+      public class DefaultProduct extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("product");
+        }
+        @Trait
+        public void Red() {
+          property("color").value("red");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class Computer extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("computer");
+        }
+        @Trait
+        public void Black() {
+          property("color").value("black");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class AStore extends Spec<Store> {
+        @Override
+        public void main() {
+          property("product").from(DefaultProduct.class).which(spec -> spec.Red());
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.type(StoreGroup.class).property("store(AStore).product(Black Computer).price", "100").create();
+      """
+      Then the result should:
+      """
+      store.product= {
+        name= computer
+        color= black
+        price= 100
+      }
+      """
