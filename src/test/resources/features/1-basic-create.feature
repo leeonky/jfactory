@@ -756,3 +756,117 @@ Feature: basic use
       """
       bean.str= hello
       """
+
+  Rule: create array
+
+    Scenario: create value array
+      When build:
+      """
+      jFactory.type(String[].class).create();
+      """
+      Then the result should:
+      """
+      = []
+      """
+      When build:
+      """
+      jFactory.type(String[].class).property("[1]", "hello").create();
+      """
+      Then the result should:
+      """
+      = [
+        '0#2'
+        hello
+      ]
+      """
+
+    Scenario: create bean array
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean[].class).property("[1].value", "hello").create();
+      """
+      Then the result should:
+      """
+      = [null {value= hello}]
+      """
+
+  Rule: type reference
+
+    Scenario: create single value type with type reference
+      When build:
+      """
+      jFactory.type(new TypeReference<String>(){}).create();
+      """
+      Then the result should:
+      """
+      = ''
+      """
+
+    Scenario: create class type with type reference
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      When build:
+      """
+      jFactory.type(new TypeReference<Bean>(){}).create();
+      """
+      Then the result should:
+      """
+      value= value#1
+      """
+
+    Scenario: support create empty array list from given collection type
+      When build:
+      """
+      jFactory.type(new TypeReference<ArrayList<String>>(){}).create();
+      """
+      Then the result should:
+      """
+      = []
+      """
+
+    Scenario: support create empty hash set
+      When build:
+      """
+      jFactory.type(new TypeReference<HashSet<String>>(){}).create();
+      """
+      Then the result should:
+      """
+      = []
+      """
+
+    Scenario: support create empty array
+      When build:
+      """
+      jFactory.type(new TypeReference<String[]>(){}).create();
+      """
+      Then the result should:
+      """
+      = []
+      """
+
+    Scenario: use input property
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      When build:
+      """
+      jFactory.type(new TypeReference<List<Bean>>(){})
+        .property("[0].value", "hello").create();
+      """
+      Then the result should:
+      """
+      = [{value= hello}]
+      """

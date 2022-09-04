@@ -781,3 +781,42 @@ Feature: input property
         price= 100
       }
       """
+
+  Rule: property in structured way
+
+    Scenario: use PropertyValue
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean[].class).properties(new PropertyValue() {
+          @Override
+          public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
+              return builder.property("[0].value", "hello");
+          }
+      }).create();
+      """
+      Then the result should:
+      """
+      = | value |
+        | hello |
+      """
+
+    Scenario: JFactroy given an empty property value
+      Given the following bean class:
+      """
+      public class Bean {
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean[].class).properties(PropertyValue.empty()).create();
+      """
+      Then the result should:
+      """
+      = []
+      """
