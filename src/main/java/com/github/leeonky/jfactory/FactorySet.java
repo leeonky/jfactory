@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Classes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,7 @@ class FactorySet {
     }
 
     public <T, S extends Spec<T>> void registerSpecClassFactory(Class<S> specClass) {
-        Spec<T> spec = BeanClass.newInstance(specClass);
+        Spec<T> spec = Classes.newInstance(specClass);
         boolean globalSpec = isGlobalSpec(specClass);
         SpecClassFactory<?> specClassFactory = specClassFactoriesWithType.computeIfAbsent(specClass,
                 type -> new SpecClassFactory<>(specClass, this, globalSpec));
@@ -78,7 +79,7 @@ class FactorySet {
     }
 
     public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {
-        return new SpecFactory<>(BeanClass.newInstance(specClass), this, trait);
+        return new SpecFactory<>(Classes.newInstance(specClass), this, trait);
     }
 
     public <T> void registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {

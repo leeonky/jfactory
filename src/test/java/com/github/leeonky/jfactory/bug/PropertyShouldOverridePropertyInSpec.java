@@ -2,7 +2,7 @@ package com.github.leeonky.jfactory.bug;
 
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
-import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Classes;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PropertyShouldOverridePropertyInSpec {
     private final JFactory jFactory = new JFactory() {{
-        BeanClass.subTypesOf(Spec.class, "com.github.leeonky.jfactory.bug").forEach(c -> register((Class) c));
+        Classes.subTypesOf(Spec.class, "com.github.leeonky.jfactory.bug").forEach(c -> register((Class) c));
     }};
 
     @Test

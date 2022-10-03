@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.util.Classes.newInstance;
 import static com.github.leeonky.util.Suppressor.run;
 
 class SpecClassFactory<T> extends ObjectFactory<T> {
@@ -15,7 +16,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     private final Supplier<ObjectFactory<T>> base;
 
     public SpecClassFactory(Class<? extends Spec<T>> specClass, FactorySet factorySet, boolean globalSpec) {
-        super(BeanClass.create(BeanClass.newInstance(specClass).getType()), factorySet);
+        super(BeanClass.create(newInstance(specClass).getType()), factorySet);
         this.specClass = specClass;
         base = guessBaseFactory(factorySet, globalSpec);
         registerTraits();
@@ -31,7 +32,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
 
     @Override
     protected Spec<T> createSpec() {
-        return BeanClass.newInstance(specClass);
+        return newInstance(specClass);
     }
 
     private void registerTraits() {
