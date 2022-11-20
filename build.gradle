@@ -64,6 +64,7 @@ dependencies {
 
     testImplementation dep(':DAL-java', '0.3.17')
     testImplementation "io.cucumber:cucumber-java:6.10.4"
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.0.0'
 
     pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }
