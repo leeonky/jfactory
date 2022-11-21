@@ -397,10 +397,10 @@ public class _06_Dependency {
         }
     }
 
-    @Nested
+    //    @Nested
     class NestedDependency {
 
-        @Test
+        //        @Test
         void dependency_in_two_object_spec_definitions() {
             jFactory.factory(BeansWrapper.class).spec(instance -> instance.spec()
                     .property("beans").byFactory()
@@ -419,7 +419,7 @@ public class _06_Dependency {
                     .hasFieldOrPropertyWithValue("bean2", bean);
         }
 
-        @Test
+        //        @Test
         void dependency_in_two_object_spec_definitions_in_collection() {
             jFactory.factory(Bean.class).spec(instance -> instance.spec()
                     .property("content").dependsOn("stringValue", identity()));
@@ -438,7 +438,7 @@ public class _06_Dependency {
     @Nested
     class TargetPropertyObjectIsNotObjectProducer {
 
-        @Test
+        //        @Test
         void should_ignore_dependency_when_parent_object_not_set_factory() {
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
                     .property("bean1.stringValue").dependsOn("bean2", obj -> ((Bean) obj).getIntValue() + ""));
@@ -453,7 +453,7 @@ public class _06_Dependency {
                     .hasFieldOrPropertyWithValue("bean2", bean);
         }
 
-        @Test
+        //        @Test
         void should_ignore_dependency_in_collection() {
             jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
                     .property("beans[1].stringValue").dependsOn("beans[0]", obj -> ((Bean) obj).getIntValue() + ""));
@@ -466,7 +466,7 @@ public class _06_Dependency {
             assertThat(beanArray.getBeans()).containsExactly(bean, null);
         }
 
-        @Test
+        //        @Test
         void should_ignore_dependency_when_parent_object_specified_during_creation() {
             jFactory.factory(Beans.class).spec(instance -> instance.spec()
                     .property("bean1").byFactory());

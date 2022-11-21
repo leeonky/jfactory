@@ -513,14 +513,13 @@ Feature: define dependency
       }]
       """
 
-    Scenario: ignore dependency when parent object was replaced by input property
+    Scenario: ignore dependency when parent object was replaced by input property in collection
       Given the following bean class:
       """
       public class BeanArrays {
         public BeanArray[] beanArrays;
       }
       """
-
       When build:
       """
       jFactory.type(BeanArray.class).property("beans[0]", null).create();
@@ -530,4 +529,167 @@ Feature: define dependency
       beans: [null, {
         stringValue= /stringValue#.*/
       }]
+      """
+
+  Rule: sub level dependency
+
+    Scenario: sub dependency in object
+      Given the following bean class:
+      """
+      public class Strings {
+        public String str1, str2;
+      }
+      """
+      And the following bean class:
+      """
+      public class Bean {
+        public String value;
+        public Strings strings;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Strings.class).spec(instance -> instance.spec()
+          .property("str1").dependsOn("str2", obj -> obj));
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+          .property("value").dependsOn("strings.str1", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("strings.str2", "hello").create();
+      """
+      Then the result should:
+      """
+      <<value, strings.str1, strings.str2>>= hello
+      """
+
+    Scenario: sub dependency in collection element
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str1, str2;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanArray {
+        public Bean[] beans;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+          .property("str1").dependsOn("str2", obj -> obj));
+      """
+      And register:
+      """
+      jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
+          .property("beans[0]").byFactory());
+      """
+      When build:
+      """
+      jFactory.type(BeanArray.class).property("beans[0].str2", "hello").create();
+      """
+      Then the result should:
+      """
+      beans[0].<<str1, str2>>= hello
+      """
+
+  Rule: ignore dependency
+
+    Scenario: ignore dependency when no parent object factory
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean bean;
+        public String value;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+          .property("bean.value").dependsOn("value", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      : {
+        bean= null
+        value= hello
+      }
+      """
+
+    Scenario: ignore dependency when no parent object factory in collection
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+          .property("beans[0].value").dependsOn("beans[1].value", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).property("beans[1].value", "hello").create();
+      """
+      Then the result should:
+      """
+      beans: [
+        null
+        {
+          value= hello
+        }
+      ]
+      """
+
+    Scenario: ignore dependency when parent object was replaced by input property
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean bean;
+        public String value;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+          .property("bean.value").dependsOn("value", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).property("bean", null).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      : {
+        bean= null
+        value= hello
+      }
       """
