@@ -627,6 +627,6 @@ Feature: use spec
       """
       Then should raise error:
       """
-      message= 'More than one @Global Spec class `src.test.Spec1` and `src.test.Spec2`'
+      message= 'More than one @Global Spec class `#package#Spec1` and `#package#Spec2`'
       """
 

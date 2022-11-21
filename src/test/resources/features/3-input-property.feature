@@ -219,7 +219,7 @@ Feature: input property
       """
       Then should raise error:
       """
-      message= 'Cannot merge different spec `Book` and `Computer` for src.test.Store.product'
+      message= 'Cannot merge different spec `Book` and `Computer` for #package#Store.product'
       """
 
   Rule: collection property

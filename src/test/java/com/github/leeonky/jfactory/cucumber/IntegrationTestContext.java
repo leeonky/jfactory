@@ -3,6 +3,8 @@ package com.github.leeonky.jfactory.cucumber;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +22,26 @@ public class IntegrationTestContext {
     private final List<String> registers = new ArrayList<>();
     private final List<Class> classes = new ArrayList<>();
     private final List<Runnable> register = new ArrayList<>();
-    private final Compiler compiler = new Compiler();
+
+    public static int threadsCount(String env, int defaultValue) {
+        String value = System.getenv(env);
+        if (value == null)
+            return defaultValue;
+        return Integer.parseInt(value);
+    }
+
+    private static final JavaCompilerPool JAVA_COMPILER_POOL =
+            new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.ws");
+    private final JavaCompiler compiler = JAVA_COMPILER_POOL.take();
     private List list;
     private JFactory jFactory = new JFactory();
     private int snippetIndex = 0;
     private Object bean;
     private Throwable throwable;
+
+    public void releaseCompiler() {
+        JAVA_COMPILER_POOL.giveBack(compiler);
+    }
 
     private <T> T createProcedure(Class<T> type, String tmpClass) {
         return (T) BeanClass.create(getType(tmpClass)).newInstance();
@@ -59,8 +75,7 @@ public class IntegrationTestContext {
 
     private void compileAll() {
         classes.clear();
-        classes.addAll(compiler.compileToClasses(classCodes.stream().map(s -> "package src.test;\n" +
-                "import com.github.leeonky.jfactory.*;\n" +
+        classes.addAll(compiler.compileToClasses(classCodes.stream().map(s -> "import com.github.leeonky.jfactory.*;\n" +
                 "import java.util.function.*;\n" +
                 "import java.util.*;\n" +
                 "import java.math.*;\n" + s).collect(Collectors.toList())));
@@ -98,7 +113,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldThrow(String dal) {
-        expect(throwable).should(dal);
+        expect(throwable).should(dal.replace("#package#", compiler.packagePrefix()));
     }
 
     public void build(String builderSnippet) {
@@ -126,8 +141,7 @@ public class IntegrationTestContext {
 
     private String createObject(String declaration) {
         String className = "Snip" + (snippetIndex++);
-        return "package src.test;\n" +
-                "import java.util.function.*;\n" +
+        return "import java.util.function.*;\n" +
                 "import java.util.*;\n" +
                 "import com.github.leeonky.util.*;\n" +
                 "import com.github.leeonky.jfactory.*;\n" +

@@ -601,7 +601,7 @@ Feature: define spec
       Then should raise error:
       """
       message: "Invalid property spec:
-      \tsrc.test.ABeanWrapper.main(ABeanWrapper.java:9)
+      \t#package#ABeanWrapper.main(ABeanWrapper.java:8)
       Should finish method chain with `and` or `which`:
       \tproperty().from().which()
       \tproperty().from().and()

@@ -1,12 +1,25 @@
 package com.github.leeonky.jfactory.cucumber;
 
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 public class Steps {
-    private IntegrationTestContext integrationTestContext = new IntegrationTestContext();
+    private IntegrationTestContext integrationTestContext;
+
+    @Before
+    public void reset() {
+        integrationTestContext = new IntegrationTestContext();
+    }
+
+    @After
+    public void releaseCompiler() {
+        integrationTestContext.releaseCompiler();
+    }
+
 
     @Given("the following bean class:")
     public void the_following_bean_class(String classCode) {
