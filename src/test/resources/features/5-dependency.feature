@@ -454,3 +454,80 @@ Feature: define dependency
         }
       }
       """
+
+  Rule: sub collection element dependency
+
+    Background:
+      Given the following bean class:
+      """
+      public class Bean {
+        public String stringValue;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanArray {
+        public Bean[] beans;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
+          .property("beans[0]").byFactory()
+          .property("beans[1]").byFactory()
+          .property("beans[0].stringValue").dependsOn("beans[1].stringValue", obj -> obj));
+      """
+
+    Scenario: depends on default value between sub collection element
+      When build:
+      """
+      jFactory.type(BeanArray.class).create();
+      """
+      Then the result should:
+      """
+      beans[0].stringValue = .beans[1].stringValue
+      """
+
+    Scenario: depends on input value between sub collection element
+      When build:
+      """
+      jFactory.type(BeanArray.class).property("beans[1].stringValue", "hello").create();
+      """
+      Then the result should:
+#TODO should be beans<<[0], [1]>>
+      """
+      <<beans[0], beans[1]>>.stringValue= hello
+      """
+
+    Scenario: ignore dependency when input property override dependency
+      When build:
+      """
+      jFactory.type(BeanArray.class).property("beans[0].stringValue", "hello").create();
+      """
+      Then the result should:
+      """
+      beans: [{
+        stringValue= hello
+      }, {
+        stringValue= /stringValue#.*/
+      }]
+      """
+
+    Scenario: ignore dependency when parent object was replaced by input property
+      Given the following bean class:
+      """
+      public class BeanArrays {
+        public BeanArray[] beanArrays;
+      }
+      """
+
+      When build:
+      """
+      jFactory.type(BeanArray.class).property("beans[0]", null).create();
+      """
+      Then the result should:
+      """
+      beans: [null, {
+        stringValue= /stringValue#.*/
+      }]
+      """

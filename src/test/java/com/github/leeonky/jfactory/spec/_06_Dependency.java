@@ -307,10 +307,10 @@ public class _06_Dependency {
         }
     }
 
-    @Nested
+    //    @Nested
     class SubCollectionElementDependency {
 
-        @Test
+        //        @Test
         void dependency_of_collection_element_property_with_default_value() {
             jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
                     .property("beans[0]").byFactory()
@@ -322,7 +322,7 @@ public class _06_Dependency {
                     .isEqualTo(beanArray.getBeans()[1].getStringValue());
         }
 
-        @Test
+        //        @Test
         void dependency_of_collection_element_property_with_specified_value() {
             jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
                     .property("beans[0]").byFactory()
@@ -336,10 +336,10 @@ public class _06_Dependency {
                     .isEqualTo("hello");
         }
 
-        @Nested
+        //        @Nested
         class Override {
 
-            @Test
+            //            @Test
             void ignore_dependency_when_input_property_override_dependency() {
                 jFactory.factory(BeansArray.class).spec(instance -> instance.spec()
                         .property("beansArray[0]").byFactory()
@@ -358,7 +358,7 @@ public class _06_Dependency {
                         .hasFieldOrPropertyWithValue("bean2", null);
             }
 
-            @Test
+            //            @Test
             void ignore_dependency_when_input_property_override_host_object() {
                 jFactory.factory(BeansArray.class).spec(instance -> instance.spec()
                         .property("beansArray[0]").byFactory()
@@ -374,7 +374,7 @@ public class _06_Dependency {
                         .hasFieldOrPropertyWithValue("bean2", null);
             }
 
-            @Test
+            //            @Test
             void parent_property_dependency_can_override_sub_property_spec() {
                 jFactory.factory(Beans.class).spec(instance -> instance.spec()
                         .property("bean1").byFactory()
