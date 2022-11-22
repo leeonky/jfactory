@@ -693,3 +693,200 @@ Feature: define dependency
         value= hello
       }
       """
+
+  Rule: dependency value
+
+    Scenario: depends on value from input object
+      Given the following bean class:
+      """
+      public class Bean {
+        private String value;
+        public Bean setValue(String str) {
+          this.value = str;
+          return this;
+        }
+
+        public String getValue() {
+          return value;
+        }
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean bean1, bean2;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+          .property("bean1").dependsOn("bean2", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).property("bean2", new Bean().setValue("hello")).create();
+      """
+      Then the result should:
+      """
+      <<bean1 bean2>>.value= hello
+      """
+
+    Scenario: depends on value from input object property
+      Given the following bean class:
+      """
+      public class Bean {
+        private String value;
+        public Bean setValue(String str) {
+          this.value = str;
+          return this;
+        }
+
+        public String getValue() {
+          return value;
+        }
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean bean1, bean2;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+          .property("bean1").byFactory()
+          .property("bean1.value").dependsOn("bean2.value", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).property("bean2", new Bean().setValue("hello")).create();
+      """
+      Then the result should:
+      """
+      <<bean1 bean2>>.value= hello
+      """
+
+    Scenario: depends on value from created object property in customized constructor
+      Given the following bean class:
+      """
+      public class Bean {
+        private String value;
+        public Bean setValue(String str) {
+          this.value = str;
+          return this;
+        }
+
+        public String getValue() {
+          return value;
+        }
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean bean1, bean2;
+        public Beans setBean2(Bean bean) {
+          this.bean2 = bean;
+          return this;
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Beans.class)
+          .constructor(instance -> new Beans().setBean2(new Bean().setValue("hello")))
+          .spec(instance -> instance.spec()
+          .property("bean1").byFactory()
+          .property("bean1.value").dependsOn("bean2.value", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).create();
+      """
+      Then the result should:
+      """
+      <<bean1 bean2>>.value= hello
+      """
+
+    Scenario: depends on value from created object property in customized constructor in collection
+      Given the following bean class:
+      """
+      public class Bean {
+        private String value;
+        public Bean setValue(String str) {
+          this.value = str;
+          return this;
+        }
+
+        public String getValue() {
+          return value;
+        }
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans1, beans2;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Beans.class)
+          .constructor(instance -> {
+            Beans beans = new Beans();
+            beans.beans2 = new Bean[]{new Bean().setValue("hello")};
+            return beans;
+          })
+          .spec(instance -> instance.spec()
+          .property("beans1[0]").byFactory()
+          .property("beans1[0].value").dependsOn("beans2[0].value", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).create();
+      """
+      Then the result should:
+      """
+      <<beans1, beans2>>[0].value= hello
+      """
+
+    Scenario: should use default value(null) when depended value parent object is null
+
+      Given the following bean class:
+      """
+      public class Bean {
+        private String value;
+        public Bean setValue(String str) {
+          this.value = str;
+          return this;
+        }
+
+        public String getValue() {
+          return value;
+        }
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean bean1, bean2;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+          .property("bean1").byFactory()
+          .property("bean1.value").dependsOn("bean2.value", obj -> obj));
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).create();
+      """
+      Then the result should:
+      """
+      : {
+        bean1.value= null
+        bean2= null
+      }
+      """
