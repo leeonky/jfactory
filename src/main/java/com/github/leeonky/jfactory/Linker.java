@@ -16,7 +16,7 @@ class Linker<T> {
     );
     private final Set<PropertyChain> linkedAbsoluteProperties = new LinkedHashSet<>();
     private final Producer<?> root;
-    private Set<Reference<T>> references = new LinkedHashSet<>();
+    private final Set<Reference<T>> references = new LinkedHashSet<>();
 
     public Linker(Producer<?> root) {
         this.root = root;
