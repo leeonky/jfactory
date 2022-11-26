@@ -20,28 +20,28 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class _09_PropertyAlias {
     private final JFactory jFactory = new JFactory();
 
-    @Test
+    //    @Test
     void support_define_and_use_property_alias_in_top_level() {
         jFactory.aliasOf(Bean.class).alias("aliasOfValue", "value");
 
         expect((jFactory.type(Bean.class).property("aliasOfValue", "hello").create())).match("{value: 'hello'}");
     }
 
-    @Test
+    //    @Test
     void should_use_as_property_when_no_alias() {
         jFactory.aliasOf(Bean.class).alias("aliasOfValue", "noMatchProperty");
 
         expect((jFactory.type(Bean.class).property("value", "hello").create())).match("{value: 'hello'}");
     }
 
-    @Test
+    //    @Test
     void alias_of_property_chain() {
         jFactory.aliasOf(BeanContainer.class).alias("beanAnotherBeanValue", "bean.anotherBean.value");
 
         expect((jFactory.type(BeanContainer.class).property("beanAnotherBeanValue", "hello").create())).match("{bean.anotherBean.value: 'hello'}");
     }
 
-    @Test
+    //    @Test
     void alias_chain() {
         jFactory.aliasOf(Bean.class).alias("aliasOfAnotherBean", "anotherBean");
         jFactory.aliasOf(AnotherBean.class).alias("aliasOfValue", "value");
@@ -51,7 +51,7 @@ public class _09_PropertyAlias {
                 .match("{anotherBean.value: 'hello'}");
     }
 
-    @Test
+    //    @Test
     void alias_in_collection() {
         jFactory.aliasOf(Bean.class).alias("aliasOfValue", "value");
 
@@ -61,7 +61,7 @@ public class _09_PropertyAlias {
         expect(beans).should("value[]: ['hello']");
     }
 
-    @Test
+    //    @Test
     void alias_of_collection() {
         jFactory.aliasOf(BeanContainer.class).alias("aliasOfBeans", "beans");
 
