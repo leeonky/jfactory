@@ -133,3 +133,153 @@ Feature: property alias
     """
     beans: [{value: hello}]
     """
+
+  Scenario: recursive alias
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    Given the following bean class:
+    """
+    public class BeanWrapper {
+      public Bean bean;
+    }
+    """
+    And register:
+    """
+    jFactory.aliasOf(BeanWrapper.class)
+        .alias("beanValue", "bean.value")
+        .alias("aliasOfBeanValue", "beanValue");
+    """
+    When build:
+    """
+    jFactory.type(BeanWrapper.class).property("aliasOfBeanValue", "hello").create();
+    """
+    Then the result should:
+    """
+    bean.value: hello
+    """
+
+  Scenario: index arg in alias
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    Given the following bean class:
+    """
+    public class BeanWrapper {
+      public Bean[] beans;
+    }
+    """
+    And register:
+    """
+    jFactory.aliasOf(BeanWrapper.class).alias("beansValue", "beans[$].value");
+    """
+    When build:
+    """
+    jFactory.type(BeanWrapper.class).property("beansValue[1]", "hello").create();
+    """
+    Then the result should:
+    """
+    beans: [null, {value: hello}]
+    """
+
+  Scenario: uses collection alias with collection args
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    Given the following bean class:
+    """
+    public class BeanWrapper {
+      public Bean[] beans;
+    }
+    """
+    And register:
+    """
+    jFactory.aliasOf(BeanWrapper.class).alias("beansValue", "beans[$].value");
+    """
+    When build:
+    """
+    jFactory.type(BeanWrapper.class).property("beansValue", java.util.Arrays.asList("hello", "world")).create();
+    """
+    Then the result should:
+    """
+    beans.value[]: [hello world]
+    """
+
+  Scenario: uses collection alias with empty collection args
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    Given the following bean class:
+    """
+    public class BeanWrapper {
+      public Bean[] beans;
+    }
+    """
+    And register:
+    """
+    jFactory.aliasOf(BeanWrapper.class)
+        .alias("beansValue", "beans[$].value")
+        .alias("aliasOfBeans", "beans[$]");
+    """
+    When build:
+    """
+    jFactory.type(BeanWrapper.class).property("beansValue", new ArrayList<>()).create();
+    """
+    Then the result should:
+    """
+    beans: []
+    """
+    When build:
+    """
+    jFactory.type(BeanWrapper.class).property("aliasOfBeans", new ArrayList<>()).create();
+    """
+    Then the result should:
+    """
+    beans: []
+    """
+
+  Scenario: intently creation with alias
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    Given the following bean class:
+    """
+    public class BeanWrapper {
+      public Bean bean;
+    }
+    """
+    And register:
+    """
+    jFactory.aliasOf(BeanWrapper.class).alias("aliasOfBean", "bean");
+    """
+    And build:
+    """
+    jFactory.type(BeanWrapper.class).property("aliasOfBean!.value", "hello").create();
+    """
+    And build:
+    """
+    jFactory.type(BeanWrapper.class).property("aliasOfBean!.value", "hello").create();
+    """
+    When build:
+    """
+    jFactory.type(Bean.class).property("value", "hello").queryAll();
+    """
+    Then the result should:
+    """
+    value[]: [hello hello]
+    """

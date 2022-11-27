@@ -70,7 +70,7 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans.value[]: ['hello']");
     }
 
-    @Test
+    //    @Test
     void recursive_alias() {
         jFactory.aliasOf(Bean.class).alias("aliasOfAnotherBeanValue", "anotherBeanValue");
         jFactory.aliasOf(Bean.class).alias("anotherBeanValue", "anotherBean.value");
@@ -78,7 +78,7 @@ public class _09_PropertyAlias {
         expect((jFactory.type(Bean.class).property("aliasOfAnotherBeanValue", "hello").create())).match("{anotherBean.value: 'hello'}");
     }
 
-    @Test
+    //    @Test
     void index_arg_in_alias() {
         jFactory.aliasOf(BeanContainer.class).alias("beansValue", "beans[$].value");
 
@@ -87,7 +87,7 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans.value[]: ['hello']");
     }
 
-    @Test
+    //    @Test
     void intently_creation_with_alias() {
         jFactory.aliasOf(Bean.class).alias("aliasOfAnotherBean", "anotherBean");
 
@@ -97,7 +97,7 @@ public class _09_PropertyAlias {
         assertThat(jFactory.type(AnotherBean.class).queryAll()).hasSize(2);
     }
 
-    @Test
+    //    @Test
     void uses_collection_alias_with_collection_args() {
         jFactory.aliasOf(BeanContainer.class).alias("beansValue", "beans[$].value");
 
@@ -107,7 +107,7 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans.value[]: ['hello' 'world']");
     }
 
-    @Test
+    //    @Test
     void empty_list_property_with_collection_alias() {
         jFactory.aliasOf(BeanContainer.class).alias("aliasOfBeans", "beans[$]");
         BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("aliasOfBeans", emptyList()).create();
@@ -115,7 +115,7 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans: []");
     }
 
-    @Test
+    //    @Test
     void empty_list_property_with_collection_alias_and_sub_properties() {
         jFactory.aliasOf(BeanContainer.class).alias("aliasOfBeansValues", "beans[$].value");
         BeanContainer beanContainer = jFactory.type(BeanContainer.class).property("aliasOfBeansValues", emptyList()).create();
@@ -123,11 +123,11 @@ public class _09_PropertyAlias {
         expect(beanContainer).should("beans: []");
     }
 
-    @Test
-    void global_spec_should_not_has_super_spec() {
-        assertThatThrownBy(() -> jFactory.register(InvalidGlobalSpec.class)).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Global Spec com.github.leeonky.jfactory.spec._09_PropertyAlias$InvalidGlobalSpec should not have super Spec com.github.leeonky.jfactory.spec._09_PropertyAlias$AliasBeanSpec.");
-    }
+//    //    @Test
+//    void global_spec_should_not_has_super_spec() {
+//        assertThatThrownBy(() -> jFactory.register(JFactoryTest.InvalidGlobalSpec.class)).isInstanceOf(IllegalArgumentException.class)
+//                .hasMessage("Global Spec com.github.leeonky.jfactory.spec._09_PropertyAlias$InvalidGlobalSpec should not have super Spec com.github.leeonky.jfactory.spec._09_PropertyAlias$AliasBeanSpec.");
+//    }
 
     @Getter
     @Setter
@@ -175,10 +175,6 @@ public class _09_PropertyAlias {
             @PropertyAlias(alias = "aliasOfValue", property = "value2")
     )
     public static class OverrideSuperSpec extends AliasBeanSpec {
-    }
-
-    @Global
-    public static class InvalidGlobalSpec extends AliasBeanSpec {
     }
 
     @Nested
