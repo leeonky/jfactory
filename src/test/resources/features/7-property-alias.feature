@@ -283,3 +283,180 @@ Feature: property alias
     """
     value[]: [hello hello]
     """
+
+  Scenario: define alias in spec class
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    And the following spec class:
+    """
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value")
+    )
+    public class ABean extends Spec<Bean> {
+    }
+    """
+    When build:
+    """
+    jFactory.spec(ABean.class).property("aliasOfValue", "hello").create();
+    """
+    Then the result should:
+    """
+    value: hello
+    """
+    When build:
+    """
+    jFactory.type(Bean.class).property("aliasOfValue", "hello").create();
+    """
+    Then should raise error:
+    """
+    : {
+      class.simpleName: NoSuchPropertyException
+      message: 'No available property: Bean.aliasOfValue'
+    }
+    """
+
+  Scenario: use type alias when missed alias on spec
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    And the following spec class:
+    """
+    public class ABean extends Spec<Bean> {
+    }
+    """
+    And register:
+    """
+    jFactory.aliasOf(Bean.class).alias("aliasOfValue", "value");
+    """
+    When build:
+    """
+    jFactory.spec(ABean.class).property("aliasOfValue", "hello").create();
+    """
+    Then the result should:
+    """
+    value= hello
+    """
+
+  Scenario: alias in super spec
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    And the following spec class:
+    """
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value")
+    )
+    public class ABean extends Spec<Bean> {
+    }
+    """
+    And the following spec class:
+    """
+    public class SubSpec extends ABean {
+    }
+    """
+    When build:
+    """
+    jFactory.spec(SubSpec.class).property("aliasOfValue", "hello").create();
+    """
+    Then the result should:
+    """
+    value= hello
+    """
+
+  Scenario: alias on global spec
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    And the following spec class:
+    """
+    @Global
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value")
+    )
+    public class ABean extends Spec<Bean> {
+    }
+    """
+    When build:
+    """
+    jFactory.type(Bean.class).property("aliasOfValue", "hello").create();
+    """
+    Then the result should:
+    """
+    value= hello
+    """
+
+  Scenario: use global alias when missed alias on spec
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    And the following spec class:
+    """
+    @Global
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value")
+    )
+    public class GlobalBean extends Spec<Bean> {
+    }
+    """
+    And the following spec class:
+    """
+    public class ABean extends Spec<Bean> {
+    }
+    """
+    When build:
+    """
+    jFactory.spec(ABean.class).property("aliasOfValue", "hello").create();
+    """
+    Then the result should:
+    """
+    value= hello
+    """
+
+  Scenario: sub spec alias override super spec alias
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value1, value2;
+    }
+    """
+    And the following spec class:
+    """
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value1")
+    )
+    public class SuperBean extends Spec<Bean> {
+    }
+    """
+    And the following spec class:
+    """
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value2")
+    )
+    public class SubBean extends SuperBean {
+    }
+    """
+
+    When build:
+    """
+    jFactory.spec(SubBean.class).property("aliasOfValue", "hello").create();
+    """
+    Then the result should:
+    """
+    value2= hello
+    """
