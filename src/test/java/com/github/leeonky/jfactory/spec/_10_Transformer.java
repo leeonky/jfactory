@@ -71,21 +71,21 @@ public class _10_Transformer {
             @Nested
             class DefineInType {
 
-                @Test
+                //                @Test
                 void matches_in_type() {
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
-                @Test
+                //                @Test
                 void matches_in_sub_type() {
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.type(ExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
-                @Test
+                //                @Test
                 void override_super_transformer() {
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                     jFactory.factory(ExtendBean.class).transformer("content", s -> "(" + s + ")");
@@ -93,14 +93,14 @@ public class _10_Transformer {
                     assertThat(jFactory.type(ExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("(abc)");
                 }
 
-                @Test
+                //                @Test
                 void matches_in_spec() {
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
-                @Test
+                //                @Test
                 void matches_spec_in_sub_type() {
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
