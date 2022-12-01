@@ -7,7 +7,9 @@ import com.github.leeonky.util.JavaCompiler;
 import com.github.leeonky.util.JavaCompilerPool;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -18,7 +20,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegrationTestContext {
-    private final List<String> classCodes = new ArrayList<>();
+    private final Map<String, String> classCodes = new HashMap<>();
     private final List<String> registers = new ArrayList<>();
     private final List<Class> classes = new ArrayList<>();
     private final List<Runnable> register = new ArrayList<>();
@@ -48,7 +50,7 @@ public class IntegrationTestContext {
     }
 
     public void givenBean(String classCode) {
-        classCodes.add(classCode);
+        addClass(classCode);
     }
 
     private Class getType(String className) {
@@ -69,13 +71,17 @@ public class IntegrationTestContext {
                 "    @Override\n" +
                 "    public void accept(JFactory jFactory) { " + builderSnippet + ";}\n" +
                 "}";
-        classCodes.add(snipCode);
+        addClass(snipCode);
         return className;
+    }
+
+    private void addClass(String snipCode) {
+        classCodes.put(JavaCompiler.guessClassName(snipCode), snipCode);
     }
 
     private void compileAll() {
         classes.clear();
-        classes.addAll(compiler.compileToClasses(classCodes.stream().map(s -> "import com.github.leeonky.jfactory.*;\n" +
+        classes.addAll(compiler.compileToClasses(classCodes.values().stream().map(s -> "import com.github.leeonky.jfactory.*;\n" +
                 "import java.util.function.*;\n" +
                 "import java.util.*;\n" +
                 "import java.math.*;\n" + s).collect(Collectors.toList())));
@@ -103,7 +109,7 @@ public class IntegrationTestContext {
     }
 
     public void specClass(String specClass) {
-        classCodes.add(specClass);
+        addClass(specClass);
     }
 
     @Deprecated
@@ -134,7 +140,7 @@ public class IntegrationTestContext {
                 String.join("\n", registers) + "\n" +
                 " return " + builderSnippet + "}\n" +
                 "}";
-        classCodes.add(snipCode);
+        addClass(snipCode);
         return className;
     }
 

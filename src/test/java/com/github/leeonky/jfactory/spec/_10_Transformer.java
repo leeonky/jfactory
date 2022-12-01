@@ -107,7 +107,7 @@ public class _10_Transformer {
                     assertThat(jFactory.spec(AExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
-                @Test
+                //                @Test
                 void not_match() {
                     jFactory.factory(Bean.class).transformer("content", new Transformer() {
                         @Override
@@ -125,7 +125,7 @@ public class _10_Transformer {
                     assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
                 }
 
-                @Test
+                //                @Test
                 void property_is_list() {
                     jFactory.factory(Bean.class).transformer("stringValues", input -> input.split(","));
 

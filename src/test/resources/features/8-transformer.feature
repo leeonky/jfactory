@@ -111,3 +111,47 @@ Feature: transformer
       """
       value: HELLO
       """
+
+    Scenario: not match transformer
+      And register:
+      """
+      jFactory.factory(Bean.class).transformer("value", new Transformer() {
+          @Override
+          public Object transform(String input) {
+              throw new RuntimeException();
+          }
+
+          @Override
+          public boolean matches(String input) {
+              return false;
+          }
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: hello
+      """
+
+    Scenario: list property
+      Given the following bean class:
+      """
+      public class Bean {
+        public List<String> value;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).transformer("value", input -> input.split(","));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "a,b,c").create();
+      """
+      Then the result should:
+      """
+      value: [a b c]
+      """
