@@ -26,6 +26,19 @@ Feature: transformer
       """
       value: HELLO
       """
+      When the following spec class:
+      """
+      public class AnySpec extends Spec<Bean> {
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
 
     Scenario: define use transformer by super type
       Given the following bean class:
@@ -40,6 +53,19 @@ Feature: transformer
       When build:
       """
       jFactory.type(SubBean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
+      When the following spec class:
+      """
+      public class AnySpec extends Spec<Bean> {
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").create();
       """
       Then the result should:
       """

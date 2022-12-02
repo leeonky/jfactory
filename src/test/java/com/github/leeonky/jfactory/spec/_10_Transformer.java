@@ -136,7 +136,7 @@ public class _10_Transformer {
                 @Nested
                 class NoOverrideSpec {
 
-                    @Test
+                    //                    @Test
                     void matches_in_type() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.register(NoOverrideABean.class);
