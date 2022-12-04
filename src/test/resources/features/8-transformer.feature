@@ -1,17 +1,18 @@
 Feature: transformer
 
-  Rule: single creation
-    Background:
-      Given declaration jFactory =
+  Background:
+    Given declaration jFactory =
       """
       new JFactory();
       """
-      Given the following bean class:
+    Given the following bean class:
       """
       public class Bean {
         public String value;
       }
       """
+
+  Rule: single creation, define in type
 
     Scenario: define use transformer by type
       And register:
@@ -113,6 +114,19 @@ Feature: transformer
       """
       value: HELLO
       """
+      And the following spec class:
+      """
+      public class AnotherBean extends Spec<Bean> {
+      }
+      """
+      When build:
+      """
+      jFactory.spec(AnotherBean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
 
     Scenario: define in type and use in sub spec
       And register:
@@ -180,4 +194,143 @@ Feature: transformer
       Then the result should:
       """
       value: [a b c]
+      """
+
+    Scenario: define in type but override in spec
+      And register:
+      """
+      jFactory.factory(Bean.class).transformer("value", String::toUpperCase);
+      """
+      And the following spec class:
+      """
+      @Global
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(ABean.class).transformer("value", str -> "(" + str + ")");
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: '(hello)'
+      """
+      Given the following bean class:
+      """
+      public class SubBean extends Bean {
+      }
+      """
+      When build:
+      """
+      jFactory.type(SubBean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: '(hello)'
+      """
+      And the following spec class:
+      """
+      public class AnotherBean extends Spec<Bean> {
+      }
+      """
+      When build:
+      """
+      jFactory.spec(AnotherBean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: '(hello)'
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: '(hello)'
+      """
+
+  Rule: single creation, define in spec
+
+    Scenario: define use transformer by spec, sub spec
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(ABean.class).transformer("value", String::toUpperCase);
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
+      And the following spec class:
+      """
+      public class SubABean extends ABean {
+      }
+      """
+      When build:
+      """
+      jFactory.spec(SubABean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
+#      keep no transformer in type and other spec
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: hello
+      """
+      And the following spec class:
+      """
+      public class AnotherBean extends Spec<Bean> {
+      }
+      """
+      When build:
+      """
+      jFactory.spec(AnotherBean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: hello
+      """
+
+    Scenario: define use transformer by global spec
+      And the following spec class:
+      """
+      @Global
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(ABean.class).transformer("value", String::toUpperCase);
+      """
+      And the following spec class:
+      """
+      public class AnotherBean extends Spec<Bean> {
+      }
+      """
+      When build:
+      """
+      jFactory.spec(AnotherBean.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      value: HELLO
       """

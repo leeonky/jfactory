@@ -68,7 +68,7 @@ public class _10_Transformer {
         @Nested
         class Single {
 
-            @Nested
+            //            @Nested
             class DefineInType {
 
                 //                @Test
@@ -133,7 +133,7 @@ public class _10_Transformer {
                             .containsExactly("a", "b", "c");
                 }
 
-                @Nested
+                //                @Nested
                 class NoOverrideSpec {
 
                     //                    @Test
@@ -144,7 +144,7 @@ public class _10_Transformer {
                         assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                     }
 
-                    @Test
+                    //                    @Test
                     void matches_in_sup_type() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.register(NoOverrideABean.class);
@@ -152,7 +152,7 @@ public class _10_Transformer {
                         assertThat(jFactory.type(ExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                     }
 
-                    @Test
+                    //                    @Test
                     void matches_in_another_spec() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.register(NoOverrideABean.class);
@@ -160,7 +160,7 @@ public class _10_Transformer {
                         assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                     }
 
-                    @Test
+                    //                    @Test
                     void matches_in_global_spec() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.register(NoOverrideABean.class);
@@ -169,10 +169,10 @@ public class _10_Transformer {
                     }
                 }
 
-                @Nested
+                //                @Nested
                 class OverrideSpec {
 
-                    @Test
+                    //                    @Test
                     void matches_in_type() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
@@ -180,7 +180,7 @@ public class _10_Transformer {
                         assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("(abc)");
                     }
 
-                    @Test
+                    //                    @Test
                     void matches_in_sub_type() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
@@ -188,7 +188,7 @@ public class _10_Transformer {
                         assertThat(jFactory.type(ExtendBean.class).property("content", "abc").create().getContent()).isEqualTo("(abc)");
                     }
 
-                    @Test
+                    //                    @Test
                     void matches_in_another_spec() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
@@ -196,7 +196,7 @@ public class _10_Transformer {
                         assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("(abc)");
                     }
 
-                    @Test
+                    //                    @Test
                     void matches_in_global_spec() {
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
                         jFactory.specFactory(OverrideABean.class).transformer("content", str -> "(" + str + ")");
@@ -209,42 +209,42 @@ public class _10_Transformer {
             @Nested
             class DefineInSpec {
 
-                @Test
+                //                @Test
                 void not_match_in_type() {
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.type(Bean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
                 }
 
-                @Test
+                //                @Test
                 void matches_in_same_spec() {
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
-                @Test
+                //                @Test
                 void matches_in_sub_spec() {
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(ABeanWithMore.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
-                @Test
+                //                @Test
                 void matches_from_base_spec() {
                     jFactory.specFactory(GlobalABean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").create().getContent()).isEqualTo("ABC");
                 }
 
-                @Test
+                //                @Test
                 void not_match_in_other_spec() {
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
 
                     assertThat(jFactory.spec(AnotherBean.class).property("content", "abc").create().getContent()).isEqualTo("abc");
                 }
 
-                @Test
+                //                @Test
                 void not_match_in_other_global_spec() {
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
                     jFactory.register(NoOverrideABean.class);
