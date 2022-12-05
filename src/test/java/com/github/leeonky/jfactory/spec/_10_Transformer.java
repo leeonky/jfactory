@@ -62,10 +62,10 @@ public class _10_Transformer {
     public static class GlobalABean extends Spec<Bean> {
     }
 
-    @Nested
+    //    @Nested
     class Create {
 
-        @Nested
+        //        @Nested
         class Single {
 
             //            @Nested
@@ -206,7 +206,7 @@ public class _10_Transformer {
                 }
             }
 
-            @Nested
+            //            @Nested
             class DefineInSpec {
 
                 //                @Test
@@ -254,10 +254,10 @@ public class _10_Transformer {
             }
         }
 
-        @Nested
+        //        @Nested
         class SubObject {
 
-            @Test
+            //            @Test
             void matches_in_type() {
                 jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
@@ -265,7 +265,7 @@ public class _10_Transformer {
                         .should("bean.content: ABC");
             }
 
-            @Test
+            //            @Test
             void matches_in_spec() {
                 jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
 
@@ -274,10 +274,10 @@ public class _10_Transformer {
             }
         }
 
-        @Nested
+        //        @Nested
         class SubElement {
 
-            @Test
+            //            @Test
             void matches_in_type() {
                 jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
 
@@ -285,7 +285,7 @@ public class _10_Transformer {
                         .should("beans[0].content: ABC");
             }
 
-            @Test
+            //            @Test
             void matches_in_spec() {
                 jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
 
