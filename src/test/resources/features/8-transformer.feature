@@ -420,3 +420,46 @@ Feature: transformer
       """
       beans.value[]: [ HELLO ]
       """
+
+  Rule: single query, define in type
+
+    Scenario: define use transformer by type
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).transformer("value", String::toUpperCase);
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
+
+    Scenario: define use transformer by super type
+      And the following bean class:
+      """
+      public class SubBean extends Bean {
+      }
+      """
+      And build:
+      """
+      jFactory.type(SubBean.class).property("value", "HELLO").create();
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).transformer("value", String::toUpperCase);
+      """
+      When build:
+      """
+      jFactory.type(SubBean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
