@@ -440,6 +440,19 @@ Feature: transformer
       """
       value: HELLO
       """
+      When the following spec class:
+      """
+      public class AnySpec extends Spec<Bean> {
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
 
     Scenario: define use transformer by super type
       And the following bean class:
@@ -458,6 +471,34 @@ Feature: transformer
       When build:
       """
       jFactory.type(SubBean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
+
+    Scenario: define in base type use in sub type spec
+      Given the following bean class:
+      """
+      public class SubBean extends Bean {
+      }
+      """
+      And build:
+      """
+      jFactory.type(SubBean.class).property("value", "HELLO").create();
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).transformer("value", String::toUpperCase);
+      """
+      When the following spec class:
+      """
+      public class ASubBean extends Spec<SubBean> {
+      }
+      """
+      When build:
+      """
+      jFactory.spec(ASubBean.class).property("value", "hello").query();
       """
       Then the result should:
       """

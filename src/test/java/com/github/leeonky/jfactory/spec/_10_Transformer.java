@@ -320,7 +320,7 @@ public class _10_Transformer {
                     assertThat(jFactory.type(ExtendBean.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
-                @Test
+                //                @Test
                 void matches_spec() {
                     Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
@@ -328,7 +328,7 @@ public class _10_Transformer {
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
-                @Test
+                //                @Test
                 void matches_spec_in_sub_type() {
                     Bean bean = jFactory.type(ExtendBean.class).property("content", "ABC").create();
                     jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
