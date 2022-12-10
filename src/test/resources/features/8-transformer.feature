@@ -504,3 +504,64 @@ Feature: transformer
       """
       value: HELLO
       """
+
+    Scenario: not match transformer
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").create();
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).transformer("value", new Transformer() {
+          @Override
+          public Object transform(String input) {
+              throw new RuntimeException();
+          }
+
+          @Override
+          public boolean matches(String input) {
+              return false;
+          }
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value: hello
+      """
+
+    Scenario: list property
+      Given the following bean class:
+      """
+      public class Bean {
+        public List<String> value;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", java.util.Arrays.asList("a","b","c")).create();
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).transformer("value", input -> input.split(","));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "a,b,c").query();
+      """
+      Then the result should:
+      """
+      value: [a b c]
+      """
+
+#    //        TODO merge annotation with field alias
+#    //            TODO transformer in create, query
+#    //            transformer in single, sub object, sub element
+#    //            define in global type transformer, use in: type, spec, sub type, extend spec
+#    //            define in global type transformer, and no override global spec, use in: type, non global spec, global spec, sub type, extend spec
+#    //            define in global type transformer, override in global spec, use in: type, non global spec, global spec, sub type, extend spec
+#    //            define in spec, use in: type, same spec, another spec, another global spec, sub type, extend spec
+#    //            define in global spec, use in: type, non global spec, global spec, sub type, extend spec

@@ -336,7 +336,7 @@ public class _10_Transformer {
                     assertThat(jFactory.spec(AExtendBean.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
-                @Test
+                //                @Test
                 void not_match() {
                     Bean bean = jFactory.type(Bean.class).property("content", "abc").create();
 
@@ -356,7 +356,7 @@ public class _10_Transformer {
                     assertThat(jFactory.type(Bean.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
-                @Test
+                //                @Test
                 void property_is_list() {
                     Bean bean = jFactory.type(Bean.class)
                             .property("stringValues[0]", "a")
@@ -572,13 +572,5 @@ public class _10_Transformer {
         }
     }
 
-//        TODO merge annotation with field alias
 }
 
-//            TODO transformer in create, query
-//            transformer in single, sub object, sub element
-//            define in global type transformer, use in: type, spec, sub type, extend spec
-//            define in global type transformer, and no override global spec, use in: type, non global spec, global spec, sub type, extend spec
-//            define in global type transformer, override in global spec, use in: type, non global spec, global spec, sub type, extend spec
-//            define in spec, use in: type, same spec, another spec, another global spec, sub type, extend spec
-//            define in global spec, use in: type, non global spec, global spec, sub type, extend spec
