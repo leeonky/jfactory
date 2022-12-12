@@ -15,13 +15,6 @@
 
 通过工厂方法创建具有某些默认属性测试数据的工具库，默认数据通过预定义数据的默认属性和关联属性实现，还可以定义数据Trait，然后创建具有某些Trait的测试数据
 
-# 安装
-
-通过Gradle添加依赖
-``` groovy
-    implementation 'com.github.leeonky:jfactory:0.1.0'
-```
-
 # 快速开始
 创建具有默认属性值的对象，实例代码默认使用[Lombok](https://projectlombok.org/)自动生成属性访问起代码。
 ```java

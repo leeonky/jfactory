@@ -301,7 +301,7 @@ public class _10_Transformer {
         @Nested
         class Single {
 
-            @Nested
+            //            @Nested
             class DefineInType {
 
                 //                @Test
@@ -370,7 +370,7 @@ public class _10_Transformer {
 
                 @Nested
                 class NoOverrideSpec {
-                    @Test
+                    //                    @Test
                     void matches_in_type() {
                         Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);
@@ -379,7 +379,7 @@ public class _10_Transformer {
                         assertThat(jFactory.type(Bean.class).property("content", "abc").query()).isSameAs(bean);
                     }
 
-                    @Test
+                    //                    @Test
                     void matches_in_sub_type() {
                         Bean bean = jFactory.type(ExtendBean.class).property("content", "ABC").create();
                         jFactory.factory(Bean.class).transformer("content", String::toUpperCase);

@@ -476,6 +476,19 @@ Feature: transformer
       """
       value: HELLO
       """
+      When the following spec class:
+      """
+      public class AnySpec extends Spec<Bean> {
+      }
+      """
+      When build:
+      """
+      jFactory.type(SubBean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
 
     Scenario: define in base type use in sub type spec
       Given the following bean class:
