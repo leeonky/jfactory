@@ -305,39 +305,39 @@ Feature: basic use
     Scenario: property chain - save and query with property chain
       Given the following bean class:
       """
-      public class Bean {
-        public String str;
+      public class Author {
+        public String name;
       }
       """
       And the following bean class:
       """
-      public class BeanWrapper {
-        public Bean bean;
+      public class Book {
+        public Author author;
       }
       """
       And build:
       """
-      jFactory.type(BeanWrapper.class).property("bean.str", "hello").create();
+      jFactory.type(Book.class).property("author.name", "Tom").create();
       """
       When build:
       """
-      jFactory.type(BeanWrapper.class).property("bean.str", "hello").query();
+      jFactory.type(Book.class).property("author.name", "Tom").query();
       """
       Then the result should:
       """
-      bean.str= hello
+      author.name= Tom
       """
       When build:
       """
-      jFactory.type(Bean.class).property("str", "hello").query();
+      jFactory.type(Author.class).property("name", "Tom").query();
       """
       Then the result should:
       """
-      str= hello
+      name= Tom
       """
       When build:
       """
-      jFactory.type(BeanWrapper.class).property("bean.str", "not hello").query();
+      jFactory.type(Book.class).property("author.name", "Luke").query();
       """
       Then the result should:
       """
@@ -353,14 +353,14 @@ Feature: basic use
       """
       And the following bean class:
       """
-      public class BeanWrapper {
+      public class Book {
         public Bean bean;
       }
       """
       When operate:
       """
       jFactory.type(Bean.class).property("str", "hello").create();
-      jFactory.type(BeanWrapper.class).property("bean.str", "hello").create();
+      jFactory.type(Book.class).property("bean.str", "hello").create();
       """
       And "jFactory.type(Bean.class).queryAll()" should
       """
@@ -661,26 +661,26 @@ Feature: basic use
     Scenario: in spec class - use args in spec class
       Given the following bean class:
       """
-      public class Bean {
-        public String str;
+      public class Author {
+        public String name;
       }
       """
       And the following spec class:
       """
-      public class ABean extends Spec<Bean> {
+      public class AuthorWithArg extends Spec<Author> {
         @Override
         public void main() {
-          property("str").value((Object)param("p"));
+          property("name").value((Object)param("input-name"));
         }
       }
       """
       When build:
       """
-      jFactory.spec(ABean.class).arg("p", "hello").create();
+      jFactory.spec(AuthorWithArg.class).arg("input-name", "Tom").create();
       """
       Then the result should:
       """
-      str= hello
+      name= Tom
       """
 
     Scenario: fetch arg - fetch arg in spec
