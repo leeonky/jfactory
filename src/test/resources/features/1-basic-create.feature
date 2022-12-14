@@ -616,46 +616,46 @@ Feature: basic use
     Scenario: nested arg - support nested args
       Given the following bean class:
       """
-      public class Bean {
-        public String str;
+      public class Address {
+        public String country;
       }
       """
       And the following bean class:
       """
-      public class BeanWrapper {
-        public Bean bean;
+      public class Author {
+        public Address address;
       }
       """
       And the following bean class:
       """
-      public class BeanWrapperWrapper {
-        public BeanWrapper beanWrapper;
+      public class Book {
+        public Author author;
       }
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
-        .property("str").value((Object) instance.param("p")));
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
-        .property("bean").byFactory());
-      jFactory.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
-        .property("beanWrapper").byFactory());
+      jFactory.factory(Address.class).spec(instance -> instance.spec()
+        .property("country").value((Object) instance.param("p")));
+      jFactory.factory(Author.class).spec(instance -> instance.spec()
+        .property("address").byFactory());
+      jFactory.factory(Book.class).spec(instance -> instance.spec()
+        .property("author").byFactory());
       """
       When build:
       """
-      jFactory.type(BeanWrapper.class).args("bean", arg("p", "hello")).create();
+      jFactory.type(Author.class).args("address", arg("p", "USA")).create();
       """
       Then the result should:
       """
-      bean.str= hello
+      address.country= USA
       """
       When build:
       """
-      jFactory.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello")).create();
+      jFactory.type(Book.class).args("author.address", arg("p", "UK")).create();
       """
       Then the result should:
       """
-      beanWrapper.bean.str= hello
+      author.address.country= UK
       """
 
     Scenario: in spec class - use args in spec class
@@ -686,75 +686,75 @@ Feature: basic use
     Scenario: fetch arg - fetch arg in spec
       Given the following bean class:
       """
-      public class Bean {
-        public String str;
-        public Bean setStr(String s) {
-          this.str = s;
+      public class Address {
+        public String country;
+        public Address setCountry(String s) {
+          this.country = s;
           return this;
         }
       }
       """
       And the following bean class:
       """
-      public class BeanWrapper {
-        public Bean bean;
-        public BeanWrapper setBean(Bean b) {
-          this.bean = b;
+      public class Author {
+        public Address address;
+        public Author setAddress(Address b) {
+          this.address = b;
           return this;
         }
       }
       """
       And the following bean class:
       """
-      public class BeanWrapperWrapper {
-        public BeanWrapper beanWrapper;
+      public class Book {
+        public Author author;
       }
       """
       And register:
       """
-      jFactory.factory(BeanWrapperWrapper.class).spec(instance -> instance.spec()
-        .property("beanWrapper").value(new BeanWrapper().setBean(new Bean()
-          .setStr(instance.params("beanWrapper").params("bean").param("p")))));
+      jFactory.factory(Book.class).spec(instance -> instance.spec()
+        .property("author").value(new Author().setAddress(new Address()
+          .setCountry(instance.params("author").params("address").param("p")))));
       """
       When build:
       """
-      jFactory.type(BeanWrapperWrapper.class).args("beanWrapper.bean", arg("p", "hello")).create();
+      jFactory.type(Book.class).args("author.address", arg("p", "USA")).create();
       """
       Then the result should:
       """
-      beanWrapper.bean.str= hello
+      author.address.country= USA
       """
 
     Scenario: pass args - pass args to another builder
       Given the following bean class:
       """
-      public class Bean {
-        public String str;
+      public class Author {
+        public String country;
       }
       """
       And the following bean class:
       """
-      public class BeanWrapper {
-        public Bean bean;
+      public class Book {
+        public Author author;
       }
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
-        .property("str").value((Object) instance.param("p")));
+      jFactory.factory(Author.class).spec(instance -> instance.spec()
+        .property("country").value((Object) instance.param("p")));
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
-        .property("bean").byFactory(builder ->builder.args(instance.params())));
+      jFactory.factory(Book.class).spec(instance -> instance.spec()
+        .property("author").byFactory(builder ->builder.args(instance.params())));
       """
       When build:
       """
-      jFactory.type(BeanWrapper.class).arg("p", "hello").create();
+      jFactory.type(Book.class).arg("p", "USA").create();
       """
       Then the result should:
       """
-      bean.str= hello
+      author.country= USA
       """
 
   Rule: create array
