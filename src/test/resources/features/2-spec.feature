@@ -18,7 +18,7 @@ Feature: use spec
       Given the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
 
         @Override
         public void main() {
@@ -33,7 +33,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.spec(ABean.class).traits("hello").create();
+      jFactory.spec(BeanSpec.class).traits("hello").create();
       """
       Then the result should:
       """
@@ -44,7 +44,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.createAs(ABean.class, spec -> spec.hello());
+      jFactory.createAs(BeanSpec.class, spec -> spec.hello());
       """
       Then the result should:
       """
@@ -55,7 +55,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.createAs("hello", "ABean");
+      jFactory.createAs("hello", "BeanSpec");
       """
       Then the result should:
       """
@@ -77,7 +77,7 @@ Feature: use spec
       And the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value").value("hello");
@@ -103,7 +103,7 @@ Feature: use spec
       And the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value1").value("hello");
@@ -112,7 +112,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.register(ABean.class);
+      jFactory.register(BeanSpec.class);
       jFactory.removeGlobalSpec(Bean.class);
       """
       When build:
@@ -138,7 +138,7 @@ Feature: use spec
       """
       And the following spec class:
       """
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value2").value("spec class");
@@ -152,7 +152,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.spec(ABean.class).create();
+      jFactory.spec(BeanSpec.class).create();
       """
       Then the result should:
       """
@@ -172,7 +172,7 @@ Feature: use spec
       And the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value2").value("global spec class");
@@ -206,7 +206,7 @@ Feature: use spec
       And the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value2").value("global spec class");
@@ -249,7 +249,7 @@ Feature: use spec
       """
       And the following spec class:
       """
-      public class ABean extends Spec<Bean>{
+      public class BeanSpec extends Spec<Bean>{
       }
       """
       And the following spec class:
@@ -264,7 +264,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.createAs(ABean.class);
+      jFactory.createAs(BeanSpec.class);
       """
       Then the result should:
       """
@@ -282,7 +282,7 @@ Feature: use spec
       """
       And the following spec class:
       """
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value").value("class spec");
@@ -296,7 +296,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.spec(ABean.class).create();
+      jFactory.spec(BeanSpec.class).create();
       """
       Then the result should:
       """
@@ -313,7 +313,7 @@ Feature: use spec
       And the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value").value("class spec");
@@ -344,7 +344,7 @@ Feature: use spec
       And the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value").value("global class spec");
@@ -412,7 +412,7 @@ Feature: use spec
       """
       And the following spec class:
       """
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Trait
         public void hello() {
           property("value").value("hello");
@@ -421,7 +421,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.spec("hello", "ABean").create();
+      jFactory.spec("hello", "BeanSpec").create();
       """
       Then the result should:
       """
@@ -437,7 +437,7 @@ Feature: use spec
       """
       Given the following spec class:
       """
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value").value("type spec");
@@ -451,7 +451,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.spec("hello", "ABean").create();
+      jFactory.spec("hello", "BeanSpec").create();
       """
       Then the result should:
       """
@@ -467,14 +467,14 @@ Feature: use spec
       """
       Given the following spec class:
       """
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value").value("type spec");
         }
 
         @Trait
-        public ABean hello() {
+        public BeanSpec hello() {
           property("value").value("hello");
           return this;
         }
@@ -482,7 +482,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.createAs(ABean.class, spec -> spec.hello());
+      jFactory.createAs(BeanSpec.class, spec -> spec.hello());
       """
       Then the result should:
       """
@@ -499,7 +499,7 @@ Feature: use spec
       Given the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         @Override
         public void main() {
           property("value").value("type spec");
@@ -530,7 +530,7 @@ Feature: use spec
       Given the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
         private static int i = 0;
 
         @Override
@@ -541,7 +541,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.spec(ABean.class).create();
+      jFactory.spec(BeanSpec.class).create();
       """
       Then the result should:
       """
@@ -560,7 +560,7 @@ Feature: use spec
       Given the following spec class:
       """
       @Global
-      public class ABean extends Spec<Bean> {
+      public class BeanSpec extends Spec<Bean> {
       }
       """
       When build:

@@ -5,55 +5,55 @@ Feature: input property
     Scenario: support multi properties in nested property creation and query
       Given the following bean class:
       """
-      public class Bean {
-        public String value1, value2;
+      public class Contact {
+        public String name, email;
       }
       """
       And the following bean class:
       """
-      public class BeanWrapper {
-        public Bean bean;
+      public class Author {
+        public Contact contact;
       }
       """
       And the following bean class:
       """
-      public class BeanWrapperWrapper {
-        public BeanWrapper beanWrapper;
+      public class Book {
+        public Author author;
       }
       """
       When build:
       """
-      jFactory.type(BeanWrapperWrapper.class)
-        .property("beanWrapper.bean.value1", "hello")
-        .property("beanWrapper.bean.value2", "world")
+      jFactory.type(Book.class)
+        .property("author.contact.name", "Tom")
+        .property("author.contact.email", "tom@gmail.com")
         .create();
       """
       Then the result should:
       """
-      beanWrapper.bean= {
-        value1= hello
-        value2= world
+      author.contact= {
+        name= Tom
+        email= tom@gmail.com
       }
       """
       And operate:
       """
-      jFactory.type(BeanWrapperWrapper.class)
-        .property("beanWrapper.bean.value1", "hello")
-        .property("beanWrapper.bean.value2", "world")
+      jFactory.type(Book.class)
+        .property("author.contact.name", "Tom")
+        .property("author.contact.email", "tom@gmail.com")
         .create();
       """
       When build:
       """
-      jFactory.type(BeanWrapperWrapper.class)
-        .property("beanWrapper.bean.value1", "hello")
-        .property("beanWrapper.bean.value2", "world")
+      jFactory.type(Book.class)
+        .property("author.contact.name", "Tom")
+        .property("author.contact.email", "tom@gmail.com")
         .query();
       """
       Then the result should:
       """
-      beanWrapper.bean= {
-        value1= hello
-        value2= world
+      author.contact= {
+        name= Tom
+        email= tom@gmail.com
       }
       """
 
