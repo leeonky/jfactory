@@ -499,7 +499,6 @@ Feature: transformer
       value[]: []
       """
 
-
   Rule: sub creation
 
     Background:
@@ -733,6 +732,72 @@ Feature: transformer
       Then the result should:
       """
       value: [a b c]
+      """
+
+  Rule: list value creation
+
+    Background:
+      Given the following bean class:
+      """
+      public class Bean {
+        public String[] values;
+      }
+      """
+
+    Scenario: define in type
+      Given register:
+      """
+      jFactory.factory(Bean.class).transformer("values[]", String::toUpperCase);
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("values[0]", "hello").create();
+      """
+      Then the result should:
+      """
+      values: [ HELLO ]
+      """
+
+    Scenario: transformer not matched
+      Given register:
+      """
+      jFactory.factory(Bean.class).transformer("values[]", new Transformer() {
+          @Override
+          public Object transform(String input) {
+              return null;
+          }
+
+          @Override
+          public boolean matches(String input) {
+              return false;
+          }
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("values[0]", "hello").create();
+      """
+      Then the result should:
+      """
+      values: [ hello ]
+      """
+
+    Scenario: define in type and then query
+      Given register:
+      """
+      jFactory.factory(Bean.class).transformer("values[]", String::toUpperCase);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("values[0]", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("values[0]", "hello").query();
+      """
+      Then the result should:
+      """
+      values: [ HELLO ]
       """
 
 #    //        TODO merge annotation with field alias
