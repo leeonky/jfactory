@@ -254,7 +254,7 @@ Feature: transformer
       value: '(hello)'
       """
 
-  Rule: single creation, define in spec
+  Rule: single creation, define in spec factory
 
     Scenario: define use transformer by spec, sub spec
       And the following spec class:
@@ -334,6 +334,171 @@ Feature: transformer
       """
       value: HELLO
       """
+
+    Scenario: define in spec factory and not match in type
+      Given the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(ABean.class).transformer("value", String::toUpperCase);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("value", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      value[]: []
+      """
+
+    Scenario: define in spec factory and match in spec
+      Given the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(ABean.class).transformer("value", String::toUpperCase);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value= HELLO
+      """
+
+    Scenario: define in spec factory and match in sub spec
+      Given the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And the following spec class:
+      """
+      public class ABeanWithMore extends ABean {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(ABean.class).transformer("value", String::toUpperCase);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.spec(ABeanWithMore.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value= HELLO
+      """
+
+    Scenario: define in spec factory with global spec and match in spec
+      Given the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And the following spec class:
+      """
+      @Global
+      public class GlobalABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(GlobalABean.class).transformer("value", String::toUpperCase);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value= HELLO
+      """
+
+    Scenario: define in spec factory and not match in another spec
+      Given the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And the following spec class:
+      """
+      public class AnotherBean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(ABean.class).transformer("value", String::toUpperCase);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.spec(AnotherBean.class).property("value", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      value[]: []
+      """
+
+    Scenario: define in spec factory and not match in another global spec
+      Given the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And the following spec class:
+      """
+      @Global
+      public class GlobalABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(ABean.class).transformer("value", String::toUpperCase);
+      """
+      And register:
+      """
+      jFactory.register(GlobalABean.class);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.spec(GlobalABean.class).property("value", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      value[]: []
+      """
+
 
   Rule: sub creation
 

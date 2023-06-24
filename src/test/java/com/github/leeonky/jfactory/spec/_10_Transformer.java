@@ -451,7 +451,7 @@ public class _10_Transformer {
             @Nested
             class DefineInSpec {
 
-                @Test
+//                @Test
                 void not_match_in_type() {
                     jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
@@ -459,7 +459,7 @@ public class _10_Transformer {
                     assertThat(jFactory.type(Bean.class).property("content", "abc").queryAll()).isEmpty();
                 }
 
-                @Test
+//                @Test
                 void matches_in_same_spec() {
                     Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
@@ -467,7 +467,7 @@ public class _10_Transformer {
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
-                @Test
+//                @Test
                 void matches_in_sub_spec() {
                     Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
@@ -475,7 +475,7 @@ public class _10_Transformer {
                     assertThat(jFactory.spec(ABeanWithMore.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
-                @Test
+//                @Test
                 void matches_from_base_spec() {
                     Bean bean = jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.specFactory(GlobalABean.class).transformer("content", String::toUpperCase);
@@ -483,7 +483,7 @@ public class _10_Transformer {
                     assertThat(jFactory.spec(ABean.class).property("content", "abc").query()).isSameAs(bean);
                 }
 
-                @Test
+//                @Test
                 void not_match_in_other_spec() {
                     jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
@@ -491,7 +491,7 @@ public class _10_Transformer {
                     assertThat(jFactory.spec(AnotherBean.class).property("content", "abc").queryAll()).isEmpty();
                 }
 
-                @Test
+//                @Test
                 void not_match_in_other_global_spec() {
                     jFactory.type(Bean.class).property("content", "ABC").create();
                     jFactory.specFactory(ABean.class).transformer("content", String::toUpperCase);
