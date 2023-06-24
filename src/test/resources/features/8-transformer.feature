@@ -254,6 +254,68 @@ Feature: transformer
       value: '(hello)'
       """
 
+    Scenario: define in type and match in spec with no override global spec defined
+      Given register:
+      """
+      jFactory.factory(Bean.class).transformer("value", String::toUpperCase);
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And the following spec class:
+      """
+      @Global
+      public class GlobalABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.register(GlobalABean.class);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
+
+    Scenario: define in type and match in global spec
+      Given register:
+      """
+      jFactory.factory(Bean.class).transformer("value", String::toUpperCase);
+      """
+      And the following spec class:
+      """
+      @Global
+      public class GlobalABean extends Spec<Bean> {
+      }
+      """
+      And register:
+      """
+      jFactory.register(GlobalABean.class);
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("value", "HELLO").create();
+      """
+      When build:
+      """
+      jFactory.spec(GlobalABean.class).property("value", "hello").query();
+      """
+      Then the result should:
+      """
+      value: HELLO
+      """
+
+
   Rule: single creation, define in spec factory
 
     Scenario: define use transformer by spec, sub spec
