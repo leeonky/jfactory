@@ -131,6 +131,7 @@ public class IntegrationTestContext {
         String className = "Snip" + (snippetIndex++);
         String snipCode = "import java.util.function.*;\n" +
                 "import java.util.*;\n" +
+                "import java.util.stream.*;\n" +
                 "import com.github.leeonky.util.*;\n" +
                 "import com.github.leeonky.jfactory.*;\n" +
                 "import static com.github.leeonky.jfactory.ArgumentMapFactory.arg;\n" +
