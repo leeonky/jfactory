@@ -72,6 +72,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    environment 'TZ', 'GMT'
 }
 
 pitest {
