@@ -723,3 +723,79 @@ Feature: System Default Value
       """
       values: [A, B]
       """
+
+  Rule: system default value for basic type
+
+    Scenario: system default value for String
+      When build:
+      """
+      jFactory.type(String.class).create();
+      """
+      Then the result should:
+      """
+      = ''
+      """
+
+    Scenario: first system default value for Date
+      When build:
+      """
+      jFactory.type(Date.class).create();
+      """
+      Then the result should:
+      """
+      toInstant: '1970-01-01T00:00:00.001Z'
+      """
+      When build:
+      """
+      jFactory.type(Date.class).create();
+      """
+      Then the result should:
+      """
+      toInstant: '1970-01-01T00:00:00.002Z'
+      """
+
+#    Scenario: throw exception now - system default value for enum
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#          public enum EnumType {
+#            A, B
+#          }
+#      }
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.EnumType.class).create();
+#      """
+#      Then the result should:
+#      """
+#      = ''      # now throws exception
+#      """
+#
+#    Scenario Outline: throw exception now - system default value for Integer/Long/Byte/Short/Float/BigInteger/BigDecimal/Boolean/UUID/LocalDate/Instant/LocalTime/LocalDateTime/OffsetDateTime
+#      When build:
+#      """
+#      jFactory.type(<type>.class).create();
+#      """
+#      Then the result should:
+#      """
+#      = 1       # now throws exception
+#      """
+#      Examples:
+#        | type                     |
+#        | Integer                  |
+#        | Long                     |
+#        | Byte                     |
+#        | Short                    |
+#        | Float                    |
+#        | BigInteger               |
+#        | BigDecimal               |
+#        | Boolean                  |
+#        | UUID                     |
+#        | java.time.LocalDate      |
+#        | java.time.Instant        |
+#        | java.time.LocalTime      |
+#        | java.time.LocalDateTime  |
+#        | java.time.OffsetDateTime |
+
+
