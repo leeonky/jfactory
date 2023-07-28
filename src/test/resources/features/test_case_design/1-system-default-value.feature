@@ -521,7 +521,7 @@ Feature: System Default Value
         | List<java.time.LocalTime>     | "08:48:03"                             | "17:26:03"                             | "00:00:01"                             | "00:00:01"                             |
         | java.time.LocalDateTime[]     | "2023-06-25T08:48:03"                  | "2023-07-08T17:26:03"                  | "1996-01-23T00:00:01"                  | "1996-01-23T00:00:01"                  |
         | List<java.time.LocalDateTime> | "2023-06-25T08:48:03"                  | "2023-07-08T17:26:03"                  | "1996-01-23T00:00:01"                  | "1996-01-23T00:00:01"                  |
-#   failed with exception as test below      | boolean[]        | true                | false                | true              | true               |
+        | boolean[]                     | true                                   | false                                  | true                                   | true                                   |
 
 #    Scenario: boolean array with more than one elements value specified
 #      Given the following bean class:

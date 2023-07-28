@@ -55,7 +55,7 @@ repositories {
 }
 
 dependencies {
-    compile dep(':bean-util', '0.6.3')
+    compile dep(':bean-util', '0.6.4')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.3'
     testImplementation 'org.assertj:assertj-core:3.15.0'
     testImplementation 'org.projectlombok:lombok:1.18.12'
