@@ -341,6 +341,7 @@ Feature: System Default Value
         | BigDecimal[]                  | 42.0                                   | 1.0                                    |
         | List<BigDecimal>              | 42.0                                   | 1.0                                    |
         | Set<BigDecimal>               | 42.0                                   | 1.0                                    |
+        | boolean[]                     | true                                   | true                                   |
         | Boolean[]                     | true                                   | true                                   |
         | List<Boolean>                 | true                                   | true                                   |
         | UUID[]                        | "5abbd538-3ef6-4391-8e4f-6dc9f98ac505" | "00000000-0000-0000-0000-000000000001" |
@@ -358,23 +359,6 @@ Feature: System Default Value
         | java.time.LocalDateTime[]     | "2023-06-25T08:48:03"                  | "1996-01-23T00:00:01"                  |
         | List<java.time.LocalDateTime> | "2023-06-25T08:48:03"                  | "1996-01-23T00:00:01"                  |
         | Set<java.time.LocalDateTime>  | "2023-06-25T08:48:03"                  | "1996-01-23T00:00:01"                  |
-#        failed with exception as test below | boolean[]        | true           | true          |
-
-#    Scenario: boolean array with one element value specified
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public boolean[] values;
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("values[1]", true).create();
-#      """
-#      Then the result should:
-#      """
-#      values: [false, true]
-#      """
 
     Scenario: Boolean Set with one element value specified
       Given the following bean class:
@@ -798,4 +782,203 @@ Feature: System Default Value
 #        | java.time.LocalDateTime  |
 #        | java.time.OffsetDateTime |
 
+  Rule: system default value for basic type list
 
+    Scenario Outline: String/int/Integer/short/Short/long/Long/byte/Byte/float/Float/double/Double/BigInteger/BigDecimal/boolean/Boolean/UUID/Date/Instant/LocalDate/LocalTime/LocalDateTime/OffsetDateTime/ZonedDateTime/Enum base type list with no element value specified
+      Given the following bean class:
+      """
+      public class Bean {
+          public enum EnumType {
+            A, B
+          }
+      }
+      """
+      When build:
+      """
+      jFactory.type(<type>.class).create();
+      """
+      Then the result should:
+      """
+      = []
+      """
+      Examples:
+        | type                       |
+        | String[]                   |
+        | int[]                      |
+        | Integer[]                  |
+        | short[]                    |
+        | Short[]                    |
+        | long[]                     |
+        | Long[]                     |
+        | byte[]                     |
+        | Byte[]                     |
+        | float[]                    |
+        | Float[]                    |
+        | double[]                   |
+        | Double[]                   |
+        | BigInteger[]               |
+        | BigDecimal[]               |
+        | boolean[]                  |
+        | Boolean[]                  |
+        | UUID[]                     |
+        | java.time.Instant[]        |
+        | java.time.LocalDate[]      |
+        | java.time.LocalTime[]      |
+        | java.time.LocalDateTime[]  |
+        | java.time.OffsetDateTime[] |
+        | java.time.ZonedDateTime[]  |
+        | Date[]                     |
+        | Bean.EnumType[]            |
+        | List                       |
+        | Set                        |
+
+    Scenario: list with one element specified
+      When build:
+      """
+      jFactory.type(List.class).property("[1]", "hello").create();
+      """
+      Then the result should:
+      """
+      = [null, hello]
+      """
+
+#    Scenario: throw exception now - set with one element specified
+#      When build:
+#      """
+#      jFactory.type(Set.class).property("[1]", "hello").create();
+#      """
+#      Then the result should:
+#      """
+#      = [null, hello]       # now throw exception
+#      """
+
+    Scenario: list with more than one element specified
+      When build:
+      """
+      jFactory.type(List.class).property("[1]", "hello").property("[3]", "world").create();
+      """
+      Then the result should:
+      """
+      = [null, hello, null, world]
+      """
+
+    Scenario Outline: String/Integer/Long/Short/Byte/Float/Double/BigInteger/BigDecimal/Boolean/UUID/LocalDate/LocalTime/Instant/LocalDateTime/OffsetDateTime/Enum basic type array with one element specified
+      Given the following bean class:
+      """
+      public class Bean {
+          public enum EnumType {
+            A, B
+          }
+      }
+      """
+      When build:
+      """
+      jFactory.type(<type>[].class).property("[1]", <specifiedValue>).create();
+      """
+      Then the result should:
+      """
+      : [<defaultValue>, <specifiedValue>]
+      """
+      Examples:
+        | type                     | specifiedValue                         | defaultValue                           |
+        | String                   | "hello"                                | "0#1"                                  |
+        | Integer                  | 42                                     | 1                                      |
+        | Long                     | 42                                     | 1                                      |
+        | Short                    | 42                                     | 1                                      |
+        | Byte                     | 42                                     | 1                                      |
+        | Float                    | 42.0f                                  | 1.0f                                   |
+        | Double                   | 42.0d                                  | 1.0d                                   |
+        | BigInteger               | 42                                     | 1                                      |
+        | BigDecimal               | 42.0                                   | 1.0                                    |
+        | Boolean                  | true                                   | true                                   |
+        | UUID                     | "5abbd538-3ef6-4391-8e4f-6dc9f98ac505" | "00000000-0000-0000-0000-000000000001" |
+        | java.time.LocalDate      | "2023-06-25"                           | "1996-01-24"                           |
+        | java.time.LocalTime      | "08:48:03"                             | "00:00:01"                             |
+        | java.time.Instant        | "2023-06-25T08:48:03Z"                 | "1996-01-23T00:00:01Z"                 |
+        | java.time.LocalDateTime  | "2023-06-25T08:48:03"                  | "1996-01-23T00:00:01"                  |
+        | java.time.OffsetDateTime | "2023-06-25T08:48:03Z"                 | "1996-01-23T00:00:01Z"                 |
+        | Bean.EnumType            | "B"                                    | "A"                                    |
+
+    Scenario: Date basic type array with one element specified
+      When build:
+      """
+      jFactory.type(Date[].class).property("[1]", "2023-06-25").create();
+      """
+      Then the result should:
+      """
+      : {
+        0.toInstant: "1996-01-24T00:00:00Z"
+        1.toInstant: "2023-06-25T00:00:00Z"
+      }
+      """
+
+#    Scenario Outline: throw exception now - int/short/long/byte/float/double/boolean basic type array with one element specified
+#      When build:
+#      """
+#      jFactory.type(<type>[].class).property("[1]", <specifiedValue>).create();
+#      """
+#      Then the result should:
+#      """
+#      = [<defaultValue>, <specifiedValue>]      # now throw exception
+#      """
+#      Examples:
+#        | type    | specifiedValue | defaultValue |
+#        | int     | 42             | 1            |
+#        | short   | 42             | 1            |
+#        | long    | 42             | 1            |
+#        | byte    | 42             | 1            |
+#        | float   | 42.0f          | 1.0f         |
+#        | double  | 42.0d          | 1.0d         |
+#        | boolean | true           | true         |
+
+    Scenario Outline: String/Integer/Long/Short/Byte/Float/Double/BigInteger/BigDecimal/Boolean/UUID/LocalDate/LocalTime/Instant/LocalDateTime/OffsetDateTime/Enum basic type array with more than one element specified
+      Given the following bean class:
+      """
+      public class Bean {
+          public enum EnumType {
+            A, B
+          }
+      }
+      """
+      When build:
+      """
+      jFactory.type(<type>[].class).property("[1]", <firstSpecifiedValue>).property("[3]", <secondSpecifiedValue>).create();
+      """
+      Then the result should:
+      """
+      : [<firstDefaultValue>, <firstSpecifiedValue>, <secondDefaultValue>, <secondSpecifiedValue>]
+      """
+      Examples:
+        | type                     | firstSpecifiedValue                    | secondSpecifiedValue                   | firstDefaultValue                      | secondDefaultValue                     |
+        | String                   | "hello"                                | "world"                                | "0#1"                                  | "2#1"                                  |
+        | Integer                  | 42                                     | 12306                                  | 1                                      | 1                                      |
+        | Long                     | 42                                     | 12306                                  | 1                                      | 1                                      |
+        | Short                    | 42                                     | 12306                                  | 1                                      | 1                                      |
+        | Byte                     | 42                                     | 75                                     | 1                                      | 1                                      |
+        | Float                    | 42.0                                   | 75.0                                   | 1.0                                    | 1.0                                    |
+        | Double                   | 42.0                                   | 75.0                                   | 1.0                                    | 1.0                                    |
+        | BigInteger               | 42                                     | 75                                     | 1                                      | 1                                      |
+        | BigDecimal               | 42.0                                   | 75.0                                   | 1.0                                    | 1.0                                    |
+        | Boolean                  | true                                   | false                                  | true                                   | true                                   |
+        | UUID                     | "5b5e9230-3b4e-4b6e-8f0d-0b9e8e0e6c6d" | "7f6e5d4c-3b2a-1b0c-9a8b-7c6d5e4f3a2b" | "00000000-0000-0000-0000-000000000001" | "00000000-0000-0000-0000-000000000001" |
+        | java.time.LocalDate      | "2023-06-25"                           | "2023-07-08"                           | "1996-01-24"                           | "1996-01-24"                           |
+        | java.time.LocalTime      | "08:48:03"                             | "17:26:03"                             | "00:00:01"                             | "00:00:01"                             |
+        | java.time.Instant        | "2023-06-25T08:48:03Z"                 | "2023-07-08T08:48:03Z"                 | "1996-01-23T00:00:01Z"                 | "1996-01-23T00:00:01Z"                 |
+        | java.time.LocalDateTime  | "2023-06-25T08:48:03"                  | "2023-07-08T17:26:03"                  | "1996-01-23T00:00:01"                  | "1996-01-23T00:00:01"                  |
+        | java.time.OffsetDateTime | "2023-06-25T08:48:03Z"                 | "2023-07-08T15:26:03Z"                 | "1996-01-23T00:00:01Z"                 | "1996-01-23T00:00:01Z"                 |
+        | Bean.EnumType            | "B"                                    | "A"                                    | "A"                                    | "A"                                    |
+
+    Scenario: Date basic type array with more than one element specified
+      When build:
+      """
+      jFactory.type(Date[].class).property("[1]", "2023-06-25").property("[3]", "2023-07-08").create();
+      """
+      Then the result should:
+      """
+      : {
+        0.toInstant: "1996-01-24T00:00:00Z"
+        1.toInstant: "2023-06-25T00:00:00Z"
+        2.toInstant: "1996-01-24T00:00:00Z"
+        3.toInstant: "2023-07-08T00:00:00Z"
+      }
+      """
