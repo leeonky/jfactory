@@ -3,6 +3,12 @@ Feature: System Default Value
   Please don't rely on the system default value in your test as it may change in the future.
 
   Background:
+    Given the following bean class:
+      """
+      public class CustomObject {
+        public String anyProperty;
+      }
+      """
     And declaration jFactory =
       """
       new JFactory(new DataRepository() {
@@ -123,6 +129,38 @@ Feature: System Default Value
         offsetDateTime.toInstant: '1996-01-23T00:00:02Z'
         zonedDateTime.toInstant: '1996-01-23T00:00:02Z'
         enumValue: B
+      }
+      """
+
+  Scenario: first and second system default value for bean property with custom type
+    Given the following bean class:
+      """
+      public class Bean {
+        public java.time.YearMonth yearMonth;
+        public CustomObject customObject;
+      }
+      """
+    When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+    Then the result should:
+      """
+      = {
+        yearMonth= null
+        customObject= null
+      }
+      """
+    When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+    Then the result should:
+      """
+      = {
+
+        yearMonth= null
+        customObject= null
       }
       """
 
@@ -291,6 +329,32 @@ Feature: System Default Value
         | List<EnumType>                 |
         | Set<EnumType>                  |
 
+    Scenario Outline: Custom type list with no element value specified
+      Given the following bean class:
+      """
+      public class Bean {
+        public <type> values;
+        public enum EnumType {
+          A, B
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+      Then the result should:
+      """
+      values: null
+      """
+      Examples:
+        | type                      |
+        | java.time.YearMonth[]     |
+        | List<java.time.YearMonth> |
+        | Set<java.time.YearMonth>  |
+        | CustomObject[]            |
+        | List<CustomObject>        |
+        | Set<CustomObject>         |
     Scenario Outline: String/int/Integer/short/Short/long/Long/byte/Byte/float/Float/double/Double/BigInteger/BigDecimal/boolean/Boolean/UUID/Instant/LocalDate/LocalTime/LocalDateTime list with one element value specified
       Given the following bean class:
       """
@@ -451,6 +515,30 @@ Feature: System Default Value
         | List<EnumType> |
         | Set<EnumType>  |
 
+    Scenario Outline: Custom type list with one element value specified
+      Given the following bean class:
+      """
+      public class Bean {
+        public <type> values;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("values[1]", <specifiedValue>).create();
+      """
+      Then the result should:
+      """
+      values: [<defaultValue>, <expectedSpecifiedValue>]
+      """
+      Examples:
+        | type                      | specifiedValue     | defaultValue | expectedSpecifiedValue |
+        | java.time.YearMonth[]     | "2023-06"          | null         | '2023-06'              |
+        | List<java.time.YearMonth> | "2023-06"          | null         | '2023-06'              |
+        | Set<java.time.YearMonth>  | "2023-06"          | null         | '2023-06'              |
+        | CustomObject[]            | new CustomObject() | null         | {...}                  |
+        | List<CustomObject>        | new CustomObject() | null         | {...}                  |
+        | Set<CustomObject>         | new CustomObject() | null         | {...}                  |
+
     Scenario Outline: String/int/Integer/short/Short/long/Long/byte/Byte/float/Float/double/Double/BigInteger/BigDecimal/boolean/Boolean/UUID/Instant/LocalDate/LocalTime/LocalDateTime list with more than one elements value specified
       Given the following bean class:
       """
@@ -493,6 +581,7 @@ Feature: System Default Value
         | List<BigInteger>              | 42                                     | 75                                     | 1                                      | 1                                      |
         | BigDecimal[]                  | 42.0                                   | 75.0                                   | 1.0                                    | 1.0                                    |
         | List<BigDecimal>              | 42.0                                   | 75.0                                   | 1.0                                    | 1.0                                    |
+        | boolean[]                     | true                                   | false                                  | true                                   | true                                   |
         | Boolean[]                     | true                                   | false                                  | true                                   | true                                   |
         | List<Boolean>                 | true                                   | false                                  | true                                   | true                                   |
         | UUID[]                        | "5b5e9230-3b4e-4b6e-8f0d-0b9e8e0e6c6d" | "7f6e5d4c-3b2a-1b0c-9a8b-7c6d5e4f3a2b" | "00000000-0000-0000-0000-000000000001" | "00000000-0000-0000-0000-000000000001" |
@@ -506,22 +595,6 @@ Feature: System Default Value
         | java.time.LocalDateTime[]     | "2023-06-25T08:48:03"                  | "2023-07-08T17:26:03"                  | "1996-01-23T00:00:01"                  | "1996-01-23T00:00:01"                  |
         | List<java.time.LocalDateTime> | "2023-06-25T08:48:03"                  | "2023-07-08T17:26:03"                  | "1996-01-23T00:00:01"                  | "1996-01-23T00:00:01"                  |
         | boolean[]                     | true                                   | false                                  | true                                   | true                                   |
-
-#    Scenario: boolean array with more than one elements value specified
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#          public boolean[] values;
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("values[1]", true).property("values[3]", false).create();
-#      """
-#      Then the result should:
-#      """
-#      values: [true, true, true, false]
-#      """
 
     Scenario Outline: Integer/Short/Long/Byte/Float/Double/BigInteger/BigDecimal/UUID/Instant/LocalDate/LocalDateTime Set with more than one elements value specified
       Given the following bean class:
@@ -738,6 +811,44 @@ Feature: System Default Value
       toInstant: '1970-01-01T00:00:00.002Z'
       """
 
+#    Scenario: throw exception now - system default value for custom type YearMonth
+#      When build:
+#      """
+#      jFactory.type(java.time.YearMonth.class).create();
+#      """
+#      Then the result should:
+#      """
+#      = null
+#      """
+
+    Scenario: system default value for any custom type
+      Given the following bean class:
+      """
+      public class AnyCustomObject {
+        public String anyProperty;
+      }
+      """
+      When build:
+      """
+      jFactory.type(AnyCustomObject.class).create();
+      """
+      Then the result should:
+      """
+      = {
+        anyProperty: anyProperty#1
+      }
+      """
+      When build:
+      """
+      jFactory.type(AnyCustomObject.class).create();
+      """
+      Then the result should:
+      """
+      = {
+        anyProperty: anyProperty#2
+      }
+      """
+
 #    Scenario: throw exception now - system default value for enum
 #      Given the following bean class:
 #      """
@@ -832,6 +943,20 @@ Feature: System Default Value
         | List                       |
         | Set                        |
 
+    Scenario Outline: Custom base type list with no element value specified
+      When build:
+      """
+      jFactory.type(<type>.class).create();
+      """
+      Then the result should:
+      """
+      = []
+      """
+      Examples:
+        | type                  |
+        | java.time.YearMonth[] |
+        | CustomObject[]        |
+
     Scenario: list with one element specified
       When build:
       """
@@ -898,6 +1023,20 @@ Feature: System Default Value
         | java.time.LocalDateTime  | "2023-06-25T08:48:03"                  | "1996-01-23T00:00:01"                  |
         | java.time.OffsetDateTime | "2023-06-25T08:48:03Z"                 | "1996-01-23T00:00:01Z"                 |
         | Bean.EnumType            | "B"                                    | "A"                                    |
+
+    Scenario Outline: Custom basic type array with one element specified
+      When build:
+      """
+      jFactory.type(<type>[].class).property("[1]", <specifiedValue>).create();
+      """
+      Then the result should:
+      """
+      : [<defaultValue>, <expectedSpecifiedValue>]
+      """
+      Examples:
+        | type                | specifiedValue     | defaultValue | expectedSpecifiedValue |
+        | java.time.YearMonth | "2023-06"          | null         | '2023-06'              |
+        | CustomObject        | new CustomObject() | null         | { anyProperty= null }  |
 
     Scenario: Date basic type array with one element specified
       When build:
@@ -967,6 +1106,20 @@ Feature: System Default Value
         | java.time.LocalDateTime  | "2023-06-25T08:48:03"                  | "2023-07-08T17:26:03"                  | "1996-01-23T00:00:01"                  | "1996-01-23T00:00:01"                  |
         | java.time.OffsetDateTime | "2023-06-25T08:48:03Z"                 | "2023-07-08T15:26:03Z"                 | "1996-01-23T00:00:01Z"                 | "1996-01-23T00:00:01Z"                 |
         | Bean.EnumType            | "B"                                    | "A"                                    | "A"                                    | "A"                                    |
+
+    Scenario Outline: Custom basic type array with more than one element specified
+      When build:
+      """
+      jFactory.type(<type>[].class).property("[1]", <firstSpecifiedValue>).property("[3]", <secondSpecifiedValue>).create();
+      """
+      Then the result should:
+      """
+      : [<firstDefaultValue>, <expectedFirstSpecifiedValue>, <secondDefaultValue>, <expectedSecondSpecifiedValue>]
+      """
+      Examples:
+        | type                | firstSpecifiedValue | secondSpecifiedValue | firstDefaultValue | secondDefaultValue | expectedFirstSpecifiedValue | expectedSecondSpecifiedValue |
+        | java.time.YearMonth | "2023-06"           | "2023-07"            | null              | null               | '2023-06'                   | '2023-07'                    |
+        | CustomObject        | new CustomObject()  | new CustomObject()   | null              | null               | { anyProperty= null }       | { anyProperty= null }        |
 
     Scenario: Date basic type array with more than one element specified
       When build:
