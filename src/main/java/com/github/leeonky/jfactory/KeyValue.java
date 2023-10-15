@@ -13,7 +13,7 @@ import static java.lang.Integer.parseInt;
 //TODO use a parser to parse this
 class KeyValue {
     private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
-    private static final String PATTERN_COLLECTION_INDEX = "(\\[(\\d+)])?";
+    private static final String PATTERN_COLLECTION_INDEX = "(\\[(-?\\d+)])?";
     private static final String PATTERN_SPEC_TRAIT_WORD = "[^, )]";
     private static final String PATTERN_TRAIT = "((" + PATTERN_SPEC_TRAIT_WORD + "+[, ])(" + PATTERN_SPEC_TRAIT_WORD + "+[, ])*)?";
     private static final String PATTERN_SPEC = "(" + PATTERN_SPEC_TRAIT_WORD + "+)";

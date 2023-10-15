@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static java.lang.Integer.max;
 import static java.lang.Integer.valueOf;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
@@ -44,12 +45,20 @@ class CollectionProducer<T, C> extends Producer<C> {
     public void setChild(String property, Producer<?> producer) {
         int intIndex = valueOf(property);
         fillCollectionWithDefaultValue(intIndex);
+        if (intIndex < 0)
+            intIndex = children.size() + intIndex;
         children.set(intIndex, producer);
     }
 
     private void fillCollectionWithDefaultValue(int index) {
-        for (int i = children.size(); i <= index; i++)
-            children.add(placeholderFactory.apply(i));
+        if (index >= 0) {
+            for (int i = children.size(); i <= index; i++)
+                children.add(placeholderFactory.apply(i));
+        } else {
+            int count = max(children.size(), -index) - children.size();
+            for (int i = 0; i < count; i++)
+                children.add(i, placeholderFactory.apply(i));
+        }
     }
 
     @Override

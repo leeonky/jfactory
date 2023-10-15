@@ -466,6 +466,59 @@ Feature: input property
       beansList.beans[]: [ null ]
       """
 
+  Rule: negative index in collection
+    Background:
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans;
+      }
+      """
+
+    Scenario: input last property when has default element spec
+      And the following spec class:
+      """
+      public class BeansSpec extends Spec<Beans> {
+        public void main() {
+          property("beans[0]").byFactory();
+          property("beans[1]").byFactory();
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeansSpec.class)
+        .property("beans[-1].value", "hello")
+      .create();
+      """
+      Then the result should:
+      """
+      beans.value[]: [{...} hello]
+      """
+
+    Scenario: should auto fill collection from index 0 when index is negative
+      When build:
+      """
+      jFactory.type(Beans.class)
+        .property("beans[-1].value", "world")
+        .property("beans[-2].value", "hello")
+      .create();
+      """
+      Then the result should:
+      """
+      beans.value[]: [hello world]
+      """
+
+#  TODO -1 -2 increase by insert from left
+#  TODO mix [0] [-2]
+#  TODO merge [0] [-1]
+
   Rule: intently create
 
     Scenario: intently create sub object should always create object evan repo has one matched data
