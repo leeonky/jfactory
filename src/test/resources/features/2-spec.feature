@@ -734,14 +734,19 @@ Feature: use spec
       value= '3'
       """
 
-    Scenario: raise error when args and parameters count is different
+    Scenario: ignore trait args when count different
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
       Given the following spec class:
       """
-      public class BeanSpec extends Spec<Object> {
-
+      public class BeanSpec extends Spec<Bean> {
         @Trait("input-(.+)-(.+)")
         public void input(int i) {
-          property("value").value(i+j);
+          property("value").value(i);
         }
       }
       """
@@ -751,5 +756,5 @@ Feature: use spec
       """
       Then the result should:
       """
-      value= '3'
+      value= '1'
       """
