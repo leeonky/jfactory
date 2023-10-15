@@ -496,7 +496,7 @@ Feature: define dependency
       Then the result should:
 #TODO should be beans<<[0], [1]>>
       """
-      <<beans[0], beans[1]>>.stringValue= hello
+      beans<<[0], [1]>>.stringValue= hello
       """
 
     Scenario: ignore dependency when input property override dependency
@@ -595,7 +595,7 @@ Feature: define dependency
       """
       Then the result should:
       """
-      beans[0].<<str1, str2>>= hello
+      beans[0]<<str1, str2>>= hello
       """
 
   Rule: ignore dependency

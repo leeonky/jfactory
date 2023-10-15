@@ -62,7 +62,7 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.3'
 
-    testImplementation dep(':DAL-java', '0.3.17')
+    testImplementation dep(':DAL-java', '0.3.22')
     testImplementation dep(':java-compiler-util', '0.0.3')
     testImplementation "io.cucumber:cucumber-java:6.10.4"
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.0.0'

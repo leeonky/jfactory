@@ -6,11 +6,13 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class ObjectFactory<T> implements Factory<T> {
     protected final FactorySet factorySet;
     private final BeanClass<T> type;
-    private final Map<String, Consumer<Instance<T>>> traits = new HashMap<>();
+    private final Map<Pattern, Consumer<Instance<T>>> traits = new HashMap<>();
     private final Map<String, Transformer> transformers = new LinkedHashMap<>();
     private final Transformer passThrough = input -> input;
     private Function<Instance<T>, T> constructor = this::defaultConstruct;
@@ -47,7 +49,7 @@ class ObjectFactory<T> implements Factory<T> {
 
     @Override
     public Factory<T> spec(String name, Consumer<Instance<T>> traits) {
-        this.traits.put(name, Objects.requireNonNull(traits));
+        this.traits.put(Pattern.compile(name), Objects.requireNonNull(traits));
         return this;
     }
 
@@ -66,12 +68,35 @@ class ObjectFactory<T> implements Factory<T> {
         return this;
     }
 
+    private static class TraitExecutor<T> {
+        private final Consumer<Instance<T>> action;
+        private final List<Object> args = new ArrayList<>();
+
+        public TraitExecutor(Matcher matcher, Consumer<Instance<T>> action) {
+            for (int i = 0; i < matcher.groupCount(); i++)
+                args.add(matcher.group(i + 1));
+            this.action = action;
+        }
+
+        public void execute(Instance<T> instance) {
+            ((RootInstance<T>) instance).runTraitWithParams(args.toArray(), action);
+        }
+    }
+
     public void collectSpec(Collection<String> traits, Instance<T> instance) {
         spec.accept(instance);
         collectSubSpec(instance);
-        traits.stream().map(name -> this.traits.computeIfAbsent(name, k -> {
-            throw new IllegalArgumentException("Trait `" + k + "` not exist");
-        })).forEach(spec -> spec.accept(instance));
+        for (String name : traits)
+            queryTrait(name).execute(instance);
+    }
+
+    private TraitExecutor<T> queryTrait(String name) {
+        for (Map.Entry<Pattern, Consumer<Instance<T>>> e : traits.entrySet()) {
+            Matcher matcher = e.getKey().matcher(name);
+            if (matcher.matches())
+                return new TraitExecutor<>(matcher, e.getValue());
+        }
+        throw new IllegalArgumentException("Trait `" + name + "` not exist");
     }
 
     protected void collectSubSpec(Instance<T> instance) {

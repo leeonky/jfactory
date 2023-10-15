@@ -20,4 +20,10 @@ public interface Instance<T> {
     default int collectionSize() {
         return 0;
     }
+
+    Object[] traitParams();
+
+    default Object traitParam(int index) {
+        return traitParams()[index];
+    }
 }

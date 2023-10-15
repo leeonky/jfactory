@@ -6,11 +6,13 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 class RootInstance<T> implements Instance<T> {
+    private static final Object[] NO_TRAIT_PARAMS = new Object[0];
     protected final Spec<T> spec;
     protected final DefaultArguments arguments;
     private final int sequence;
     private final ValueCache<T> valueCache = new ValueCache<>();
     private int collectionSize = 0;
+    private Object[] traitParams = NO_TRAIT_PARAMS;
 
     public RootInstance(int sequence, Spec<T> spec, DefaultArguments arguments) {
         this.sequence = sequence;
@@ -68,5 +70,19 @@ class RootInstance<T> implements Instance<T> {
     @Override
     public int collectionSize() {
         return collectionSize;
+    }
+
+    @Override
+    public Object[] traitParams() {
+        return traitParams;
+    }
+
+    void runTraitWithParams(Object[] params, Consumer<Instance<T>> action) {
+        traitParams = params;
+        try {
+            action.accept(this);
+        } finally {
+            traitParams = NO_TRAIT_PARAMS;
+        }
     }
 }

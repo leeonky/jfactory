@@ -630,3 +630,82 @@ Feature: use spec
       message= 'More than one @Global Spec class `#package#Spec1` and `#package#Spec2`'
       """
 
+  Rule: args in trait
+
+    Scenario: support use parameter in Trait lambda
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec("input-(.+)", ins -> {
+          ins.spec().property("value").value(ins.traitParam(0));
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).traits("input-hello").create();
+      """
+      Then the result should:
+      """
+      value= hello
+      """
+
+    Scenario: support multi args in trait lambda
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec("input-(.+)-(.+)", ins -> {
+          ins.spec().property("value").value(ins.traitParam(0)+ "_" +  ins.traitParam(1));
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).traits("input-hello-world").create();
+      """
+      Then the result should:
+      """
+      value= hello_world
+      """
+
+    Scenario: support multi args and multi traits in trait lambda
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2, value3;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec("input1-(.+)-(.+)", ins -> {
+          ins.spec().property("value1").value(ins.traitParam(0)+ "_1_" +  ins.traitParam(1));
+      });
+      jFactory.factory(Bean.class).spec("input3-(.+)-(.+)", ins -> {
+          ins.spec().property("value3").value(ins.traitParam(0)+ "_3_" +  ins.traitParam(1));
+      });
+      jFactory.factory(Bean.class).spec("input-value2", ins -> {
+          ins.spec().property("value2").value("v2");
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).traits("input1-hello-world", "input-value2", "input3-goodbye-world").create();
+      """
+      Then the result should:
+      """
+      value{}: {
+        '1'= hello_1_world
+        '2'= v2
+        '3'= goodbye_3_world
+      }
+      """
+
+# trait method
