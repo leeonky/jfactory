@@ -1,8 +1,10 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Converter;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -38,7 +40,15 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     private void registerTraits() {
         Stream.of(specClass.getMethods())
                 .filter(this::isTraitMethod)
-                .forEach(method -> spec(getTraitName(method), instance -> run(() -> method.invoke(instance.spec()))));
+                .forEach(method -> spec(getTraitName(method), instance -> run(() ->
+                        method.invoke(instance.spec(), convertParams(method, instance.traitParams())))));
+    }
+
+    private Object[] convertParams(Method method, Object[] traitParams) {
+        return new ArrayList<Object>() {{
+            for (int i = 0; i < method.getParameterTypes().length; i++)
+                add(Converter.getInstance().convert(method.getParameterTypes()[i], traitParams[i]));
+        }}.toArray();
     }
 
     private boolean isTraitMethod(Method method) {

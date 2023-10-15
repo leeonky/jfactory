@@ -708,4 +708,48 @@ Feature: use spec
       }
       """
 
-# trait method
+    Scenario: support args in trait method
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+
+        @Trait("input-(.+)-(.+)")
+        public void input(int i, int j) {
+          property("value").value(i+j);
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).traits("input-1-2").create();
+      """
+      Then the result should:
+      """
+      value= '3'
+      """
+
+    Scenario: raise error when args and parameters count is different
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Object> {
+
+        @Trait("input-(.+)-(.+)")
+        public void input(int i) {
+          property("value").value(i+j);
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).traits("input-1-2").create();
+      """
+      Then the result should:
+      """
+      value= '3'
+      """
