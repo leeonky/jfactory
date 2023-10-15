@@ -2,6 +2,8 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.Property;
 
+import java.util.List;
+
 abstract class Expression<P> {
     protected final Property<P> property;
     protected boolean intently = false;
@@ -21,6 +23,10 @@ abstract class Expression<P> {
     protected abstract boolean isPropertyMatch(Object propertyValue);
 
     public abstract Producer<?> buildProducer(JFactory jFactory, Producer<P> parent);
+
+    static <T> Expression<T> merge(List<Expression<T>> expressions) {
+        return expressions.stream().reduce(Expression::mergeTo).get();
+    }
 
     protected Expression<P> mergeTo(Expression<P> newExpression) {
         return newExpression;

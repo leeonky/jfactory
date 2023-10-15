@@ -40,7 +40,7 @@ public class KeyValueCollection {
     <T> Collection<Expression<T>> expressions(BeanClass<T> type, ObjectFactory<T> objectFactory) {
         return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type, objectFactory))
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
-                .map(expressions -> expressions.stream().reduce(Expression::mergeTo).get())
+                .map(Expression::merge)
                 .collect(Collectors.toList());
     }
 

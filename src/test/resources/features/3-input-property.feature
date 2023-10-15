@@ -472,6 +472,7 @@ Feature: input property
       """
       public class Bean {
         public String value;
+        public String value2;
       }
       """
       And the following bean class:
@@ -515,9 +516,72 @@ Feature: input property
       beans.value[]: [hello world]
       """
 
-#  TODO -1 -2 increase by insert from left
-#  TODO mix [0] [-2]
-#  TODO merge [0] [-1]
+    Scenario: collection override when use both positive and negative index
+      When build:
+      """
+      jFactory.type(Beans.class)
+        .property("beans[0].value", "world")
+        .property("beans[-2].value", "hello")
+      .create();
+      """
+      Then the result should:
+      """
+      beans.value[]: [hello world]
+      """
+      When build:
+      """
+      jFactory.type(Beans.class)
+        .property("beans[-2].value", "hello")
+        .property("beans[0].value", "world")
+      .create();
+      """
+      Then the result should:
+      """
+      beans: [{
+        value= world
+      }, null]
+      """
+
+    Scenario: mixed using positive and negative index
+      When build:
+      """
+      jFactory.type(Beans.class)
+        .property("beans[2].value", "world")
+        .property("beans[-2].value", "hello")
+      .create();
+      """
+      Then the result should:
+      """
+      beans: [null {value= hello} {value= world}]
+      """
+
+    Scenario: merge same sub object when mixed using positive and negative index
+      Given the following bean class:
+      """
+      public class BeanRef {
+        public Bean bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanRefs {
+        public BeanRef[] beanRefs;
+      }
+      """
+      When build:
+      """
+      jFactory.type(BeanRefs.class)
+        .property("beanRefs[-1].bean.value", "hello")
+        .property("beanRefs[0].bean.value2", "world")
+      .create();
+      """
+      Then the result should:
+      """
+      beanRefs.bean[]= [{
+        value= hello
+        value2= world
+      }]
+      """
 
   Rule: intently create
 

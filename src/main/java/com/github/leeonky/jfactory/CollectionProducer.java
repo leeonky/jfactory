@@ -50,15 +50,17 @@ class CollectionProducer<T, C> extends Producer<C> {
         children.set(intIndex, producer);
     }
 
-    private void fillCollectionWithDefaultValue(int index) {
+    public int fillCollectionWithDefaultValue(int index) {
+        int changed = 0;
         if (index >= 0) {
-            for (int i = children.size(); i <= index; i++)
+            for (int i = children.size(); i <= index; i++, changed++)
                 children.add(placeholderFactory.apply(i));
         } else {
             int count = max(children.size(), -index) - children.size();
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++, changed++)
                 children.add(i, placeholderFactory.apply(i));
         }
+        return changed;
     }
 
     @Override
@@ -89,5 +91,9 @@ class CollectionProducer<T, C> extends Producer<C> {
         children.stream().filter(ObjectProducer.class::isInstance).map(ObjectProducer.class::cast).forEach(objectProducer ->
                 objectProducer.setupAssociation(association, instance, cachedChildren));
 
+    }
+
+    public int childrenCount() {
+        return children.size();
     }
 }

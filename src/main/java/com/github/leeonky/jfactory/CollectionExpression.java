@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.CollectionHelper;
 import com.github.leeonky.util.Property;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +35,32 @@ class CollectionExpression<P, E> extends Expression<P> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(JFactory jFactory, Producer<P> parent) {
-        CollectionProducer<?, E> collectionProducer = cast(parent.childOrDefault(property.getName()),
+        CollectionProducer<?, E> producer = cast(parent.childOrDefault(property.getName()),
                 CollectionProducer.class).orElseThrow(IllegalArgumentException::new);
-        children.forEach((k, v) ->
-                collectionProducer.setChild(k.toString(), v.buildProducer(jFactory, collectionProducer)));
-        return collectionProducer;
+        groupByAdjustedPositiveAndNegativeIndexExpression(producer).forEach((index, expressions) ->
+                producer.setChild(index.toString(), merge(expressions).buildProducer(jFactory, producer)));
+        return producer;
+    }
+
+    private Map<Integer, List<Expression<E>>> groupByAdjustedPositiveAndNegativeIndexExpression(
+            CollectionProducer<?, E> collectionProducer) {
+        Map<Integer, List<Expression<E>>> result = new LinkedHashMap<>();
+        for (Map.Entry<Integer, Expression<E>> entry : children.entrySet()) {
+            int index = entry.getKey();
+            int addedProducerCount = collectionProducer.fillCollectionWithDefaultValue(index);
+            if (index < 0) {
+                index = collectionProducer.childrenCount() + index;
+                result = adjustIndexByInserted(result, addedProducerCount);
+            }
+            result.computeIfAbsent(index, k -> new ArrayList<>()).add(entry.getValue());
+        }
+        return result;
+    }
+
+    private LinkedHashMap<Integer, List<Expression<E>>> adjustIndexByInserted(
+            Map<Integer, List<Expression<E>>> result, int addedProducerCount) {
+        return result.entrySet().stream().collect(LinkedHashMap::new,
+                (m, e) -> m.put(e.getKey() + addedProducerCount, e.getValue()), LinkedHashMap::putAll);
     }
 
     @Override
@@ -49,13 +71,10 @@ class CollectionExpression<P, E> extends Expression<P> {
     @Override
     @SuppressWarnings("unchecked")
     protected Expression<P> mergeFrom(CollectionExpression<P, ?> origin) {
-        origin.children.forEach((index, expression) ->
-                children.put(index, mergeFromOrAssign(index, (Expression<E>) expression)));
-        return this;
-    }
-
-    private Expression<E> mergeFromOrAssign(Integer index, Expression<E> expression) {
-        return children.containsKey(index) ? expression.mergeTo(children.get(index)) : expression;
+        children.forEach((index, expression) ->
+                origin.children.put(index, origin.children.containsKey(index) ?
+                        origin.children.get(index).mergeTo((Expression) expression) : (Expression) expression));
+        return origin;
     }
 
     @Override
