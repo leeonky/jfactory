@@ -494,7 +494,6 @@ Feature: define dependency
       jFactory.type(BeanArray.class).property("beans[1].stringValue", "hello").create();
       """
       Then the result should:
-#TODO should be beans<<[0], [1]>>
       """
       beans<<[0], [1]>>.stringValue= hello
       """

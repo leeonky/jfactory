@@ -31,6 +31,7 @@ public class BuilderValueProducer<T> extends Producer<T> {
         return this;
     }
 
+    //    TODO need test missing all test of this method() query in spec and should be created after merge input property
     public Producer<?> getProducer() {
         Object[] objects = builder.queryAll().toArray();
         if (objects.length != 0)
