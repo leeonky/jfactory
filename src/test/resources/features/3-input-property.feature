@@ -467,6 +467,7 @@ Feature: input property
       """
 
   Rule: negative index in collection
+
     Background:
       Given the following bean class:
       """

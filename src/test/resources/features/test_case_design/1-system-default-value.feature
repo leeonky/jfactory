@@ -355,6 +355,7 @@ Feature: System Default Value
         | CustomObject[]            |
         | List<CustomObject>        |
         | Set<CustomObject>         |
+
     Scenario Outline: String/int/Integer/short/Short/long/Long/byte/Byte/float/Float/double/Double/BigInteger/BigDecimal/boolean/Boolean/UUID/Instant/LocalDate/LocalTime/LocalDateTime list with one element value specified
       Given the following bean class:
       """

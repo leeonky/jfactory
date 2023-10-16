@@ -6,10 +6,7 @@ import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.JavaCompiler;
 import com.github.leeonky.util.JavaCompilerPool;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -24,6 +21,10 @@ public class IntegrationTestContext {
     private final List<String> registers = new ArrayList<>();
     private final List<Class> classes = new ArrayList<>();
     private final List<Runnable> register = new ArrayList<>();
+
+    {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
     public static int threadsCount(String env, int defaultValue) {
         String value = System.getenv(env);
