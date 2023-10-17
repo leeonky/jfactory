@@ -38,16 +38,18 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     public Optional<Producer<?>> child(String property) {
         int index = valueOf(property);
+        if (index < 0)
+            index = children.size() + index;
         return Optional.ofNullable(index < children.size() ? children.get(index) : null);
     }
 
     @Override
     public void setChild(String property, Producer<?> producer) {
-        int intIndex = valueOf(property);
-        fillCollectionWithDefaultValue(intIndex);
-        if (intIndex < 0)
-            intIndex = children.size() + intIndex;
-        children.set(intIndex, producer);
+        int index = valueOf(property);
+        fillCollectionWithDefaultValue(index);
+        if (index < 0)
+            index = children.size() + index;
+        children.set(index, producer);
     }
 
     public int fillCollectionWithDefaultValue(int index) {
