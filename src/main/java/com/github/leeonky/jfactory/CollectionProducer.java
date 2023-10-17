@@ -38,8 +38,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     public Optional<Producer<?>> child(String property) {
         int index = valueOf(property);
-        if (index < 0)
-            index = children.size() + index;
+        index = transformNegativeIndex(index);
         return Optional.ofNullable(index < children.size() ? children.get(index) : null);
     }
 
@@ -47,9 +46,13 @@ class CollectionProducer<T, C> extends Producer<C> {
     public void setChild(String property, Producer<?> producer) {
         int index = valueOf(property);
         fillCollectionWithDefaultValue(index);
+        children.set(transformNegativeIndex(index), producer);
+    }
+
+    private int transformNegativeIndex(int index) {
         if (index < 0)
             index = children.size() + index;
-        children.set(index, producer);
+        return index;
     }
 
     public int fillCollectionWithDefaultValue(int index) {
@@ -69,7 +72,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     public Producer<?> childOrDefault(String property) {
         int index = valueOf(property);
         fillCollectionWithDefaultValue(index);
-        return children.get(index);
+        return children.get(transformNegativeIndex(index));
     }
 
     @Override

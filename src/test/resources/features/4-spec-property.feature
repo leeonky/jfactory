@@ -899,6 +899,38 @@ Feature: define spec
       ]
       """
 
+    Scenario: support negative index in spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+        public Bean setValue(String v) {
+          this.value = v;
+          return this;
+        }
+      }
+      """
+      And the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans;
+      }
+      """
+      When register:
+      """
+      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+        .property("beans[0]").value(new Bean().setValue("world"))
+        .property("beans[-2]").value(new Bean().setValue("hello")));
+      """
+      When build:
+      """
+      jFactory.create(Beans.class);
+      """
+      Then the result should:
+      """
+      beans.value[]= [hello world]
+      """
+
 #    Scenario: collection element property should override collection spec
     Scenario: to be implement
       Given the following bean class:
@@ -935,7 +967,7 @@ Feature: define spec
       """
       class.simpleName: IllegalArgumentException
       """
-#      TODO
+#      TODO ?
 #      Then the result should:
 #      """
 #      beans.value[]: [ hello ]
