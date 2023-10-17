@@ -38,7 +38,7 @@ class CollectionExpression<P, E> extends Expression<P> {
         CollectionProducer<?, E> producer = cast(parent.childOrDefault(property.getName()),
                 CollectionProducer.class).orElseThrow(IllegalArgumentException::new);
         groupByAdjustedPositiveAndNegativeIndexExpression(producer).forEach((index, expressions) ->
-                producer.setChild(index.toString(), merge(expressions).buildProducer(jFactory, producer)));
+                producer.changeChild(index.toString(), merge(expressions).buildProducer(jFactory, producer)));
         return producer;
     }
 

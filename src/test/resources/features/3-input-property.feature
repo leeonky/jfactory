@@ -900,6 +900,187 @@ Feature: input property
       }
       """
 
+  Rule: try to use a spec in collection
+
+    Scenario: should try use a spec in parent spec and override property when input and keep the value in spec which not specified from input property in collection
+      Given the following bean class:
+      """
+      public class Product {
+        public String name, color;
+        public int price;
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public Product[] products;
+      }
+      """
+      And the following spec class:
+      """
+      public class DefaultProduct extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("product");
+        }
+        @Trait
+        public void Red() {
+          property("color").value("red");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class AStore extends Spec<Store> {
+        @Override
+        public void main() {
+          property("products[0]").from(DefaultProduct.class).which(spec -> spec.Red());
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(AStore.class).property("products[0].price", "100").create();
+      """
+      Then the result should:
+      """
+      products= [{
+        name= product
+        color= red
+        price= 100
+      }]
+      """
+
+    Scenario: input property could override spec and trait in parent spec in collection
+      Given the following bean class:
+      """
+      public class Product {
+        public String name, color;
+        public int price;
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public Product[] products;
+      }
+      """
+      And the following spec class:
+      """
+      public class DefaultProduct extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("product");
+        }
+        @Trait
+        public void Red() {
+          property("color").value("red");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class Computer extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("computer");
+        }
+        @Trait
+        public void Black() {
+          property("color").value("black");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class AStore extends Spec<Store> {
+        @Override
+        public void main() {
+          property("products[0]").from(DefaultProduct.class).which(spec -> spec.Red());
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(AStore.class).property("products[0](Black Computer).price", "100").create();
+      """
+      Then the result should:
+      """
+      products= [{
+        name= computer
+        color= black
+        price= 100
+      }]
+      """
+
+    Scenario: spec in property chain in collection
+      Given the following bean class:
+      """
+      public class Product {
+        public String name, color;
+        public int price;
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public Product[] products;
+      }
+      """
+      And the following bean class:
+      """
+      public class StoreGroup {
+        public Store store;
+      }
+      """
+      And the following spec class:
+      """
+      public class DefaultProduct extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("product");
+        }
+        @Trait
+        public void Red() {
+          property("color").value("red");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class Computer extends Spec<Product> {
+        @Override
+        public void main() {
+          property("name").value("computer");
+        }
+        @Trait
+        public void Black() {
+          property("color").value("black");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class AStore extends Spec<Store> {
+        @Override
+        public void main() {
+          property("products[0]").from(DefaultProduct.class).which(spec -> spec.Red());
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.type(StoreGroup.class).property("store(AStore).products[0](Black Computer).price", "100").create();
+      """
+      Then the result should:
+      """
+      store.products= [{
+        name= computer
+        color= black
+        price= 100
+      }]
+      """
+
   Rule: property in structured way
 
     Scenario: use PropertyValue
