@@ -140,6 +140,7 @@ Feature: define link
       """
 
 #      TODO link priority object producer with sub input property > object producer
+
     Scenario: element link property
       Given the following bean class:
       """
@@ -232,6 +233,27 @@ Feature: define link
       Then the result should:
       """
       <<beans[0].value, beans[1].value, value>>= hello
+      """
+
+    Scenario: support negative index in link
+      Given the following bean class:
+      """
+      public class Bean {
+        public String[] values;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+          .link("values[0]", "values[-1]"));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("values[1]", "hello").property("values[2]", "world").create();
+      """
+      Then the result should:
+      """
+      values= [world hello world]
       """
 
   Rule: nested link
