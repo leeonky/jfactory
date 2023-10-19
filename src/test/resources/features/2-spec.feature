@@ -758,3 +758,56 @@ Feature: use spec
       """
       value= '1'
       """
+
+    Scenario: should use trait with full name matched first
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec("input-(.+)", ins -> {
+        throw new RuntimeException("failed");
+      }).spec("input-hello", ins -> {
+          ins.spec().property("value").value("hello");
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).traits("input-hello").create();
+      """
+      Then the result should:
+      """
+      value= hello
+      """
+
+    Scenario: raise error when more than one pattern matched
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).spec("input-(.+)", ins -> {
+        throw new RuntimeException("failed");
+      }).spec("input-(.*)", ins -> {
+        throw new RuntimeException("failed");
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).traits("input-hello").create();
+      """
+      Then should raise error:
+      """
+      message= ```
+               Ambiguous trait pattern: input-hello, candidates are:
+                 input-(.+)
+                 input-(.*)
+               ```
+      """
+

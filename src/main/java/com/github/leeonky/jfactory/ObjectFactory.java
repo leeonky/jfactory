@@ -8,11 +8,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 class ObjectFactory<T> implements Factory<T> {
     protected final FactorySet factorySet;
     private final BeanClass<T> type;
-    private final Map<Pattern, Consumer<Instance<T>>> traits = new HashMap<>();
+    private final Map<String, Consumer<Instance<T>>> traits = new LinkedHashMap<>();
+    private final Map<String, Pattern> traitPatterns = new LinkedHashMap<>();
     private final Map<String, Transformer> transformers = new LinkedHashMap<>();
     private final Transformer passThrough = input -> input;
     private Function<Instance<T>, T> constructor = this::defaultConstruct;
@@ -48,8 +50,9 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> spec(String name, Consumer<Instance<T>> traits) {
-        this.traits.put(Pattern.compile(name), Objects.requireNonNull(traits));
+    public Factory<T> spec(String name, Consumer<Instance<T>> trait) {
+        traits.put(name, Objects.requireNonNull(trait));
+        traitPatterns.put(name, Pattern.compile(name));
         return this;
     }
 
@@ -78,6 +81,10 @@ class ObjectFactory<T> implements Factory<T> {
             this.action = action;
         }
 
+        public TraitExecutor(Consumer<Instance<T>> action) {
+            this.action = action;
+        }
+
         public void execute(Instance<T> instance) {
             ((RootInstance<T>) instance).runTraitWithParams(args.toArray(), action);
         }
@@ -91,11 +98,16 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     private TraitExecutor<T> queryTrait(String name) {
-        for (Map.Entry<Pattern, Consumer<Instance<T>>> e : traits.entrySet()) {
-            Matcher matcher = e.getKey().matcher(name);
-            if (matcher.matches())
-                return new TraitExecutor<>(matcher, e.getValue());
-        }
+        Consumer<Instance<T>> action = traits.get(name);
+        if (action != null)
+            return new TraitExecutor<>(action);
+        List<Matcher> matchers = traitPatterns.values().stream().map(p -> p.matcher(name)).filter(Matcher::matches)
+                .collect(Collectors.toList());
+        if (matchers.size() == 1)
+            return new TraitExecutor<>(matchers.get(0), traits.get(matchers.get(0).pattern().pattern()));
+        if (matchers.size() > 1)
+            throw new IllegalArgumentException(String.format("Ambiguous trait pattern: %s, candidates are:\n%s", name,
+                    matchers.stream().map(p -> "  " + p.pattern().pattern()).collect(Collectors.joining("\n"))));
         throw new IllegalArgumentException("Trait `" + name + "` not exist");
     }
 
