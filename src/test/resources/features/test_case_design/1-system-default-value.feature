@@ -166,7 +166,48 @@ Feature: System Default Value
 
   Rule: recursive system default value for bean property
 
-    Scenario Outline: byte/Byte/short/Short/boolean/Boolean/LocalTime, for int/Integer/long/Long single test runs too long time so have to be ignored
+    Scenario Outline: byte/Byte/short/Short/boolean/Boolean, for int/Integer/long/Long single test runs too long time so have to be ignored
+      Given the following bean class:
+      """
+      public class Bean {
+        public <primitiveType> primitiveValue;
+        public <classType> classTypeValue;
+      }
+      """
+      When register:
+      """
+      IntStream.range(0, <sequence>).forEach(i -> {
+        jFactory.type(Bean.class).create();
+      });
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+      Then the result should:
+      """
+      : {
+        primitiveValue: <value>
+        classTypeValue: <value>
+      }
+      """
+      Examples:
+        | primitiveType | classType | sequence            | value   |
+        | byte          | Byte      | Byte.MAX_VALUE-1    | 127y    |
+        | byte          | Byte      | Byte.MAX_VALUE      | -128    |
+        | byte          | Byte      | Byte.MAX_VALUE+1    | -127y   |
+        | byte          | Byte      | Byte.MAX_VALUE*2    | -1y     |
+        | byte          | Byte      | Byte.MAX_VALUE*2+1  | 0y      |
+        | byte          | Byte      | Byte.MAX_VALUE*2+2  | 1y      |
+        | short         | Short     | Short.MAX_VALUE-1   | 32767s  |
+        | short         | Short     | Short.MAX_VALUE     | -32768  |
+        | short         | Short     | Short.MAX_VALUE+1   | -32767s |
+        | short         | Short     | Short.MAX_VALUE*2   | -1s     |
+        | short         | Short     | Short.MAX_VALUE*2+1 | 0s      |
+        | short         | Short     | Short.MAX_VALUE*2+2 | 1s      |
+        | boolean       | Boolean   | 2                   | true    |
+
+    Scenario Outline: LocalTime
       Given the following bean class:
       """
       public class Bean {
@@ -188,34 +229,8 @@ Feature: System Default Value
       value: <value>
       """
       Examples:
-        | type                | sequence            | value      |
-        | byte                | Byte.MAX_VALUE-1    | 127y       |
-        | byte                | Byte.MAX_VALUE      | -128       |
-        | byte                | Byte.MAX_VALUE+1    | -127y      |
-        | byte                | Byte.MAX_VALUE*2    | -1y        |
-        | byte                | Byte.MAX_VALUE*2+1  | 0y         |
-        | byte                | Byte.MAX_VALUE*2+2  | 1y         |
-        | Byte                | Byte.MAX_VALUE-1    | 127y       |
-        | Byte                | Byte.MAX_VALUE      | -128       |
-        | Byte                | Byte.MAX_VALUE+1    | -127y      |
-        | Byte                | Byte.MAX_VALUE*2    | -1y        |
-        | Byte                | Byte.MAX_VALUE*2+1  | 0y         |
-        | Byte                | Byte.MAX_VALUE*2+2  | 1y         |
-        | short               | Short.MAX_VALUE-1   | 32767s     |
-        | short               | Short.MAX_VALUE     | -32768     |
-        | short               | Short.MAX_VALUE+1   | -32767s    |
-        | short               | Short.MAX_VALUE*2   | -1s        |
-        | short               | Short.MAX_VALUE*2+1 | 0s         |
-        | short               | Short.MAX_VALUE*2+2 | 1s         |
-        | Short               | Short.MAX_VALUE-1   | 32767s     |
-        | Short               | Short.MAX_VALUE     | -32768     |
-        | Short               | Short.MAX_VALUE+1   | -32767s    |
-        | Short               | Short.MAX_VALUE*2   | -1s        |
-        | Short               | Short.MAX_VALUE*2+1 | 0s         |
-        | Short               | Short.MAX_VALUE*2+2 | 1s         |
-        | boolean             | 2                   | true       |
-        | Boolean             | 2                   | true       |
-        | java.time.LocalTime | 24*60*60            | '00:00:01' |
+        | type                | sequence | value      |
+        | java.time.LocalTime | 24*60*60 | '00:00:01' |
 
     Scenario: Enum
       Given the following bean class:
