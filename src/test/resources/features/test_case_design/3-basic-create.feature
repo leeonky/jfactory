@@ -695,7 +695,7 @@ Feature: Basic Create
       message= /Cannot convert from .+NumberToBeConverted to class java.math.BigDecimal/
       """
 
-  Rule: Create bean with propertyValue("name", PropertyValue)
+  Rule: Create bean with propertyValue("name", PropertyValue) and properties(PropertyValue)
 
     Background:
       And the following bean class:
@@ -726,6 +726,38 @@ Feature: Basic Create
         }
       }
       """
+      And the following bean class:
+      """
+      public class PropertyValueImplWithName<T> implements PropertyValue {
+        private final T value;
+        private final String name;
+
+        public PropertyValueImplWithName(String name, T value) {
+          this.value = value;
+          this.name = name;
+        }
+
+        public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
+          return builder.property(name, value);
+        }
+      }
+      """
+      And the following bean class:
+      """
+      public class PropertyValueImplConvertedWithName<T, C> implements PropertyValue {
+        private final C value;
+        private final String name;
+
+        public PropertyValueImplConvertedWithName(String name, C value) {
+          this.value = value;
+          this.name = name;
+        }
+
+        public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
+          return builder.property(name, value);
+        }
+      }
+      """
 
     Scenario Outline: Create bean with propertyValue("name", PropertyValue) - All base type = except special cases
       Given the following bean class:
@@ -737,6 +769,14 @@ Feature: Basic Create
       When build:
       """
       jFactory.type(Bean.class).propertyValue("value", new PropertyValueImpl<<type>>(<input>)).create();
+      """
+      Then the result should:
+      """
+      value= <expected>
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplWithName<<type>>("value", <input>)).create();
       """
       Then the result should:
       """
@@ -770,6 +810,14 @@ Feature: Basic Create
       """
       value= <expected>
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, String>("value", <input>)).create();
+      """
+      Then the result should:
+      """
+      value= <expected>
+      """
       Examples:
         | type       | input    | expected |
         | Integer    | "42"     | 42       |
@@ -797,6 +845,14 @@ Feature: Basic Create
       """
       value: <expected>
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplWithName<<type>>("value", <input>)).create();
+      """
+      Then the result should:
+      """
+      value: <expected>
+      """
       Examples:
         | type                     | input                                                                            | expected                               |
         | UUID                     | UUID.fromString("123e4567-e89b-12d3-a456-426655440000")                          | '123e4567-e89b-12d3-a456-426655440000' |
@@ -817,6 +873,14 @@ Feature: Basic Create
       When build:
       """
       jFactory.type(Bean.class).propertyValue("value", new PropertyValueImplConverted<<type>, String>(<input>)).create();
+      """
+      Then the result should:
+      """
+      value: <expected>
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, String>("value", <input>)).create();
       """
       Then the result should:
       """
@@ -848,6 +912,14 @@ Feature: Basic Create
       """
       value: <expected>
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplWithName<<type>>("value", <input>)).create();
+      """
+      Then the result should:
+      """
+      value: <expected>
+      """
       Examples:
         | type                | input                           | expected              |
         | java.time.YearMonth | java.time.YearMonth.of(1978, 5) | '1978-05'             |
@@ -863,6 +935,14 @@ Feature: Basic Create
       When build:
       """
       jFactory.type(Bean.class).propertyValue("value", new PropertyValueImplConverted<<type>, String>(<input>)).create();
+      """
+      Then the result should:
+      """
+      value: <expected>
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, String>("value", <input>)).create();
       """
       Then the result should:
       """
@@ -887,6 +967,14 @@ Feature: Basic Create
       """
       value.toInstant: <expected>
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplWithName<<type>>("value", <input>)).create();
+      """
+      Then the result should:
+      """
+      value.toInstant: <expected>
+      """
       Examples:
         | type | input       | expected               |
         | Date | new Date(0) | '1970-01-01T00:00:00Z' |
@@ -901,6 +989,14 @@ Feature: Basic Create
       When build:
       """
       jFactory.type(Bean.class).propertyValue("value", new PropertyValueImplConverted<<type>, String>(<input>)).create();
+      """
+      Then the result should:
+      """
+      value.toInstant: <expected>
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, String>("value", <input>)).create();
       """
       Then the result should:
       """
@@ -933,6 +1029,14 @@ Feature: Basic Create
       """
       value= converted-value
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<String, ToBeConverted>("value", new ToBeConverted())).create();
+      """
+      Then the result should:
+      """
+      value= converted-value
+      """
 
     Scenario Outline: create bean with propertyValue("name", PropertyValue) - Number->byte/Byte/short/Short/int/Integer/long/Long/float/Float/double/Double/BigInteger/BigDecimal
       Given the following bean class:
@@ -944,6 +1048,14 @@ Feature: Basic Create
       When build:
       """
       jFactory.type(Bean.class).propertyValue("value", new PropertyValueImplConverted<<type>, <convertedType>>(<input>)).create();
+      """
+      Then the result should:
+      """
+      value= <expected>
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, <convertedType>>("value", <input>)).create();
       """
       Then the result should:
       """
@@ -1031,6 +1143,14 @@ Feature: Basic Create
       """
       message= /Cannot convert from <errorMessage>/
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, <convertedType>>("value", <input>)).create();
+      """
+      Then should raise error:
+      """
+      message= /Cannot convert from <errorMessage>/
+      """
       Examples:
         | type       | convertedType | input                                                                                                                                                                                                                                                                                                                                   | errorMessage                                    |
         | Byte       | Short         | Short.valueOf("128")                                                                                                                                                                                                                                                                                                                    | java.lang.Short to class java.lang.Byte         |
@@ -1096,6 +1216,14 @@ Feature: Basic Create
       """
       message= /Cannot convert from .+NumberToBeConverted to <typeInMessage>/
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, NumberToBeConverted>("value", new NumberToBeConverted())).create();
+      """
+      Then should raise error:
+      """
+      message= /Cannot convert from .+NumberToBeConverted to <typeInMessage>/
+      """
       Examples:
         | type    | typeInMessage           |
         | Byte    | class java.lang.Byte    |
@@ -1120,6 +1248,14 @@ Feature: Basic Create
       When build:
       """
       jFactory.type(Bean.class).propertyValue("value", new PropertyValueImplConverted<<type>, NumberToBeConverted>(new NumberToBeConverted())).create();
+      """
+      Then should raise error:
+      """
+      message= /Cannot convert from .+NumberToBeConverted to <typeInMessage>/
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, NumberToBeConverted>("value", new NumberToBeConverted())).create();
       """
       Then should raise error:
       """
@@ -1152,6 +1288,14 @@ Feature: Basic Create
       """
       message= /Cannot convert from .+NumberToBeConverted to <typeInMessage>/
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, NumberToBeConverted>("value", new NumberToBeConverted())).create();
+      """
+      Then should raise error:
+      """
+      message= /Cannot convert from .+NumberToBeConverted to <typeInMessage>/
+      """
       Examples:
         | type  | typeInMessage         |
         | Float | class java.lang.Float |
@@ -1174,6 +1318,14 @@ Feature: Basic Create
       When build:
       """
       jFactory.type(Bean.class).propertyValue("value", new PropertyValueImplConverted<<type>, NumberToBeConverted>(new NumberToBeConverted())).create();
+      """
+      Then should raise error:
+      """
+      message= /Cannot convert from .+NumberToBeConverted to <typeInMessage>/
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<<type>, NumberToBeConverted>("value", new NumberToBeConverted())).create();
       """
       Then should raise error:
       """
@@ -1209,6 +1361,14 @@ Feature: Basic Create
       """
       message= /Cannot convert from .+NumberToBeConverted to class java.math.BigInteger/
       """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<BigInteger, NumberToBeConverted>("value", new NumberToBeConverted())).create();
+      """
+      Then should raise error:
+      """
+      message= /Cannot convert from .+NumberToBeConverted to class java.math.BigInteger/
+      """
 
     Scenario: throw exception create bean with propertyValue("name", PropertyValue) and value is a custom Number implementation - Number->BigDecimal
       Given the following bean class:
@@ -1231,6 +1391,14 @@ Feature: Basic Create
       When build:
       """
       jFactory.type(Bean.class).propertyValue("value", new PropertyValueImplConverted<BigDecimal, NumberToBeConverted>(new NumberToBeConverted())).create();
+      """
+      Then should raise error:
+      """
+      message= /Cannot convert from .+NumberToBeConverted to class java.math.BigDecimal/
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValueImplConvertedWithName<BigDecimal, NumberToBeConverted>("value", new NumberToBeConverted())).create();
       """
       Then should raise error:
       """
