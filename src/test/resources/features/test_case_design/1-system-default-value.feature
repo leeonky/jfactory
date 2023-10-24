@@ -1151,3 +1151,267 @@ Feature: System Default Value
         3.toInstant: "2023-07-08T00:00:00Z"
       }
       """
+
+  Rule: Ignore default value
+
+    Background:
+      Given the following bean class:
+      """
+      public class BeanOne {
+        public String stringValue;
+        public int intValue;
+        public Integer integerValue;
+        public short shortValue;
+        public Short shortClassValue;
+        public byte byteValue;
+        public Byte byteClassValue;
+        public long longValue;
+        public Long longClassValue;
+        public float floatValue;
+        public Float floatClassValue;
+        public double doubleValue;
+        public Double doubleClassValue;
+        public boolean booleanValue;
+        public Boolean booleanClassValue;
+        public BigInteger bigIntegerValue;
+        public BigDecimal bigDecimalValue;
+        public UUID uuidValue;
+        public Date dateValue;
+        public java.time.Instant instantValue;
+        public java.time.LocalDate localDateValue;
+        public java.time.LocalTime localTimeValue;
+        public java.time.LocalDateTime localDateTimeValue;
+        public java.time.OffsetDateTime offsetDateTimeValue;
+        public java.time.ZonedDateTime zonedDateTimeValue;
+        public EnumType enumValue;
+
+        public enum EnumType {
+          A, B
+        }
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanTwo {
+        public String stringValue;
+        public int intValue;
+        public Integer integerValue;
+        public short shortValue;
+        public Short shortClassValue;
+        public byte byteValue;
+        public Byte byteClassValue;
+        public long longValue;
+        public Long longClassValue;
+        public float floatValue;
+        public Float floatClassValue;
+        public double doubleValue;
+        public Double doubleClassValue;
+        public boolean booleanValue;
+        public Boolean booleanClassValue;
+        public BigInteger bigIntegerValue;
+        public BigDecimal bigDecimalValue;
+        public UUID uuidValue;
+        public Date dateValue;
+        public java.time.Instant instantValue;
+        public java.time.LocalDate localDateValue;
+        public java.time.LocalTime localTimeValue;
+        public java.time.LocalDateTime localDateTimeValue;
+        public java.time.OffsetDateTime offsetDateTimeValue;
+        public java.time.ZonedDateTime zonedDateTimeValue;
+        public EnumType enumValue;
+
+        public enum EnumType {
+          A, B
+        }
+      }
+      """
+
+    Scenario: Ignore default value for all bean property
+      When register:
+      """
+      jFactory.ignoreDefaultValue(propertyWriter -> Arrays.asList("stringValue", "intValue", "integerValue", "shortValue", "shortClassValue", "byteValue", "byteClassValue", "longValue", "longClassValue", "floatValue", "floatClassValue", "doubleValue", "doubleClassValue", "booleanValue", "booleanClassValue", "bigIntegerValue", "bigDecimalValue", "uuidValue", "dateValue", "instantValue", "localDateValue", "localTimeValue", "localDateTimeValue", "offsetDateTimeValue", "zonedDateTimeValue", "enumValue")
+        .contains(propertyWriter.getName()));
+      """
+      And build:
+      """
+      jFactory.type(BeanOne.class).create();
+      """
+      Then the result should:
+      """
+      : {
+        stringValue= null
+        intValue= 0
+        integerValue= null
+        shortValue= 0s
+        shortClassValue= null
+        byteValue= 0y
+        byteClassValue= null
+        longValue= 0l
+        longClassValue= null
+        floatValue= 0.0f
+        floatClassValue= null
+        doubleValue= 0.0d
+        doubleClassValue= null
+        booleanValue= false
+        booleanClassValue= null
+        bigIntegerValue= null
+        bigDecimalValue= null
+        uuidValue= null
+        dateValue= null
+        instantValue= null
+        localDateValue= null
+        localTimeValue= null
+        localDateTimeValue= null
+        offsetDateTimeValue= null
+        zonedDateTimeValue= null
+        enumValue= null
+      }
+      """
+      And build:
+      """
+      jFactory.type(BeanTwo.class).create();
+      """
+      Then the result should:
+      """
+      : {
+        stringValue= null
+        intValue= 0
+        integerValue= null
+        shortValue= 0s
+        shortClassValue= null
+        byteValue= 0y
+        byteClassValue= null
+        longValue= 0l
+        longClassValue= null
+        floatValue= 0.0f
+        floatClassValue= null
+        doubleValue= 0.0d
+        doubleClassValue= null
+        booleanValue= false
+        booleanClassValue= null
+        bigIntegerValue= null
+        bigDecimalValue= null
+        uuidValue= null
+        dateValue= null
+        instantValue= null
+        localDateValue= null
+        localTimeValue= null
+        localDateTimeValue= null
+        offsetDateTimeValue= null
+        zonedDateTimeValue= null
+        enumValue= null
+      }
+      """
+
+    Scenario: ignore property on spec
+      Given the following spec class:
+      """
+      public class BeanSpecOne extends Spec<BeanOne> {
+
+        @Override
+        public void main() {
+          property("stringValue").ignore();
+          property("intValue").ignore();
+          property("integerValue").ignore();
+          property("shortValue").ignore();
+          property("shortClassValue").ignore();
+          property("byteValue").ignore();
+          property("byteClassValue").ignore();
+          property("longValue").ignore();
+          property("longClassValue").ignore();
+          property("floatValue").ignore();
+          property("floatClassValue").ignore();
+          property("doubleValue").ignore();
+          property("doubleClassValue").ignore();
+          property("booleanValue").ignore();
+          property("booleanClassValue").ignore();
+          property("bigIntegerValue").ignore();
+          property("bigDecimalValue").ignore();
+          property("uuidValue").ignore();
+          property("dateValue").ignore();
+          property("instantValue").ignore();
+          property("localDateValue").ignore();
+          property("localTimeValue").ignore();
+          property("localDateTimeValue").ignore();
+          property("offsetDateTimeValue").ignore();
+          property("zonedDateTimeValue").ignore();
+          property("enumValue").ignore();
+        }
+
+      }
+      """
+      And the following spec class:
+      """
+      public class BeanSpecTwo extends Spec<BeanTwo> {
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpecOne.class).create();
+      """
+      Then the result should:
+      """
+      : {
+        stringValue= null
+        intValue= 0
+        integerValue= null
+        shortValue= 0s
+        shortClassValue= null
+        byteValue= 0y
+        byteClassValue= null
+        longValue= 0l
+        longClassValue= null
+        floatValue= 0.0f
+        floatClassValue= null
+        doubleValue= 0.0d
+        doubleClassValue= null
+        booleanValue= false
+        booleanClassValue= null
+        bigIntegerValue= null
+        bigDecimalValue= null
+        uuidValue= null
+        dateValue= null
+        instantValue= null
+        localDateValue= null
+        localTimeValue= null
+        localDateTimeValue= null
+        offsetDateTimeValue= null
+        zonedDateTimeValue= null
+        enumValue= null
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpecTwo.class).create();
+      """
+      When the result should:
+      """
+      : {
+        stringValue= stringValue#1
+        intValue= 1
+        integerValue= 1
+        shortValue= 1s
+        shortClassValue= 1s
+        byteValue= 1y
+        byteClassValue= 1y
+        longValue= 1l
+        longClassValue= 1l
+        floatValue= 1.0f
+        floatClassValue= 1.0f
+        doubleValue= 1.0d
+        doubleClassValue= 1.0d
+        booleanValue= true
+        booleanClassValue= true
+        bigIntegerValue= 1bi
+        bigDecimalValue= 1bd
+        uuidValue: '00000000-0000-0000-0000-000000000001'
+        dateValue.toInstant: '1996-01-24T00:00:00Z'
+        instantValue: '1996-01-23T00:00:01Z'
+        localDateValue: '1996-01-24'
+        localTimeValue: '00:00:01'
+        localDateTimeValue: '1996-01-23T00:00:01'
+        offsetDateTimeValue.toInstant: '1996-01-23T00:00:01Z'
+        zonedDateTimeValue.toInstant: '1996-01-23T00:00:01Z'
+        enumValue: A
+      }
+      """
