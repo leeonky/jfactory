@@ -45,8 +45,17 @@ public class KeyValueCollection {
     }
 
     <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Property<?> parentProperty, ObjectFactory<?> objectFactory) {
-        return isSingleValue() ? new SingleValueExpression<>(transform(property, parentProperty, objectFactory), traitsSpec, property)
-                : new SubObjectExpression<>(this, traitsSpec, property, objectFactory);
+        if (isSingleValue()) {
+            Object value = transform(property, parentProperty, objectFactory);
+            if (createOrLinkAnyExist(value))
+                return new SubObjectExpression<>(new KeyValueCollection(factorySet), traitsSpec, property, objectFactory);
+            return new SingleValueExpression<>(value, traitsSpec, property);
+        }
+        return new SubObjectExpression<>(this, traitsSpec, property, objectFactory);
+    }
+
+    private boolean createOrLinkAnyExist(Object value) {
+        return value instanceof Map && ((Map<?, ?>) value).isEmpty();
     }
 
     private <H> Object transform(Property<H> property, Property<?> parentProperty, ObjectFactory<?> objectFactory) {

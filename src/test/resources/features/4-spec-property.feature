@@ -1083,6 +1083,34 @@ Feature: define spec
       ]
       """
 
+    Scenario: should not setup reverse association when input a object directly
+      Given the following bean class:
+      """
+      public class Person {
+          public Passport passport;
+      }
+      """
+      And the following bean class:
+      """
+      public class Passport {
+          public Person person;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Person.class).spec(instance -> instance.spec()
+        .property("passport").reverseAssociation("person")
+        .property("passport").byFactory());
+      """
+      When build:
+      """
+      jFactory.type(Person.class).property("passport", new Passport()).create();
+      """
+      Then the result should:
+      """
+      passport.person= null
+      """
+
     Scenario: reverse association on collection
       Given the following bean class:
       """
@@ -1141,4 +1169,35 @@ Feature: define spec
       Then "jFactory.type(OrderLine.class).queryAll()" should
       """
       ::size= 2
+      """
+
+    Scenario: should not setup reverse association when input a collection directly
+      Given the following bean class:
+      """
+      public class Order {
+          public OrderLine[] orderLines;
+      }
+      """
+      And the following bean class:
+      """
+      public class OrderLine {
+          public Order order;
+          public String info;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Order.class).spec(instance -> instance.spec()
+        .property("orderLines").reverseAssociation("order"));
+      """
+      When build:
+      """
+      jFactory.type(Order.class).property("orderLines", new OrderLine[]{new OrderLine()}).create();
+      """
+      Then the result should:
+      """
+      orderLines: [{
+        order= null
+        info= null
+      }]
       """

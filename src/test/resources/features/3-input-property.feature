@@ -222,6 +222,73 @@ Feature: input property
       message= 'Cannot merge different spec `Book` and `Computer` for #package#Store.product'
       """
 
+    Scenario: pass empty map means create an object with no properties
+      Given the following bean class:
+      """
+      public class Contact {
+        public String name, email;
+      }
+      """
+      And the following bean class:
+      """
+      public class Author {
+        public Contact contact;
+      }
+      """
+      And the following bean class:
+      """
+      public class Book {
+        public Author author;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Book.class)
+        .property("author.contact", new HashMap<String, String>() {{
+        }}).create();
+      """
+      Then the result should:
+      """
+      author.contact= {
+        name: {...}
+        email: {...}
+      }
+      """
+
+    Scenario: should use any exist object when pass empty map with no properties
+      Given the following bean class:
+      """
+      public class Contact {
+        public String name, email;
+      }
+      """
+      And the following bean class:
+      """
+      public class Author {
+        public Contact contact;
+      }
+      """
+      And the following bean class:
+      """
+      public class Book {
+        public Author author;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Contact.class).property("name", "Tom").create();
+      """
+      And build:
+      """
+      jFactory.type(Book.class)
+        .property("author.contact", new HashMap<String, String>() {{
+        }}).create();
+      """
+      Then the result should:
+      """
+      author.contact.name: Tom
+      """
+
   Rule: collection property
 
     Scenario: support input collection element property
@@ -464,6 +531,172 @@ Feature: input property
       Then the result should:
       """
       beansList.beans[]: [ null ]
+      """
+
+    Scenario: support input raw object collection
+      Given the following bean class:
+      """
+      public class Product {
+        public int price;
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public List<Product> products;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Store.class).property("products", new Product[] {new Product() {{
+        this.price = 100;
+      }}}).create();
+      """
+      Then the result should:
+      """
+      products: [{
+        price= 100
+      }]
+      """
+      When build:
+      """
+      jFactory.type(Store.class).property("products", new ArrayList<>()).create();
+      """
+      Then the result should:
+      """
+      products: []
+      """
+
+    Scenario: should query exist object by empty collection
+      Given the following bean class:
+      """
+      public class Product {
+        public int price;
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public List<Product> products;
+      }
+      """
+      And the following bean class:
+      """
+      public class StoreRef {
+        public Store store;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Store.class).property("products", new Product[]{}).create();
+      """
+      When build:
+      """
+      jFactory.type(StoreRef.class).property("store.products", new Product[]{}).create();
+      """
+      And build:
+      """
+      jFactory.type(Store.class).queryAll();
+      """
+      Then the result should:
+      """
+      : [{
+        products= []
+      }]
+      """
+
+    Scenario: should query exist object by collection object
+      Given the following bean class:
+      """
+      public class Product {
+        public int id;
+
+        public Product(int v) {
+          this.id = v;
+        }
+
+        public int hashcode() {
+          return id;
+        }
+
+        public boolean equals(Object other) {
+          return other != null && ((Product)other).id == id;
+        }
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public List<Product> products;
+      }
+      """
+      And the following bean class:
+      """
+      public class StoreRef {
+        public Store store;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Store.class).property("products", new Product[]{new Product(100)}).create();
+      """
+      When build:
+      """
+      jFactory.type(StoreRef.class).property("store.products", new Product[]{new Product(100)}).create();
+      """
+      And build:
+      """
+      jFactory.type(Store.class).queryAll();
+      """
+      Then the result should:
+      """
+      : [{
+        products: [{id= 100}]
+      }]
+      """
+
+    Scenario: collection are not same when element not override equals
+      Given the following bean class:
+      """
+      public class Product {
+        public int id;
+
+        public Product(int v) {
+          this.id = v;
+        }
+      }
+      """
+      And the following bean class:
+      """
+      public class Store {
+        public List<Product> products;
+      }
+      """
+      And the following bean class:
+      """
+      public class StoreRef {
+        public Store store;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Store.class).property("products", new Product[]{new Product(100)}).create();
+      """
+      When build:
+      """
+      jFactory.type(StoreRef.class).property("store.products", new Product[]{new Product(100)}).create();
+      """
+      And build:
+      """
+      jFactory.type(Store.class).queryAll();
+      """
+      Then the result should:
+      """
+      : [{
+        products: [{id= 100}]
+      }{
+        products: [{id= 100}]
+      }]
       """
 
   Rule: negative index in collection

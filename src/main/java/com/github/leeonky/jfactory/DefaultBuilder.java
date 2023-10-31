@@ -164,7 +164,8 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private Expression<T> intentlyCreateWhenReverseAssociation(ObjectProducer<T> producer, Expression<T> exp) {
-        return producer.isReverseAssociation(exp.getProperty()) ? exp.setIntently(true) : exp;
+        return exp instanceof SingleValueExpression ? exp :
+                producer.isReverseAssociation(exp.getProperty()) ? exp.setIntently(true) : exp;
     }
 
     public DefaultBuilder<T> marge(DefaultBuilder<T> another) {
