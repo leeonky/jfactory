@@ -255,6 +255,48 @@ Feature: input property
       }
       """
 
+    Scenario: pass empty map means create an object with given spec and no properties
+      Given the following bean class:
+      """
+      public class Contact {
+        public String name, email;
+      }
+      """
+      And the following bean class:
+      """
+      public class Author {
+        public Contact contact;
+      }
+      """
+      And the following bean class:
+      """
+      public class Book {
+        public Author author;
+      }
+      """
+      And the following spec class:
+      """
+      public class ContactSpec extends Spec<Contact> {
+        public void main() {
+          property("name").value("Tom");
+          property("email").value("Tom@gmail.com");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.type(Book.class)
+        .property("author.contact(ContactSpec)", new HashMap<String, String>() {{
+        }}).create();
+      """
+      Then the result should:
+      """
+      author.contact= {
+        name= Tom
+        email= Tom@gmail.com
+      }
+      """
+
     Scenario: should use any exist object when pass empty map with no properties
       Given the following bean class:
       """
