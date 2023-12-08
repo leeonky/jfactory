@@ -1,41 +1,90 @@
 package com.github.leeonky.jfactory;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
-class Link {
-    private final Set<PropertyChain> properties = new LinkedHashSet<>();
+import static com.github.leeonky.util.BeanClass.cast;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+
+class Link<T> {
+    private static final List<Class<?>> TYPE_PRIORITY = asList(
+            FixedValueProducer.class,
+            ReadOnlyProducer.class,
+            DependencyProducer.class,
+            UnFixedValueProducer.class
+    );
+    private final Set<PropertyChain> linkedAbsoluteProperties = new LinkedHashSet<>();
+    private final Producer<?> root;
+    private final Set<Reference<T>> references = new LinkedHashSet<>();
+
+    public Link(Producer<?> root) {
+        this.root = root;
+    }
+
+    public Link<T> link(PropertyChain absoluteCurrent) {
+        linkedAbsoluteProperties.add(absoluteCurrent);
+        return this;
+    }
+
+    private Optional<Producer<T>> chooseProducer(Class<?> type, Collection<Producer<T>> linkedProducers) {
+        Optional<Producer<T>> fixedProducer = linkedProducers.stream().filter(Producer::isFixed).findFirst();
+        return fixedProducer.isPresent() ? fixedProducer : linkedProducers.stream().filter(type::isInstance).findFirst();
+    }
 
     @SuppressWarnings("unchecked")
-    public void process(Producer<?> root, PropertyChain current) {
-        Linker linker = syncLink(root, current);
-        absoluteProperties(current).forEach(linkProperty ->
-                root.changeDescendant(linkProperty, (nextToLast, property) ->
-                        new LinkProducer(nextToLast.getPropertyWriterType(property), linker,
-                                root.descendant(linkProperty).getLinkOrigin(), linkProperty)));
+    public Producer<T> chooseProducer() {
+        List<Producer<T>> linkedProducers = linkedAbsoluteProperties.stream()
+                .map(p -> (Producer<T>) root.descendant(p).getLinkOrigin())
+                .collect(toList());
+        return TYPE_PRIORITY.stream().map(type -> chooseProducer(type, linkedProducers))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .orElseGet(() -> linkedProducers.iterator().next());
     }
 
-    private Stream<PropertyChain> absoluteProperties(PropertyChain current) {
-        return properties.stream().map(current::concat);
+    public void link(Reference<T> reference) {
+        linkedAbsoluteProperties.addAll(reference.getLinker().linkedAbsoluteProperties);
+        reference.setLinker(this);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> Linker<T> syncLink(Producer<?> root, PropertyChain current) {
-        Linker<T> linker = new Linker<>(root);
-        absoluteProperties(current)
-                .flatMap(property -> ((Producer<T>) root.descendant(property))
-                        .allLinkerReferences(root, property))
-                .distinct().forEach(linker::link);
-        return linker;
+    public Stream<Reference<T>> allLinkedReferences() {
+        return references.stream();
     }
 
-    public boolean contains(List<PropertyChain> properties) {
-        return properties.stream().anyMatch(this.properties::contains);
-    }
+    static class Reference<T> {
+        private final PropertyChain absoluteCurrent;
+        private Link<T> link;
 
-    public void merge(List<PropertyChain> properties) {
-        this.properties.addAll(properties);
+        public Reference(PropertyChain absoluteCurrent) {
+            this.absoluteCurrent = absoluteCurrent;
+        }
+
+        public static <T> Reference<T> defaultLinkerReference(Producer<?> root, PropertyChain absoluteCurrent) {
+            return new Reference<T>(absoluteCurrent).setLinker(new Link<T>(root).link(absoluteCurrent));
+        }
+
+        public Link<T> getLinker() {
+            return link;
+        }
+
+        public Reference<T> setLinker(Link<T> link) {
+            this.link = link;
+            link.references.add(this);
+            return this;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(Reference.class, absoluteCurrent);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return cast(obj, Reference.class)
+                    .map(another -> Objects.equals(absoluteCurrent, another.absoluteCurrent))
+                    .orElseGet(() -> super.equals(obj));
+        }
     }
 }

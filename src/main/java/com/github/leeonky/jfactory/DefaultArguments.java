@@ -3,7 +3,7 @@ package com.github.leeonky.jfactory;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 
 class DefaultArguments implements Arguments {
 
@@ -16,22 +16,22 @@ class DefaultArguments implements Arguments {
     @Override
     @SuppressWarnings("unchecked")
     public <P> P param(String key) {
-        return (P) params.get(createChain(key));
+        return (P) params.get(propertyChain(key));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <P> P param(String key, P defaultValue) {
-        return (P) params.getOrDefault(createChain(key), defaultValue);
+        return (P) params.getOrDefault(propertyChain(key), defaultValue);
     }
 
     @Override
     public Arguments params(String property) {
-        return params(createChain(property));
+        return params(propertyChain(property));
     }
 
     public void put(String key, Object value) {
-        put(createChain(key), value);
+        put(propertyChain(key), value);
     }
 
     private void put(PropertyChain key, Object value) {
@@ -39,7 +39,7 @@ class DefaultArguments implements Arguments {
     }
 
     public void put(String property, String key, Object value) {
-        put(createChain(property).concat(key), value);
+        put(propertyChain(property).concat(key), value);
     }
 
     public Arguments params(PropertyChain propertyChain) {

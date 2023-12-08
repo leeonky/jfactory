@@ -76,7 +76,7 @@ public class PropertySpec<T> {
     public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> rule) {
         return spec.append((jFactory, objectProducer) ->
                 objectProducer.addDependency(property, rule,
-                        dependencies.stream().map(PropertyChain::createChain).collect(Collectors.toList())));
+                        dependencies.stream().map(PropertyChain::propertyChain).collect(Collectors.toList())));
     }
 
     private Spec<T> appendProducer(Fuc<JFactory, Producer<?>, String, Producer<?>> producerFactory) {

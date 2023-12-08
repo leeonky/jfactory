@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static com.github.leeonky.util.BeanClass.create;
 import static java.util.stream.IntStream.range;
 
@@ -18,7 +18,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
     private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();
-    private final LinkCollection linkCollection = new LinkCollection();
+    private final LinkSpecCollection linkSpecCollection = new LinkSpecCollection();
     private final ListPersistable cachedChildren = new ListPersistable();
     private final Set<String> ignorePropertiesInSpec = new HashSet<>();
     private Persistable persistable;
@@ -110,14 +110,14 @@ class ObjectProducer<T> extends Producer<T> {
 
     public ObjectProducer<T> doDependenciesAndLinks() {
         doDependencies();
-        doLinks(this, createChain(""));
+        doLinks(this, propertyChain(""));
         return this;
     }
 
     @Override
-    protected void doLinks(Producer<?> root, PropertyChain current) {
-        children.forEach((property, producer) -> producer.doLinks(root, current.concat(property)));
-        linkCollection.processLinks(root, current);
+    protected void doLinks(Producer<?> root, PropertyChain base) {
+        children.forEach((property, producer) -> producer.doLinks(root, base.concat(property)));
+        linkSpecCollection.processLinks(root, base);
     }
 
     @Override
@@ -127,7 +127,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     public void link(List<PropertyChain> properties) {
-        linkCollection.link(properties);
+        linkSpecCollection.link(properties);
     }
 
     private void createDefaultValueProducers() {
@@ -163,7 +163,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     public boolean isReverseAssociation(String property) {
-        return reverseAssociations.containsKey(PropertyChain.createChain(property));
+        return reverseAssociations.containsKey(PropertyChain.propertyChain(property));
     }
 
     public void ignoreProperty(String property) {

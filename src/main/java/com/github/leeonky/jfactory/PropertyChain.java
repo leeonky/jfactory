@@ -25,7 +25,7 @@ class PropertyChain {
         property = new ArrayList<>(propertyChain);
     }
 
-    public static PropertyChain createChain(String property) {
+    public static PropertyChain propertyChain(String property) {
         return new PropertyChain(property);
     }
 
@@ -91,7 +91,7 @@ class PropertyChain {
     }
 
     public PropertyChain concat(String node) {
-        return concat(createChain(node));
+        return concat(propertyChain(node));
     }
 
     public Optional<PropertyChain> sub(PropertyChain propertyChain) {

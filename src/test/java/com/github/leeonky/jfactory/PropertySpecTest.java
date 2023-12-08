@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PropertySpecTest {
     private Spec<Object> spec = new Spec<>();
-    private PropertySpec<Object> propertySpec = new PropertySpec<>(spec, PropertyChain.createChain("p1"));
+    private PropertySpec<Object> propertySpec = new PropertySpec<>(spec, PropertyChain.propertyChain("p1"));
 
     @Test
     void method_chain() {

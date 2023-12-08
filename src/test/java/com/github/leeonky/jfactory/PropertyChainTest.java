@@ -3,7 +3,7 @@ package com.github.leeonky.jfactory;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,18 +13,18 @@ class PropertyChainTest {
 
     @Test
     void is_chain_single() {
-        assertTrue(createChain("a").isSingle());
-        assertTrue(createChain("[0]").isSingle());
-        assertFalse(createChain("a.b").isSingle());
+        assertTrue(propertyChain("a").isSingle());
+        assertTrue(propertyChain("[0]").isSingle());
+        assertFalse(propertyChain("a.b").isSingle());
     }
 
     @Test
     void top_level_collection() {
-        assertTrue(createChain("a[0]").isTopLevelPropertyCollection());
-        assertFalse(createChain("a[0].b").isTopLevelPropertyCollection());
-        assertFalse(createChain("a").isTopLevelPropertyCollection());
-        assertFalse(createChain("[0]").isTopLevelPropertyCollection());
-        assertFalse(createChain("a[0][1]").isTopLevelPropertyCollection());
+        assertTrue(propertyChain("a[0]").isTopLevelPropertyCollection());
+        assertFalse(propertyChain("a[0].b").isTopLevelPropertyCollection());
+        assertFalse(propertyChain("a").isTopLevelPropertyCollection());
+        assertFalse(propertyChain("[0]").isTopLevelPropertyCollection());
+        assertFalse(propertyChain("a[0][1]").isTopLevelPropertyCollection());
     }
 
     @Nested
@@ -49,7 +49,7 @@ class PropertyChainTest {
         }
 
         private void assertToString(String chain) {
-            assertThat(createChain(chain).toString()).isEqualTo(chain);
+            assertThat(propertyChain(chain).toString()).isEqualTo(chain);
         }
     }
 
@@ -65,7 +65,7 @@ class PropertyChainTest {
             assertHashEqual("b[0].c");
             assertHashEqual("b[0]");
 
-            assertThat(createChain("p1").hashCode()).isNotEqualTo(createChain("p2").hashCode());
+            assertThat(propertyChain("p1").hashCode()).isNotEqualTo(propertyChain("p2").hashCode());
         }
 
         @Test
@@ -77,15 +77,15 @@ class PropertyChainTest {
             assertContentEqual("b[0].c");
             assertContentEqual("b[0]");
 
-            assertThat(createChain("p1")).isNotEqualTo(createChain("p2"));
+            assertThat(propertyChain("p1")).isNotEqualTo(propertyChain("p2"));
         }
 
         private void assertContentEqual(String value) {
-            assertThat(createChain(value)).isEqualTo(createChain(value));
+            assertThat(propertyChain(value)).isEqualTo(propertyChain(value));
         }
 
         private void assertHashEqual(String value) {
-            assertThat(createChain(value).hashCode()).isEqualTo(createChain(value).hashCode());
+            assertThat(propertyChain(value).hashCode()).isEqualTo(propertyChain(value).hashCode());
         }
     }
 
@@ -94,14 +94,14 @@ class PropertyChainTest {
 
         @Test
         void return_empty_when_not_matches() {
-            assertThat(createChain("a").sub(createChain("b"))).isEmpty();
-            assertThat(createChain("a.x").sub(createChain("a.x.y"))).isEmpty();
+            assertThat(propertyChain("a").sub(propertyChain("b"))).isEmpty();
+            assertThat(propertyChain("a.x").sub(propertyChain("a.x.y"))).isEmpty();
         }
 
         @Test
         void return_the_left_chain() {
-            assertThat(createChain("a.b").sub(createChain("a"))).isEqualTo(of(createChain("b")));
-            assertThat(createChain("a[1].b").sub(createChain("a[1]"))).isEqualTo(of(createChain("b")));
+            assertThat(propertyChain("a.b").sub(propertyChain("a"))).isEqualTo(of(propertyChain("b")));
+            assertThat(propertyChain("a[1].b").sub(propertyChain("a[1]"))).isEqualTo(of(propertyChain("b")));
         }
     }
 }

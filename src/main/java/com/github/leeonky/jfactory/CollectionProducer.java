@@ -81,9 +81,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    protected void doLinks(Producer<?> root, PropertyChain current) {
+    protected void doLinks(Producer<?> root, PropertyChain base) {
         range(0, children.size()).forEach(i ->
-                children.get(i).doLinks(root, current.concat(String.valueOf(i))));
+                children.get(i).doLinks(root, base.concat(String.valueOf(i))));
     }
 
     @Override

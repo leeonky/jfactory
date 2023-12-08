@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.jfactory.Linker.Reference.defaultLinkerReference;
+import static com.github.leeonky.jfactory.Link.Reference.defaultLinkerReference;
 import static java.util.function.Function.identity;
 
 abstract class Producer<T> {
@@ -31,7 +31,7 @@ abstract class Producer<T> {
     protected void doDependencies() {
     }
 
-    protected void doLinks(Producer<?> root, PropertyChain current) {
+    protected void doLinks(Producer<?> root, PropertyChain base) {
     }
 
     public void setChild(String property, Producer<?> producer) {
@@ -51,9 +51,9 @@ abstract class Producer<T> {
     }
 
     public void changeDescendant(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerFactory) {
-        String lastProperty = property.tail();
-        property.removeTail().access(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(nextToLast ->
-                nextToLast.changeChild(lastProperty, producerFactory.apply(nextToLast, lastProperty)));
+        String tail = property.tail();
+        property.removeTail().access(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(lastObjectProducer ->
+                lastObjectProducer.changeChild(tail, producerFactory.apply(lastObjectProducer, tail)));
     }
 
     @SuppressWarnings("unchecked")
@@ -66,7 +66,7 @@ abstract class Producer<T> {
         return getType().getPropertyWriter(property).getType();
     }
 
-    public Stream<Linker.Reference<T>> allLinkerReferences(Producer<?> root, PropertyChain absoluteCurrent) {
+    public Stream<Link.Reference<T>> allLinkerReferences(Producer<?> root, PropertyChain absoluteCurrent) {
         return Stream.of(defaultLinkerReference(root, absoluteCurrent));
     }
 

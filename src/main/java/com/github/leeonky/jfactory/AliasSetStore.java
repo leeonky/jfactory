@@ -5,7 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Collections.singletonList;
 
 public class AliasSetStore {
@@ -15,12 +15,12 @@ public class AliasSetStore {
     public <T> String resolve(ObjectFactory<T> objectFactory, String propertyChain, boolean collectionProperties) {
         if (objectFactory instanceof SpecClassFactory) {
             String evaluated = specAliasSet(((SpecClassFactory<T>) objectFactory).getSpecClass())
-                    .resolve(createChain(propertyChain), collectionProperties).toString();
+                    .resolve(propertyChain(propertyChain), collectionProperties).toString();
             if (!evaluated.equals(propertyChain))
                 return evaluated;
             return resolve(objectFactory.getBase(), propertyChain, collectionProperties);
         }
-        return aliasSet(objectFactory.getType()).resolve(createChain(propertyChain), collectionProperties).toString();
+        return aliasSet(objectFactory.getType()).resolve(propertyChain(propertyChain), collectionProperties).toString();
     }
 
     public AliasSet aliasSet(BeanClass<?> type) {
@@ -50,7 +50,7 @@ public class AliasSetStore {
                 }
                 if (intently)
                     property = property + "!";
-                return resolve(createChain(property), collectionProperties).concat(left);
+                return resolve(propertyChain(property), collectionProperties).concat(left);
             }
             return new PropertyChain(singletonList(head)).concat(left);
         }

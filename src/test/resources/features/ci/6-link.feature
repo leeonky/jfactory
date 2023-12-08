@@ -52,7 +52,6 @@ Feature: define link
       <<str1, str2, str3, str4>>= /str.*/ and str1= .str2 and str2= .str3 and str3= .str4
       """
 
-#      TODO bug link with default factory
     Scenario: link object property - bug
       Given the following bean class:
       """
@@ -75,10 +74,10 @@ Feature: define link
       """
       jFactory.type(Beans.class).create();
       """
-#      Then the result should:
-#      """
-#      bean1= .bean2 and bean1: {...}
-#      """
+      Then the result should:
+      """
+      bean1= .bean2 and bean1: {...}
+      """
 
     Scenario: link object property
       Given the following bean class:
@@ -109,7 +108,7 @@ Feature: define link
 
   Rule: link in collection
 
-    Scenario: element link element
+    Scenario: link element property and input sub property
       Given the following bean class:
       """
       public class Bean {
@@ -139,9 +138,7 @@ Feature: define link
       <<beans[0], beans[1], beans[2]>>.value= hello
       """
 
-#      TODO link priority object producer with sub input property > object producer
-
-    Scenario: element link property
+    Scenario: link element and input sub property
       Given the following bean class:
       """
       public class Bean {
@@ -158,18 +155,21 @@ Feature: define link
       And register:
       """
       jFactory.factory(Beans.class).spec(instance -> instance.spec()
+          .property("beans[0]").byFactory()
+          .property("beans[1]").byFactory()
           .link("beans[0]", "beans[1]", "bean"));
       """
       When build:
       """
       jFactory.type(Beans.class).property("bean.value", "hello").create();
       """
+#      TODO BUG not implement
 #      Then the result should:
 #      """
 #      <<beans[0], beans[1], bean>>.value= hello
 #      """
 
-    Scenario: element link property
+    Scenario: link element and input object
       Given the following bean class:
       """
       public class Bean {
@@ -201,7 +201,7 @@ Feature: define link
       <<beans[0], beans[1], bean>>.value= hello
       """
 
-    Scenario: element property link property
+    Scenario: link element property and input property
       Given the following bean class:
       """
       public class Bean {
@@ -485,25 +485,39 @@ Feature: define link
       <<str1, str2>>= hello
       """
 
-    Scenario: raise error when ambiguous link
+  Rule: link parent object but sub property is not default
+
+    Scenario: link object and input sub property
       Given the following bean class:
       """
       public class Bean {
-        public String str1, str2, str3;
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean bean1, bean2;
       }
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
-        .link("str1", "str2", "str3"));
+      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+        .property("bean1").byFactory()
+        .property("bean2").byFactory()
+        .link("bean1", "bean2")
+        );
       """
       When build:
       """
-      jFactory.type(Bean.class).property("str1", "v1").property("str2", "v2").create();
+      jFactory.type(Beans.class).property("bean2.value", "hello").create();
       """
-      Then should raise error:
+      Then the result should:
       """
-      message: 'Ambiguous value in link'
+      : {
+        <<bean1.value bean2.value>>= hello
+        .bean1= .bean2
+      }
       """
 
   Rule: link to read only

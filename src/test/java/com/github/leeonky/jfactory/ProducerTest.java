@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
-import static com.github.leeonky.jfactory.PropertyChain.createChain;
+import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 
 class ProducerTest {
     private final JFactory JFactory = new JFactory();
@@ -38,9 +38,9 @@ class ProducerTest {
 
     @SuppressWarnings("unchecked")
     private void assertChange(String message, String from, String to, String result) {
-        Producer producer = beanProducer.descendant(createChain(from));
-        new ProducerAssert(producer.changeTo(beanProducer.descendant(createChain(to)))).
-                isSameProducer(beanProducer.descendant(createChain(result)));
+        Producer producer = beanProducer.descendant(propertyChain(from));
+        new ProducerAssert(producer.changeTo(beanProducer.descendant(propertyChain(to)))).
+                isSameProducer(beanProducer.descendant(propertyChain(result)));
     }
 
     static class ProducerAssert extends AbstractAssert<ProducerAssert, Producer<?>> {

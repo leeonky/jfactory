@@ -6,12 +6,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class LinkProducer<T> extends Producer<T> {
-    private final Linker.Reference<T> linkerReference;
+    private final Link.Reference<T> linkerReference;
     private final Producer<T> origin;
 
-    public LinkProducer(BeanClass<T> type, Linker<T> linker, Producer<T> origin, PropertyChain linkProperty) {
+    public LinkProducer(BeanClass<T> type, Link<T> link, Producer<T> origin, PropertyChain linkProperty) {
         super(type);
-        linkerReference = new Linker.Reference<T>(linkProperty).setLinker(linker);
+        linkerReference = new Link.Reference<T>(linkProperty).setLinker(link);
         this.origin = origin;
     }
 
@@ -21,7 +21,7 @@ class LinkProducer<T> extends Producer<T> {
     }
 
     @Override
-    public Stream<Linker.Reference<T>> allLinkerReferences(Producer<?> root, PropertyChain absoluteCurrent) {
+    public Stream<Link.Reference<T>> allLinkerReferences(Producer<?> root, PropertyChain absoluteCurrent) {
         return linkerReference.getLinker().allLinkedReferences();
     }
 
