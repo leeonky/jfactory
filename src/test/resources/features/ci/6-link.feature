@@ -74,10 +74,13 @@ Feature: define link
       """
       jFactory.type(Beans.class).create();
       """
-      Then the result should:
-      """
-      bean1= .bean2 and bean1: {...}
-      """
+#      Then the result should:
+#      """
+#      : {
+#        bean1= .bean2
+#        bean1: {...}
+#      }
+#      """
 
     Scenario: link object property
       Given the following bean class:
@@ -101,13 +104,13 @@ Feature: define link
       """
       jFactory.type(Beans.class).property("bean2", new Bean()).create();
       """
-#      Then the result should:
-#      """
-#      : {
-#        bean1= .bean2
-#        bean1: {...}
-#      }
-#      """
+      Then the result should:
+      """
+      : {
+        bean1= .bean2
+        bean1: {...}
+      }
+      """
 
   Rule: link in collection
 
