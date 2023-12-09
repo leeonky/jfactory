@@ -25,3 +25,7 @@ jobs:
             git config --global user.name "leeonky"
             git tag ${PUB_VERSION} -a -m 'CI Release'
             git push --tags
+
+      - store_artifacts:
+          path: /root/project/build/reports/
+          destination: build-reports
